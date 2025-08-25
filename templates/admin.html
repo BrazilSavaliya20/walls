@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin Panel - Backlit Crafts</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+    <div style="padding: 40px;">
+        <h1>Welcome to Admin Panel</h1>
+        <p>You are logged in successfully.</p>
+        <p><a href="{{ url_for('admin_logout') }}">Logout</a></p>
+    </div>
+</body>
+</html>

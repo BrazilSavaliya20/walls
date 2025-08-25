@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Backlit Crafts{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-gold">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('products') }}" class="text-gold">Products</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('products', category_id=product.category.id) }}" class="text-gold">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Image -->
+        <div class="col-lg-6 mb-4">
+            <div class="product-detail-image">
+                <div class="main-image mb-3">
+                    <img src="{{ product.image_url or 'https://via.placeholder.com/600x600/ccc/666?text=No+Image' }}" 
+                         alt="{{ product.name }}" class="img-fluid rounded-3 shadow" id="mainImage">
+                </div>
+                
+                <!-- Thumbnail images (placeholder for future multiple images) -->
+                <div class="thumbnail-images">
+                    <div class="row">
+                        <div class="col-3">
+                            <img src="{{ product.image_url or 'https://via.placeholder.com/150x150/ccc/666?text=No+Image' }}" 
+                                 alt="Thumbnail" class="img-fluid rounded thumbnail-img active" onclick="changeImage(this.src)">
+                        </div>
+                        <div class="col-3">
+                            <img src="{{ product.image_url or 'https://via.placeholder.com/150x150/555/999?text=View+2' }}" 
+                                 alt="Thumbnail" class="img-fluid rounded thumbnail-img" onclick="changeImage(this.src)">
+                        </div>
+                        <div class="col-3">
+                            <img src="{{ product.image_url or 'https://via.placeholder.com/150x150/333/fff?text=View+3' }}" 
+                                 alt="Thumbnail" class="img-fluid rounded thumbnail-img" onclick="changeImage(this.src)">
+                        </div>
+                        <div class="col-3">
+                            <img src="{{ product.image_url or 'https://via.placeholder.com/150x150/777/fff?text=View+4' }}" 
+                                 alt="Thumbnail" class="img-fluid rounded thumbnail-img" onclick="changeImage(this.src)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="col-lg-6">
+            <div class="product-details">
+                <!-- Product Name -->
+                <h1 class="display-5 fw-bold mb-3">{{ product.name }}</h1>
+                
+                <!-- Category and Featured Badge -->
+                <div class="mb-3">
+                    <span class="badge bg-secondary me-2">{{ product.category.name }}</span>
+                    {% if product.featured %}
+                    <span class="badge bg-gold text-dark">
+                        <i class="fas fa-star me-1"></i>Featured
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Rating -->
+                <div class="rating mb-3">
+                    {% for i in range(5) %}
+                        {% if i < product.rating %}
+                            <i class="fas fa-star text-warning fs-5"></i>
+                        {% else %}
+                            <i class="far fa-star text-muted fs-5"></i>
+                        {% endif %}
+                    {% endfor %}
+                    <span class="ms-2 text-muted">({{ product.rating }}/5)</span>
+                </div>
+
+                <!-- Price -->
+                <div class="price-section mb-4">
+                    <span class="price text-gold fw-bold" style="font-size: 2rem;">₹{{ "%.0f"|format(product.price) }}</span>
+                    {% if product.original_price and product.original_price > product.price %}
+                    <span class="original-price text-muted text-decoration-line-through fs-4 ms-3">₹{{ "%.0f"|format(product.original_price) }}</span>
+                    <span class="discount-percentage badge bg-danger ms-2">
+                        {{ "%.0f"|format((1 - product.price/product.original_price) * 100) }}% OFF
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Stock Status -->
+                <div class="stock-status mb-4">
+                    {% if product.stock_quantity > 0 %}
+                        <div class="text-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>In Stock</strong> ({{ product.stock_quantity }} items available)
+                        </div>
+                    {% else %}
+                        <div class="text-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Out of Stock</strong>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Product Variants (Size and Light) -->
+                <form method="POST" action="{{ url_for('add_to_cart') }}" id="addToCartForm">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    
+                    <!-- Size Selection -->
+                    <div class="variant-section mb-4">
+                        <h6 class="fw-bold mb-2">Size:</h6>
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="size" id="size-small" value="small" checked>
+                            <label class="btn btn-outline-dark" for="size-small">Small</label>
+
+                            <input type="radio" class="btn-check" name="size" id="size-medium" value="medium">
+                            <label class="btn btn-outline-dark" for="size-medium">Medium</label>
+
+                            <input type="radio" class="btn-check" name="size" id="size-large" value="large">
+                            <label class="btn btn-outline-dark" for="size-large">Large</label>
+                        </div>
+                    </div>
+
+                    <!-- Light Color Selection -->
+                    <div class="variant-section mb-4">
+                        <h6 class="fw-bold mb-2">Light Color:</h6>
+                        <div class="btn-group flex-wrap" role="group">
+                            <input type="radio" class="btn-check" name="light" id="light-warm" value="warm" checked>
+                            <label class="btn btn-outline-dark" for="light-warm">Warm White</label>
+
+                            <input type="radio" class="btn-check" name="light" id="light-blue" value="blue">
+                            <label class="btn btn-outline-dark" for="light-blue">Blue</label>
+
+                            <input type="radio" class="btn-check" name="light" id="light-red" value="red">
+                            <label class="btn btn-outline-dark" for="light-red">Red</label>
+
+                            <input type="radio" class="btn-check" name="light" id="light-rgb" value="rgb">
+                            <label class="btn btn-outline-dark" for="light-rgb">RGB</label>
+
+                            <input type="radio" class="btn-check" name="light" id="light-none" value="none">
+                            <label class="btn btn-outline-dark" for="light-none">Without Light</label>
+                        </div>
+                    </div>
+
+                    <!-- Quantity Selection -->
+                    <div class="quantity-section mb-4">
+                        <h6 class="fw-bold mb-2">Quantity:</h6>
+                        <div class="input-group" style="width: 150px;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="decrementQuantity()">-</button>
+                            <input type="number" class="form-control text-center" name="quantity" id="quantity" value="1" min="1" max="{{ product.stock_quantity }}">
+                            <button class="btn btn-outline-secondary" type="button" onclick="incrementQuantity()">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Add to Cart Button -->
+                    <div class="action-buttons mb-4">
+                        <button type="submit" class="btn btn-gold btn-lg me-3 px-4" 
+                                {{ 'disabled' if product.stock_quantity <= 0 else '' }}>
+                            <i class="fas fa-cart-plus me-2"></i>
+                            {{ 'Out of Stock' if product.stock_quantity <= 0 else 'Add to Cart' }}
+                        </button>
+                        <button type="button" class="btn btn-outline-dark btn-lg px-4" onclick="addToWishlist()">
+                            <i class="far fa-heart me-2"></i>Wishlist
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Product Features -->
+                <div class="product-features">
+                    <h6 class="fw-bold mb-3">Features:</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Laser-cut MDF wood construction</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Premium LED backlighting</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Mounting hardware included</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Power adapter provided</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Easy to clean and maintain</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Safe packaging with bubble wrap</li>
+                    </ul>
+                </div>
+
+                <!-- Share Options -->
+                <div class="share-section mt-4">
+                    <h6 class="fw-bold mb-2">Share:</h6>
+                    <div class="share-buttons">
+                        <a href="#" class="btn btn-outline-primary btn-sm me-2">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-info btn-sm me-2">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-success btn-sm me-2">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-danger btn-sm">
+                            <i class="fab fa-pinterest"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Description -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card luxury-card">
+                <div class="card-header bg-gold">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="fas fa-info-circle me-2"></i>Product Description
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="fs-6">{{ product.description }}</p>
+                    
+                    <!-- Additional product information -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Specifications:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Material:</strong> Premium MDF Wood</li>
+                                <li><strong>LED Type:</strong> High-quality LED strips</li>
+                                <li><strong>Power:</strong> 12V DC adapter included</li>
+                                <li><strong>Mounting:</strong> Wall mount hardware included</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Care Instructions:</h6>
+                            <ul class="list-unstyled">
+                                <li>• Wipe with dry cloth for cleaning</li>
+                                <li>• Avoid direct water contact</li>
+                                <li>• Handle with care during installation</li>
+                                <li>• Keep away from extreme temperatures</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="fw-bold mb-4">Related Products</h3>
+            <div class="row">
+                {% for related_product in related_products %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="product-card luxury-card h-100">
+                        <div class="product-image">
+                            <img src="{{ related_product.image_url or 'https://via.placeholder.com/300x300/ccc/666?text=No+Image' }}" 
+                                 alt="{{ related_product.name }}" class="card-img-top">
+                            <div class="product-overlay">
+                                <a href="{{ url_for('product_detail', id=related_product.id) }}" 
+                                   class="btn btn-gold btn-sm">View Details</a>
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <h6 class="card-title">{{ related_product.name }}</h6>
+                            <div class="price-section">
+                                <span class="price text-gold fw-bold">₹{{ "%.0f"|format(related_product.price) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.thumbnail-img {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.thumbnail-img:hover,
+.thumbnail-img.active {
+    opacity: 1;
+    border-color: #d4af37;
+}
+
+.variant-section .btn-group .btn {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.share-buttons a {
+    transition: transform 0.2s ease;
+}
+
+.share-buttons a:hover {
+    transform: scale(1.1);
+}
+
+.product-detail-image {
+    position: sticky;
+    top: 100px;
+}
+
+@media (max-width: 768px) {
+    .product-detail-image {
+        position: relative;
+        top: auto;
+    }
+}
+</style>
+
+<script>
+function changeImage(src) {
+    document.getElementById('mainImage').src = src;
+    
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail-img').forEach(img => {
+        img.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+
+function incrementQuantity() {
+    const input = document.getElementById('quantity');
+    const max = parseInt(input.getAttribute('max'));
+    if (parseInt(input.value) < max) {
+        input.value = parseInt(input.value) + 1;
+    }
+}
+
+function decrementQuantity() {
+    const input = document.getElementById('quantity');
+    if (parseInt(input.value) > 1) {
+        input.value = parseInt(input.value) - 1;
+    }
+}
+
+function addToWishlist() {
+    alert('Wishlist feature coming soon!');
+}
+
+// Enhanced form submission
+document.getElementById('addToCartForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const button = this.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    
+    // Show loading state
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adding to Cart...';
+    button.disabled = true;
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            // Show success message
+            button.innerHTML = '<i class="fas fa-check me-2"></i>Added to Cart!';
+            button.classList.remove('btn-gold');
+            button.classList.add('btn-success');
+            
+            // Update cart count
+            updateCartCount();
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-gold');
+                button.disabled = false;
+            }, 2000);
+        } else {
+            throw new Error('Failed to add to cart');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.innerHTML = '<i class="fas fa-times me-2"></i>Error';
+        button.classList.add('btn-danger');
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('btn-danger');
+            button.disabled = false;
+        }, 2000);
+    });
+});
+</script>
+{% endblock %}
