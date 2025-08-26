@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Tuple
 from flask import Flask, render_template, request, session, flash, redirect, url_for
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv  # <-- this is missing
 
 import firebase_admin
 from firebase_admin import credentials, firestore
