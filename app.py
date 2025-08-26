@@ -12,18 +12,24 @@ from firebase_admin import credentials, firestore
 # ---------------------------------------------------------------------
 # App & Config
 # ---------------------------------------------------------------------
+# Load .env
+load_dotenv()
+
+# Base directories
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PRIVATE_DIR = os.path.join(BASE_DIR, "private")
+os.makedirs(PRIVATE_DIR, exist_ok=True)
+
+# Flask app
 app = Flask(__name__, static_folder="public", static_url_path="/static")
-app.secret_key = os.environ.get("SECRET_KEY", "replace_this_value")
+
+# Flask secret key
+app.secret_key = os.environ.get("SECRET_KEY", "8141@#Kaswala")
 
 # Upload folder
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "public", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Private folder
-PRIVATE_DIR = os.path.join(BASE_DIR, "private")
-os.makedirs(PRIVATE_DIR, exist_ok=True)
 
 # Products file path
 products_file = os.path.join(PRIVATE_DIR, "products.json")
@@ -40,20 +46,24 @@ def allowed_file(filename):
 # -------------------------------------------------------------------
 # Firebase Init
 # -------------------------------------------------------------------
+# -------------------------------------------------------------------
+# Firebase Init
+# -------------------------------------------------------------------
 def init_firestore():
-    firebase_json = os.environ.get("FIREBASE_KEY")
-    if not firebase_json:
-        raise Exception("FIREBASE_KEY environment variable not found!")
-
-    cred_dict = json.loads(firebase_json)
+    # Path to your firebase-key.json
+    firebase_path = os.path.join(PRIVATE_DIR, "firebase-key.json")
+    
+    if not os.path.exists(firebase_path):
+        raise Exception(f"Firebase key file not found at {firebase_path}!")
 
     if not firebase_admin._apps:
-        cred = credentials.Certificate(cred_dict)
+        cred = credentials.Certificate(firebase_path)
         firebase_admin.initialize_app(cred)
 
     return firestore.client()
 
 db = init_firestore()
+
 
 # -------------------------------------------------------------------
 # Helpers
@@ -115,7 +125,6 @@ products = load_products()
 @app.context_processor
 def inject_request():
     return dict(request=request)
-
 # -------------------------------------------------------------------
 # Routes
 # -------------------------------------------------------------------
