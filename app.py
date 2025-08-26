@@ -30,17 +30,22 @@ logger = logging.getLogger("wallcraft")
 # Firebase Init
 # -------------------------------------------------------------------
 def init_firestore():
-    key_path = os.path.join(PRIVATE_DIR, "firebase-key.json")
-    if not os.path.exists(key_path):
-        logger.error("❌ firebase-key.json missing")
+    firebase_key_json = os.environ.get("FIREBASE_KEY")
+    
+    if not firebase_key_json:
+        logger.error("❌ FIREBASE_KEY env variable missing")
         return None
 
-    cred = credentials.Certificate(key_path)
-    if not firebase_admin._apps:  # prevent re-init
-        firebase_admin.initialize_app(cred)
-        logger.info("🔥 Firebase initialized successfully.")
-
-    return firestore.client()
+    try:
+        key_dict = json.loads(firebase_key_json)
+        cred = credentials.Certificate(key_dict)
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(cred)
+            logger.info("🔥 Firebase initialized successfully.")
+        return firestore.client()
+    except Exception as e:
+        logger.error(f"Failed to initialize Firebase: {e}")
+        return None
 
 db = init_firestore()
 
@@ -321,6 +326,7 @@ if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
