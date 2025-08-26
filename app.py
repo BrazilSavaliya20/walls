@@ -4,6 +4,7 @@ import logging
 from typing import List, Dict, Any, Tuple
 from flask import Flask, render_template, request, session, flash, redirect, url_for
 from datetime import datetime
+from werkzeug.utils import secure_filename
 
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -14,6 +15,11 @@ from firebase_admin import credentials, firestore
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder="public", static_url_path="/static")
 app.secret_key = os.environ.get("SECRET_KEY", "replace_this_value")
+
+# Upload folder
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "public", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Private folder
 PRIVATE_DIR = os.path.join(BASE_DIR, "private")
@@ -26,21 +32,39 @@ products_file = os.path.join(PRIVATE_DIR, "products.json")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("wallcraft")
 
+# Allowed image types
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 # -------------------------------------------------------------------
 # Firebase Init
 # -------------------------------------------------------------------
 def init_firestore():
-    key_path = os.path.join(PRIVATE_DIR, "firebase-key.json")
-    if not os.path.exists(key_path):
-        logger.error("❌ firebase-key.json missing")
+    """Initialize Firestore using environment variable or local file"""
+    try:
+        firebase_key_env = os.environ.get("FIREBASE_KEY")
+        if firebase_key_env:
+            cred_dict = json.loads(firebase_key_env)
+            cred = credentials.Certificate(cred_dict)
+            logger.info("🔥 Firebase credentials loaded from environment variable.")
+        else:
+            key_path = os.path.join(PRIVATE_DIR, "firebase-key.json")
+            if not os.path.exists(key_path):
+                logger.error("❌ firebase-key.json missing")
+                return None
+            cred = credentials.Certificate(key_path)
+            logger.info(f"🔥 Firebase credentials loaded from {key_path}.")
+
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(cred)
+            logger.info("🔥 Firebase initialized successfully.")
+
+        return firestore.client()
+    except Exception as e:
+        logger.error(f"Failed to initialize Firebase: {e}")
         return None
 
-    cred = credentials.Certificate(key_path)
-    if not firebase_admin._apps:  # prevent re-init
-        firebase_admin.initialize_app(cred)
-        logger.info("🔥 Firebase initialized successfully.")
-
-    return firestore.client()
 
 db = init_firestore()
 
@@ -48,7 +72,6 @@ db = init_firestore()
 # Helpers
 # -------------------------------------------------------------------
 def money_to_int(val: str) -> int:
-    """Convert '₹9,999' -> 9999"""
     if not val:
         return 0
     return int(val.replace("₹", "").replace(",", "").strip() or 0)
@@ -61,7 +84,6 @@ def save_products(data: List[Dict[str, Any]]) -> None:
         logger.error(f"Failed to write products file: {e}")
 
 def load_products() -> List[Dict[str, Any]]:
-    """Load products from JSON, or seed if missing"""
     if os.path.exists(products_file):
         try:
             with open(products_file, "r", encoding="utf-8") as f:
@@ -81,7 +103,6 @@ def load_products() -> List[Dict[str, Any]]:
     return products_seed
 
 def get_cart_items_and_total(cart: Dict[str, int], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
-    """Build cart items + calculate total"""
     items = []
     total = 0
     for pid, qty in cart.items():
@@ -98,7 +119,7 @@ def get_cart_items_and_total(cart: Dict[str, int], products: List[Dict[str, Any]
         })
     return items, total
 
-# Load products into memory
+# Load products
 products = load_products()
 
 # -------------------------------------------------------------------
@@ -130,6 +151,10 @@ def contact():
 
 @app.route('/process_contact', methods=['POST'])
 def process_contact():
+    if db is None:
+        flash("⚠️ Firestore is not initialized.", "danger")
+        return redirect(url_for("contact"))
+
     name = request.form.get('name')
     email = request.form.get('email')
     subject = request.form.get('subject')
@@ -139,17 +164,20 @@ def process_contact():
         flash("⚠️ Please fill in all fields.")
         return redirect(url_for('contact'))
 
-    # Save to Firestore (optional)
-    db.collection("contacts").add({
-        "name": name,
-        "email": email,
-        "subject": subject,
-        "message": message,
-        "timestamp": datetime.utcnow()
-    })
-
-    flash("✅ Thank you! Your message has been sent successfully.")
-    return render_template("success.html", name=name)
+    try:
+        db.collection("contacts").add({
+            "name": name,
+            "email": email,
+            "subject": subject,
+            "message": message,
+            "timestamp": datetime.utcnow()
+        })
+        flash("✅ Thank you! Your message has been sent successfully.")
+        return render_template("success.html", name=name)
+    except Exception as e:
+        logger.error(f"Failed to save contact: {e}")
+        flash("⚠️ Failed to send message.", "danger")
+        return redirect(url_for("contact"))
 
 @app.route('/shop')
 def shop():
@@ -157,12 +185,12 @@ def shop():
 
 @app.route('/cart')
 def cart():
-    cart = session.get("cart", {})
-    if not isinstance(cart, dict):
-        cart = {}
-        session["cart"] = cart
+    cart_data = session.get("cart", {})
+    if not isinstance(cart_data, dict):
+        cart_data = {}
+        session["cart"] = cart_data
 
-    cart_items, total = get_cart_items_and_total(cart, products)
+    cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("cart.html", cart_items=cart_items, total=total)
 
 @app.route('/add-to-cart', methods=['POST'])
@@ -170,12 +198,12 @@ def add_to_cart():
     product_id = str(request.form.get('product_id'))
     quantity = int(request.form.get('quantity', 1))
 
-    cart = session.get("cart", {})
-    if not isinstance(cart, dict):
-        cart = {}
+    cart_data = session.get("cart", {})
+    if not isinstance(cart_data, dict):
+        cart_data = {}
 
-    cart[product_id] = cart.get(product_id, 0) + quantity
-    session["cart"] = cart
+    cart_data[product_id] = cart_data.get(product_id, 0) + quantity
+    session["cart"] = cart_data
     return ("", 204)
 
 @app.route('/update-cart', methods=['POST'])
@@ -183,33 +211,37 @@ def update_cart():
     pid = str(request.form.get("product_id"))
     action = request.form.get("action")
 
-    cart = session.get("cart", {})
-    if not isinstance(cart, dict):
-        cart = {}
+    cart_data = session.get("cart", {})
+    if not isinstance(cart_data, dict):
+        cart_data = {}
 
-    if pid in cart:
+    if pid in cart_data:
         if action == "increase":
-            cart[pid] += 1
+            cart_data[pid] += 1
         elif action == "decrease":
-            cart[pid] = max(1, cart[pid] - 1)
+            cart_data[pid] = max(1, cart_data[pid] - 1)
         elif action == "remove":
-            cart.pop(pid, None)
+            cart_data.pop(pid, None)
 
-    session["cart"] = cart
+    session["cart"] = cart_data
     return redirect(url_for("cart"))
 
 @app.route("/checkout", methods=["GET"])
 def checkout():
-    cart = session.get("cart", {})
-    if not isinstance(cart, dict) or not cart:
+    cart_data = session.get("cart", {})
+    if not isinstance(cart_data, dict) or not cart_data:
         flash("Your cart is empty. Please add items before checkout.", "warning")
         return redirect(url_for("shop"))
 
-    cart_items, total = get_cart_items_and_total(cart, products)
+    cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("checkout.html", cart_items=cart_items, total=total)
 
 @app.route("/process_order", methods=["POST"])
 def process_order():
+    if db is None:
+        flash("⚠️ Firestore is not initialized.", "danger")
+        return redirect(url_for("checkout"))
+
     order_data = {
         "name": request.form.get("name"),
         "mobile": request.form.get("mobile"),
@@ -217,13 +249,13 @@ def process_order():
         "address": request.form.get("address"),
         "items": [],
         "total": 0,
-        "timestamp": datetime.utcnow()  # ✅ add timestamp for sorting
+        "timestamp": datetime.utcnow()
     }
 
-    cart = session.get("cart", {})
+    cart_data = session.get("cart", {})
 
     try:
-        for pid, qty in cart.items():
+        for pid, qty in cart_data.items():
             product = next((p for p in products if p["id"] == int(pid)), None)
             if product:
                 price = money_to_int(product.get("new"))
@@ -238,24 +270,19 @@ def process_order():
                     "subtotal": subtotal
                 })
 
-        # Save order to Firestore
         db.collection("orders").add(order_data)
-
-        # Clear cart
         session.pop("cart", None)
 
         return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
 
     except Exception as e:
-        app.logger.error(f"Failed to save order data: {e}")
+        logger.error(f"Failed to save order data: {e}")
         flash("Failed to process your order. Please try again later.", "danger")
         return redirect(url_for("checkout"))
 
-
-
-# -----------------------------------------------------------------------------
-# Admin (simple, not authenticated — protect before production!)
-# -----------------------------------------------------------------------------
+# -------------------------------------------------------------------
+# Admin Panel (basic, NOT authenticated!)
+# -------------------------------------------------------------------
 @app.route('/secret-admin', methods=['GET', 'POST'])
 def secret_admin():
     global products
@@ -315,8 +342,6 @@ def secret_admin():
 
     return render_template('admin_panel.html', products=products)
 
-
-# -----------------------------------------------------------------------------
+# -------------------------------------------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
-
