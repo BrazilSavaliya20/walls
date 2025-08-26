@@ -41,6 +41,7 @@ def allowed_file(filename):
 # Firebase Init
 # -------------------------------------------------------------------
 def init_firestore():
+<<<<<<< HEAD
     """Initialize Firestore using environment variable or local file"""
     try:
         firebase_key_env = os.environ.get("FIREBASE_KEY")
@@ -65,6 +66,24 @@ def init_firestore():
         logger.error(f"Failed to initialize Firebase: {e}")
         return None
 
+=======
+    firebase_key_json = os.environ.get("FIREBASE_KEY")
+    
+    if not firebase_key_json:
+        logger.error("❌ FIREBASE_KEY env variable missing")
+        return None
+
+    try:
+        key_dict = json.loads(firebase_key_json)
+        cred = credentials.Certificate(key_dict)
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(cred)
+            logger.info("🔥 Firebase initialized successfully.")
+        return firestore.client()
+    except Exception as e:
+        logger.error(f"Failed to initialize Firebase: {e}")
+        return None
+>>>>>>> c1bb3a8b07632b669629724376663d6009fdf505
 
 db = init_firestore()
 
@@ -344,4 +363,14 @@ def secret_admin():
 
 # -------------------------------------------------------------------
 if __name__ == "__main__":
+<<<<<<< HEAD
     app.run(debug=True)
+=======
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
+
+
+
+>>>>>>> c1bb3a8b07632b669629724376663d6009fdf505
