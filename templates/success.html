@@ -6,22 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      background: linear-gradient(135deg, #f9fafc 0%, #ede1f4 100%);
+      background: linear-gradient(120deg, #24173a 0%, #101622 100%);
       font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
       margin: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      color: #e4dfff;
     }
     .thankyou-container {
-      background: white;
-      box-shadow: 0 8px 44px rgba(80, 61, 166, 0.12);
+      background: #181227;
+      box-shadow: 0 8px 44px rgba(80, 61, 166, 0.16);
       border-radius: 20px;
       max-width: 420px;
       padding: 48px 38px 36px 38px;
       text-align: center;
       position: relative;
+      border: 1px solid #2e215e;
     }
     .thankyou-container::before {
       content: '';
@@ -31,61 +33,73 @@
       transform: translateX(-50%);
       width: 88px;
       height: 88px;
-      background: url('https://cdn-icons-png.flaticon.com/512/190/190411.png') center/cover no-repeat; /* Replace with your brand's icon/image */
+      background: url('https://cdn-icons-png.flaticon.com/512/190/190411.png') center/cover no-repeat;
       border-radius: 50%;
-      box-shadow: 0 2px 16px rgba(80,61,166,0.18);
-      border: 4px solid #f1ebfa;
+      box-shadow: 0 2px 16px rgba(87,61,166,0.15);
+      border: 4px solid #2e215e;
+      background-color: #24173a;
     }
     h1 {
-      color: #513c9a;
+      color: #ffe483;
       margin-top: 44px;
       font-size: 2.25rem;
       font-weight: 700;
       letter-spacing: -1px;
       margin-bottom: 14px;
+      text-shadow: 0 2px 18px #24173a88;
     }
     .convo-message {
       font-size: 1.17rem;
-      color: #3d3750;
+      color: #e9e3ff;
       margin-bottom: 20px;
       font-weight: 500;
     }
     .next-actions {
       margin-bottom: 24px;
-      color: #7564cd;
+      color: #a99dfc;
       font-size: 1.02rem;
     }
     .cta-btn {
       display: inline-block;
       padding: 11px 38px;
-      background: linear-gradient(90deg, #8163fa 0%, #5be7c4 100%);
+      background: linear-gradient(90deg, #b092fa 0%, #24173a 100%);
       color: #fff;
       font-weight: 600;
       border: none;
       border-radius: 30px;
-      box-shadow: 0 2px 12px rgba(129,99,250,0.14);
+      box-shadow: 0 2px 12px rgba(129,99,250,0.15);
       font-size: 1.07rem;
       text-decoration: none;
       margin-top: 4px;
       transition: background 0.18s, box-shadow 0.18s;
     }
     .cta-btn:hover {
-      background: linear-gradient(90deg, #5be7c4 0%, #8163fa 100%);
-      box-shadow: 0 6px 20px rgba(80,61,166,0.16);
+      background: linear-gradient(90deg, #ffe483 0%, #512dab 100%);
+      color: #181227;
+      box-shadow: 0 8px 20px #19133744;
     }
     .social-links {
       margin-top: 18px;
       display: flex;
       justify-content: center;
-      gap: 14px;
+      gap: 18px;
     }
     .social-links a {
-      color: #7564cd;
+      color: #ffe483;
       font-size: 1.35rem;
-      transition: color 0.17s;
+      background: #23183b;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s, color 0.18s;
     }
     .social-links a:hover {
-      color: #513c9a;
+      color: #fff;
+      background: linear-gradient(120deg, #b092fa, #ffe483 90%);
+      box-shadow: 0 4px 12px #27183b44;
     }
     @media (max-width: 520px) {
       .thankyou-container {
@@ -99,9 +113,9 @@
 </head>
 <body>
   <div class="thankyou-container">
-    <h1>Thank you, {{ name }}!</h1>
+    <h1>Thank you,</h1>
     <div class="convo-message">
-      Your message has reached our team at Bozzaro Lifestyle.<br>
+      Your message has reached our team at Wall Craft.<br>
       <strong>We're genuinely excited to connect with you!</strong>
     </div>
     <div class="next-actions">
@@ -109,19 +123,18 @@
     </div>
     <a href="{{ url_for('home') }}" class="cta-btn">Back to Home</a>
     <div class="social-links">
-  <a href="https://wa.me/919409910447?text=hello" target="_blank" rel="noopener" class="icon whatsapp" aria-label="WhatsApp">
-  <i class="fa-brands fa-whatsapp"></i>
-</a>
-
-  <a class="icon instagram" href="https://www.instagram.com/wall_craft_design_?igsh=MTlwbzNzZHhzbTloOQ" target="_blank" rel="noopener" aria-label="Instagram">
-    <i class="fab fa-instagram"></i>
-  </a>
-  <a class="icon facebook"  href="https://www.facebook.com/profile.php?id=100089059718140" target="_blank" rel="noopener" aria-label="Facebook">
-    <i class="fab fa-facebook-f"></i>
-  </a>
-  <a class="icon youtube"   href="https://youtube.com/@jk-design-jk?si=swrfNDEoE4muk_9m" target="_blank" rel="noopener" aria-label="YouTube">
-    <i class="fab fa-youtube"></i>
-  </a>
+      <a href="https://wa.me/919409910447?text=hello" target="_blank" rel="noopener" class="icon whatsapp" aria-label="WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+      <a class="icon instagram" href="https://www.instagram.com/wall_craft_design_?igsh=MTlwbzNzZHhzbTloOQ" target="_blank" rel="noopener" aria-label="Instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a class="icon facebook" href="https://www.facebook.com/profile.php?id=100089059718140" target="_blank" rel="noopener" aria-label="Facebook">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a class="icon youtube" href="https://youtube.com/@jk-design-jk?si=swrfNDEoE4muk_9m" target="_blank" rel="noopener" aria-label="YouTube">
+        <i class="fab fa-youtube"></i>
+      </a>
     </div>
   </div>
 </body>
