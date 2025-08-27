@@ -14,6 +14,18 @@ from firebase_admin import credentials, firestore
 # App & Config
 # ---------------------------------------------------------------------
 # Load .env
+import os
+import json
+import logging
+from typing import List, Dict, Any, Tuple
+from flask import Flask, request
+import firebase_admin
+from firebase_admin import credentials, firestore
+from dotenv import load_dotenv
+
+# -------------------------------------------------------------------
+# Load environment variables
+# -------------------------------------------------------------------
 load_dotenv()
 
 # Base directories
@@ -45,26 +57,22 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # -------------------------------------------------------------------
-# Firebase Init
-# -------------------------------------------------------------------
-# -------------------------------------------------------------------
-# Firebase Init
+# Firebase Init (from environment variable)
 # -------------------------------------------------------------------
 def init_firestore():
-    # Path to your firebase-key.json
-    firebase_path = os.path.join(PRIVATE_DIR, "firebase-key.json")
-    
-    if not os.path.exists(firebase_path):
-        raise Exception(f"Firebase key file not found at {firebase_path}!")
+    firebase_key_json = os.environ.get("FIREBASE_KEY")
+    if not firebase_key_json:
+        raise Exception("FIREBASE_KEY environment variable not set!")
+
+    firebase_key_dict = json.loads(firebase_key_json)
 
     if not firebase_admin._apps:
-        cred = credentials.Certificate(firebase_path)
+        cred = credentials.Certificate(firebase_key_dict)
         firebase_admin.initialize_app(cred)
 
     return firestore.client()
 
 db = init_firestore()
-
 
 # -------------------------------------------------------------------
 # Helpers
@@ -126,6 +134,7 @@ products = load_products()
 @app.context_processor
 def inject_request():
     return dict(request=request)
+
 # -------------------------------------------------------------------
 # Routes
 # -------------------------------------------------------------------
