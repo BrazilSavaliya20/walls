@@ -163,18 +163,20 @@ def process_contact():
 
     name = request.form.get('name')
     email = request.form.get('email')
-    subject = request.form.get('subject')
+    mobile = request.form.get('mobile')
+    address = request.form.get('address')
     message = request.form.get('message')
 
-    if not name or not email or not subject or not message:
-        flash("⚠️ Please fill in all fields.")
+    if not name or not email or not mobile:
+        flash("⚠️ Please fill in all required fields.")
         return redirect(url_for('contact'))
 
     try:
         db.collection("contacts").add({
             "name": name,
             "email": email,
-            "subject": subject,
+            "mobile": mobile,
+            "address": address,
             "message": message,
             "timestamp": datetime.utcnow()
         })
