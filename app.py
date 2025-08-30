@@ -66,13 +66,15 @@ def init_firestore():
 
     firebase_key_dict = json.loads(firebase_key_json)
 
-    if not firebase_admin._apps:
+    if not firebase_admin._apps:  # prevents re-initialization
         cred = credentials.Certificate(firebase_key_dict)
-        firebase_admin.initialize_app(cred)
+        firebase_admin.initialize_app(cred, {
+            "storageBucket": "project-7527910338923540672.appspot.com"
+        })
 
-    return firestore.client()
+    return firestore.client(), storage.bucket()
 
-db = init_firestore()
+db, bucket = init_firestore()
 
 # -------------------------------------------------------------------
 # Helpers
@@ -291,65 +293,67 @@ def process_order():
 # -------------------------------------------------------------------
 # Admin Panel (basic, NOT authenticated!)
 # -------------------------------------------------------------------
-@app.route('/secret-admin', methods=['GET', 'POST'])
+@app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
     global products
 
-    if request.method == 'POST':
-        action = request.form.get('action')
+    if request.method == "POST":
+        action = request.form.get("action")
 
-        if action == 'add':
-            file = request.files.get('img_file')
+        # ADD PRODUCT
+        if action == "add":
+            file = request.files.get("img_file")
             if not file or not allowed_file(file.filename):
-                flash('Invalid or no image uploaded for new product!', "danger")
-                return redirect(url_for('secret_admin'))
+                flash("Invalid or no image uploaded for new product!", "danger")
+                return redirect(url_for("secret_admin"))
 
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
             new_id = max([p['id'] for p in products], default=0) + 1
             products.append({
-                'id': new_id,
-                'img': filename,
-                'name': request.form.get('name'),
-                'desc': request.form.get('desc'),
-                'old': request.form.get('old'),
-                'new': request.form.get('new')
+                "id": new_id,
+                "img": filename,
+                "name": request.form.get("name"),
+                "desc": request.form.get("desc"),
+                "old": request.form.get("old"),
+                "new": request.form.get("new")
             })
             save_products(products)
-            flash('Product added successfully.', "success")
+            flash("✅ Product added successfully!", "success")
 
-        elif action == 'update':
-            pid = int(request.form.get('id'))
+        # UPDATE PRODUCT
+        elif action == "update":
+            pid = int(request.form.get("id"))
             product = next((p for p in products if p['id'] == pid), None)
             if not product:
-                flash('Product not found.', "danger")
-                return redirect(url_for('secret_admin'))
+                flash("Product not found.", "danger")
+                return redirect(url_for("secret_admin"))
 
-            product['name'] = request.form.get('name')
-            product['desc'] = request.form.get('desc')
-            product['old'] = request.form.get('old')
-            product['new'] = request.form.get('new')
+            product["name"] = request.form.get("name")
+            product["desc"] = request.form.get("desc")
+            product["old"] = request.form.get("old")
+            product["new"] = request.form.get("new")
 
-            file = request.files.get('img_file')
+            file = request.files.get("img_file")
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                product['img'] = filename
+                product["img"] = filename
 
             save_products(products)
-            flash('Product updated successfully.', "success")
+            flash("✏️ Product updated successfully!", "success")
 
-        elif action == 'delete':
-            pid = int(request.form.get('id'))
+        # DELETE PRODUCT
+        elif action == "delete":
+            pid = int(request.form.get("id"))
             products = [p for p in products if p['id'] != pid]
             save_products(products)
-            flash('Product deleted successfully.', "success")
+            flash("🗑️ Product deleted successfully!", "success")
 
-        return redirect(url_for('secret_admin'))
+        return redirect(url_for("secret_admin"))
 
-    return render_template('admin_panel.html', products=products)
-
+    return render_template("admin_panel.html", products=products)
 # -------------------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
