@@ -139,22 +139,26 @@ def inject_request():
 # -------------------------------------------------------------------
 # Routes
 # -------------------------------------------------------------------
+from flask import render_template, request, redirect, url_for, flash, session
+from datetime import datetime
+
 @app.route('/')
 def home():
     return render_template('home.html', products=products)
+
 
 @app.route('/about')
 def about():
     return render_template('about.html')
 
+
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
         flash('Thank you for connecting with us! We will get back to you soon.')
         return redirect(url_for('contact'))
     return render_template('contact.html')
+
 
 @app.route('/process_contact', methods=['POST'])
 def process_contact():
@@ -188,9 +192,11 @@ def process_contact():
         flash("⚠️ Failed to send message.", "danger")
         return redirect(url_for("contact"))
 
+
 @app.route('/shop')
 def shop():
     return render_template('shop.html', products=products)
+
 
 @app.route('/cart')
 def cart():
@@ -201,6 +207,7 @@ def cart():
 
     cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("cart.html", cart_items=cart_items, total=total)
+
 
 @app.route('/add-to-cart', methods=['POST'])
 def add_to_cart():
@@ -214,6 +221,7 @@ def add_to_cart():
     cart_data[product_id] = cart_data.get(product_id, 0) + quantity
     session["cart"] = cart_data
     return ("", 204)
+
 
 @app.route('/update-cart', methods=['POST'])
 def update_cart():
@@ -235,6 +243,7 @@ def update_cart():
     session["cart"] = cart_data
     return redirect(url_for("cart"))
 
+
 @app.route("/checkout", methods=["GET"])
 def checkout():
     cart_data = session.get("cart", {})
@@ -244,6 +253,7 @@ def checkout():
 
     cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("checkout.html", cart_items=cart_items, total=total)
+
 
 @app.route("/process_order", methods=["POST"])
 def process_order():
