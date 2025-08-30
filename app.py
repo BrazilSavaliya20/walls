@@ -20,7 +20,7 @@ import logging
 from typing import List, Dict, Any, Tuple
 from flask import Flask, request
 import firebase_admin
-from firebase_admin import credentials, firestore, storage
+from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
 
 # -------------------------------------------------------------------
@@ -63,22 +63,16 @@ def init_firestore():
     firebase_key_json = os.environ.get("FIREBASE_KEY")
     if not firebase_key_json:
         raise Exception("FIREBASE_KEY environment variable not set!")
+
     firebase_key_dict = json.loads(firebase_key_json)
+
     if not firebase_admin._apps:
         cred = credentials.Certificate(firebase_key_dict)
-        firebase_admin.initialize_app(cred, {
-            "storageBucket": "project-7527910338923540672.appspot.com"
-        })
-    return firestore.client(), storage.bucket()
+        firebase_admin.initialize_app(cred)
 
-db, bucket = init_firestore()
-def upload_image_to_storage(file, filename):
-    """Uploads a file object to Firebase storage. Returns the public URL."""
-    blob = bucket.blob(f"product_images/{filename}")
-    blob.upload_from_file(file, content_type=file.content_type)
-    blob.make_public()  # Make the file public (or set ACL if needed)
-    return blob.public_url
+    return firestore.client()
 
+db = init_firestore()
 
 # -------------------------------------------------------------------
 # Helpers
@@ -309,13 +303,14 @@ def secret_admin():
             if not file or not allowed_file(file.filename):
                 flash('Invalid or no image uploaded for new product!', "danger")
                 return redirect(url_for('secret_admin'))
+
             filename = secure_filename(file.filename)
-            # upload to firebase storage
-            image_url = upload_image_to_storage(file, filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
             new_id = max([p['id'] for p in products], default=0) + 1
             products.append({
                 'id': new_id,
-                'img': image_url,  # Store the URL, not the filename
+                'img': filename,
                 'name': request.form.get('name'),
                 'desc': request.form.get('desc'),
                 'old': request.form.get('old'),
@@ -330,15 +325,18 @@ def secret_admin():
             if not product:
                 flash('Product not found.', "danger")
                 return redirect(url_for('secret_admin'))
+
             product['name'] = request.form.get('name')
             product['desc'] = request.form.get('desc')
             product['old'] = request.form.get('old')
             product['new'] = request.form.get('new')
+
             file = request.files.get('img_file')
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                image_url = upload_image_to_storage(file, filename)
-                product['img'] = image_url  # Update with new image URL
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                product['img'] = filename
+
             save_products(products)
             flash('Product updated successfully.', "success")
 
@@ -347,10 +345,10 @@ def secret_admin():
             products = [p for p in products if p['id'] != pid]
             save_products(products)
             flash('Product deleted successfully.', "success")
+
         return redirect(url_for('secret_admin'))
 
     return render_template('admin_panel.html', products=products)
-
 
 # -------------------------------------------------------------------
 if __name__ == "__main__":

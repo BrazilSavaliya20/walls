@@ -4,220 +4,191 @@
     <meta charset="UTF-8" />
     <title>Admin Product Management</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-<style>
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #f9fafb;
-    color: #333;
-    margin: 0;
-    padding: 0;
-}
-.admin-section {
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 30px 40px;
-    background: white;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
-}
-h2 {
-    margin-bottom: 27px;
-    font-weight: 700;
-    font-size: 2rem;
-    color: #222;
-}
-.top-bar {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
-}
-.btn-home {
-    background: linear-gradient(90deg,#d4af37, #b8860b 80%);
-    color: white;
-    padding: 11px 19px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.3s;
-    letter-spacing: 0.7px;
-}
-.btn-home:hover {
-    background: linear-gradient(90deg,#b8860b,#d4af37 80%);
-    color: #222;
-}
-.flash {
-    color: #15803d;
-    font-weight: 600;
-    margin-bottom: 20px;
-    padding: 10px 18px;
-    border-radius: 8px;
-    background: #def7ec;
-    border: 1px solid #a7f3d0;
-}
-
-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 12px;
-    margin-bottom: 50px;
-    font-size: 1rem;
-    overflow-x: auto;
-    display: block;
-}
-
-th, td {
-    padding: 15px 12px;
-    vertical-align: middle;
-}
-
-th {
-    text-align: left;
-    padding-left: 16px;
-    font-weight: 600;
-    color: #555;
-    border-bottom: 2px solid #e2e8f0;
-    background: #f7f7f7;
-    font-size: 1.04rem;
-}
-td {
-    background-color: #fefefe;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    font-size: 0.98rem;
-    word-break: break-word;
-}
-img {
-    max-width: 60px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.13);
-    display: block;
-    margin: 0 auto;
-}
-input[type="text"], input[type="file"], textarea {
-    width: 100%;
-    min-width: 0;
-    max-width: 240px;
-    padding: 10px 13px;
-    margin-bottom: 0;
-    font-size: 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    background-color: #fafafa;
-    transition: border 0.25s, box-shadow 0.25s;
-    box-sizing: border-box;
-    display: block;
-}
-input[type="text"]:focus,
-textarea:focus,
-input[type="file"]:focus {
-    outline: none;
-    border-color: #d4af37;
-    box-shadow: 0 0 6px #d4af37;
-    background-color: #fff;
-}
-textarea {
-    resize: vertical;
-    min-height: 70px;
-}
-input[type="file"] {
-    cursor: pointer;
-    background: #fff;
-}
-form.inline-form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px 18px;
-}
-.input-wrapper {
-    flex: 1 1 150px;
-    min-width: 120px;
-}
-.btn {
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: none;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 0.99rem;
-    transition: box-shadow 0.2s, background 0.3s;
-    min-width: 90px;
-    text-align: center;
-    margin-top: 7px;
-}
-.btn-edit {
-    background: linear-gradient(90deg,#d4af37,#b8860b 80%);
-    color: white;
-    box-shadow: 0 4px 8px rgba(218,165,32,0.06);
-}
-.btn-edit:hover {
-    background: linear-gradient(90deg,#b8860b,#d4af37 80%);
-    color: #222;
-}
-.btn-delete {
-    background: #ef4444;
-    color: white;
-    box-shadow: 0 4px 8px rgba(239,68,68,0.09);
-}
-.btn-delete:hover {
-    background: #b91c1c;
-}
-.btn-add {
-    background: #22c55e;
-    color: white;
-    font-size: 1rem;
-    padding: 13px 29px;
-    border-radius: 10px;
-    box-shadow: 0 6px 15px rgba(34,197,94,0.13);
-    margin-top: 15px;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    display: block;
-    width: max-content;
-}
-.btn-add:hover {
-    background-color: #15803d;
-    box-shadow: 0 8px 24px rgba(21,128,61,0.07);
-}
-@media(max-width:1024px) {
-    .admin-section {padding:18px 3vw;}
-    table { font-size: 0.96rem;}
-    th, td { padding: 9px 8px;}
-}
-@media (max-width: 900px) {
-    .admin-section {
-        padding: 10px 1vw;
-        margin: 10px;
-    }
-    form.inline-form {
-        flex-direction: column;
-        gap: 7px;
-        align-items: stretch;
-    }
-    .input-wrapper { min-width: 80px; }
-    .btn { min-width: 80px; width:100%; }
-    table { font-size: 0.91rem; }
-}
-@media (max-width:600px) {
-    .admin-section { padding: 4vw 1vw;}
-    h2, h3 { font-size: 1.10rem; margin-bottom: 12px;}
-    .top-bar { padding: 3px 0;}
-    .btn-home { font-size: 0.97rem; padding:9px 12px;}
-    .btn { font-size:0.93rem; }
-    table, thead, tbody, th, td, tr { display: block; width: 100%; }
-    table { overflow-x:auto; padding: 0 1px;}
-    tr { margin-bottom: 16px;}
-    th { border-bottom: none; padding: 12px 6px; font-size:1rem;}
-    td { border-radius: 8px; box-shadow: 0 2px 3px rgba(212,175,55,0.05);}
-    img { max-width: 58vw;}
-}
-@media (max-width:400px) {
-    .btn-home, .btn, .btn-add { font-size: 0.91rem; padding: 9px 9px;}
-    .admin-section { padding: 4vw 0;}
-}
-</style>
-
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f9fafb;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .admin-section {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 30px 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-bottom: 27px;
+            font-weight: 700;
+            font-size: 2rem;
+            color: #222;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .btn-home {
+            background-color: goldenrod;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn-home:hover {
+            background-color: #b8860b;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+            margin-bottom: 50px;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 15px 12px;
+            vertical-align: middle;
+        }
+        th {
+            text-align: left;
+            padding-left: 16px;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        td {
+            background-color: #fefefe;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        }
+        img {
+            max-width: 60px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            display: block;
+            margin: 0 auto;
+        }
+        .flash {
+            color: #15803d; /* green-600 */
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="file"], textarea {
+            width: 100%;
+            max-width: 280px;
+            padding: 10px 14px;
+            margin-bottom: 0;
+            font-size: 1rem;
+            font-family: 'Segoe UI', sans-serif;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+            color: #333;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+            display: block;
+        }
+        input[type="text"]:focus,
+        textarea:focus,
+        input[type="file"]:focus {
+            outline: none;
+            border-color: goldenrod;
+            box-shadow: 0 0 6px goldenrod;
+            background-color: #fff;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        input[type="file"] {
+            cursor: pointer;
+            background-color: #fff;
+        }
+        /* Form layout inside table */
+        form.inline-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+        form.inline-form td {
+            padding: 8px 10px;
+        }
+        .input-wrapper {
+            flex: 1 1 150px;
+            min-width: 140px;
+        }
+        /* Buttons styling inside table */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: box-shadow 0.2s ease;
+            min-width: 90px;
+            text-align: center;
+        }
+        .btn-edit {
+            background-color: goldenrod;
+            color: white;
+            box-shadow: 0 4px 8px rgba(218,165,32,0.4);
+        }
+        .btn-edit:hover {
+            background-color: #b8860b;
+            box-shadow: 0 6px 12px rgba(184,134,11,0.6);
+        }
+        .btn-delete {
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            box-shadow: 0 4px 8px rgba(239,68,68,0.4);
+        }
+        .btn-delete:hover {
+            background-color: #b91c1c; /* red-700 */
+            box-shadow: 0 6px 12px rgba(185,28,28,0.6);
+        }
+        .btn-add {
+            background-color: #22c55e; /* green-500 */
+            color: white;
+            font-size: 1rem;
+            padding: 12px 28px;
+            border-radius: 10px;
+            box-shadow: 0 6px 15px rgba(34,197,94,0.5);
+            margin-top: 15px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            display: block;
+            width: max-content;
+        }
+        .btn-add:hover {
+            background-color: #15803d; /* green-700 */
+            box-shadow: 0 8px 20px rgba(21,128,61,0.7);
+        }
+        /* Responsive design */
+        @media(max-width: 900px) {
+            .admin-section {
+                padding: 20px;
+                margin: 20px;
+            }
+            form.inline-form {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .input-wrapper {
+                min-width: 100%;
+            }
+            .btn {
+                min-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="admin-section">
@@ -248,7 +219,7 @@ form.inline-form {
             <tr>
                 <form method="POST" enctype="multipart/form-data" class="inline-form">
                     <td>
-                        <img src="{{ product.img }}" alt="{{ product.name }}">
+                        <img src="{{ url_for('static', filename='images/' + product.img) }}" alt="{{ product.name }}">
                     </td>
                     <td class="input-wrapper">
                         <input type="text" name="name" value="{{ product.name }}" required>
