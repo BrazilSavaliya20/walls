@@ -68,18 +68,11 @@ def init_firestore():
 
     if not firebase_admin._apps:
         cred = credentials.Certificate(firebase_key_dict)
-        firebase_admin.initialize_app(cred, {
-            "storageBucket": "project-7527910338923540672.appspot.com"  # Replace with your actual bucket name
-        })
+        firebase_admin.initialize_app(cred)  # No storageBucket needed
 
-    # Initialize Firestore client
-    db = firestore.client()
-    # Initialize Firebase Storage bucket
-    bucket = storage.bucket()
-    return db, bucket
+    return firestore.client()
 
-# Get clients
-db, bucket = init_firestore()
+db = init_firestore()
 
 
 # -------------------------------------------------------------------
@@ -299,6 +292,30 @@ def process_order():
 # -------------------------------------------------------------------
 # Admin Panel (basic, NOT authenticated!)
 # -------------------------------------------------------------------
+import base64
+import requests
+from flask import flash, redirect, url_for
+
+IMGBB_API_KEY = "4daaf1a5f4db5099ddf6cc4035486275"  # Your Imgbb API Key
+IMG_UPLOAD_URL = "https://api.imgbb.com/1/upload"
+
+def upload_image_to_imgbb(file):
+    encoded_image = base64.b64encode(file.read()).decode('utf-8')
+    file.seek(0)  # reset file pointer after reading
+    payload = {
+        'key': IMGBB_API_KEY,
+        'image': encoded_image,
+        'name': file.filename
+    }
+    response = requests.post(IMG_UPLOAD_URL, data=payload)
+    data = response.json()
+    if response.status_code == 200 and data.get('success'):
+        return data['data']['url']
+    else:
+        error_msg = data.get('error', {}).get('message', 'Unknown error during Imgbb upload')
+        raise Exception(f"ImgBB upload failed: {error_msg}")
+
+
 @app.route('/secret-admin', methods=['GET', 'POST'])
 def secret_admin():
     global products
@@ -311,15 +328,16 @@ def secret_admin():
             if not file or not allowed_file(file.filename):
                 flash('Invalid or no image uploaded for new product!', "danger")
                 return redirect(url_for('secret_admin'))
-
-            filename = secure_filename(file.filename)
-            # Upload file to Firebase Storage and get URL
-            image_url = upload_image_to_storage(file, filename)
+            try:
+                img_url = upload_image_to_imgbb(file)
+            except Exception as e:
+                flash(str(e), "danger")
+                return redirect(url_for('secret_admin'))
 
             new_id = max([p['id'] for p in products], default=0) + 1
             products.append({
                 'id': new_id,
-                'img': image_url,  # Store URL instead of filename
+                'img': img_url,
                 'name': request.form.get('name'),
                 'desc': request.form.get('desc'),
                 'old': request.form.get('old'),
@@ -342,10 +360,12 @@ def secret_admin():
 
             file = request.files.get('img_file')
             if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                # Upload new file to Firebase Storage and update URL
-                image_url = upload_image_to_storage(file, filename)
-                product['img'] = image_url
+                try:
+                    img_url = upload_image_to_imgbb(file)
+                    product['img'] = img_url
+                except Exception as e:
+                    flash(str(e), 'danger')
+                    return redirect(url_for('secret_admin'))
 
             save_products(products)
             flash('Product updated successfully.', "success")
@@ -359,7 +379,6 @@ def secret_admin():
         return redirect(url_for('secret_admin'))
 
     return render_template('admin_panel.html', products=products)
-
 
 # -------------------------------------------------------------------
 if __name__ == "__main__":
