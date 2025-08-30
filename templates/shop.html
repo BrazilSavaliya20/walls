@@ -472,7 +472,7 @@ function toggleMenu(x) {
     <div class="product-grid">
         {% for product in products %}
         <div class="product-card">
-            <img src="{{ url_for('static', filename='images/' + product.img) }}" alt="{{ product.name }}">
+            <img src="{{ item.img }}" alt="{{ item.name }}" class="cart-img">
             <div class="product-info">
                 <h3>{{ product.name }}</h3>
                 <p>{{ product.desc }}</p>
