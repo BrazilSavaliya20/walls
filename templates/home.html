@@ -692,7 +692,8 @@ function toggleMenu(x) {
     {% for product in products %}
     <div class="product-card ultra-luxury-product-card">
       <div class="product-image-wrapper">
-        <img src="{{ url_for('static', filename='images/' + product.img) }}" alt="{{ product.name }}">
+        <img src="{{ product.img }}" alt="{{ product.name }}">
+
         {% if product.old and (product.old|float) != 0 %}
         <div class="discount-badge">-{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%</div>
         {% endif %}
