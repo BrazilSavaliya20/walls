@@ -68,11 +68,19 @@ def init_firestore():
 
     if not firebase_admin._apps:
         cred = credentials.Certificate(firebase_key_dict)
-        firebase_admin.initialize_app(cred)
+        firebase_admin.initialize_app(cred, {
+            "storageBucket": "project-7527910338923540672.appspot.com"  # Replace with your actual bucket name
+        })
 
-    return firestore.client()
+    # Initialize Firestore client
+    db = firestore.client()
+    # Initialize Firebase Storage bucket
+    bucket = storage.bucket()
+    return db, bucket
 
-db = init_firestore()
+# Get clients
+db, bucket = init_firestore()
+
 
 # -------------------------------------------------------------------
 # Helpers
@@ -305,12 +313,13 @@ def secret_admin():
                 return redirect(url_for('secret_admin'))
 
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            # Upload file to Firebase Storage and get URL
+            image_url = upload_image_to_storage(file, filename)
 
             new_id = max([p['id'] for p in products], default=0) + 1
             products.append({
                 'id': new_id,
-                'img': filename,
+                'img': image_url,  # Store URL instead of filename
                 'name': request.form.get('name'),
                 'desc': request.form.get('desc'),
                 'old': request.form.get('old'),
@@ -334,8 +343,9 @@ def secret_admin():
             file = request.files.get('img_file')
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                product['img'] = filename
+                # Upload new file to Firebase Storage and update URL
+                image_url = upload_image_to_storage(file, filename)
+                product['img'] = image_url
 
             save_products(products)
             flash('Product updated successfully.', "success")
@@ -349,6 +359,7 @@ def secret_admin():
         return redirect(url_for('secret_admin'))
 
     return render_template('admin_panel.html', products=products)
+
 
 # -------------------------------------------------------------------
 if __name__ == "__main__":
