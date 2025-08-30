@@ -390,6 +390,31 @@ function toggleMenu(x) {
     <button type="submit">Place Order</button>
   </form>
 </div>
+<!-- ✅ QR Code Section -->
+<div class="qr-section">
+  <h3>Scan to Pay</h3>
+  <img src="{{ url_for('static', filename='images/qr_code.jpg') }}" alt="Scan to Pay QR" />
+</div>
+/* 🌟 QR Code Section */
+.qr-section {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.qr-section h3 {
+  color: #d4af37;
+  margin-bottom: 12px;
+  font-size: 20px;
+  text-shadow: 0 0 8px rgba(212,175,55,0.4);
+}
+
+.qr-section img {
+  max-width: 260px;    /* never grow too big */
+  width: 100%;         /* shrink nicely on small screens */
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(212,175,55,0.4);
+}
 
 <footer>
   <div class="footer-container">
