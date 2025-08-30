@@ -163,12 +163,13 @@
     gap: 16px;
   }
 }
-@media (max-width: 540px) {
+@media (max-width: 576px) {
   .ultra-luxury-grid {
-    grid-template-columns: 1fr; /* 1 card per row on small mobiles */
-    gap: 10px;
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row on small mobile */
+    gap: 15px; /* smaller gap for tight screen */
   }
 }
+
 
 /* Product Card */
 .ultra-luxury-product-card {
