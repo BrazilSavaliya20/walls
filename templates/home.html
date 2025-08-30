@@ -146,27 +146,27 @@
     /* Grid System */
 .ultra-luxury-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* desktop default */
+  grid-template-columns: repeat(4, 1fr); /* desktop */
   gap: 25px;
-  margin: 0 auto;
-  width: 100%;
 }
 
 @media (max-width: 992px) {
   .ultra-luxury-grid {
-    grid-template-columns: repeat(3, 1fr); /* tablet */
+    grid-template-columns: repeat(3, 1fr);
   }
 }
+
 @media (max-width: 768px) {
   .ultra-luxury-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 cards on medium mobiles */
+    grid-template-columns: repeat(2, 1fr); /* mobile/tablet */
     gap: 16px;
   }
 }
-@media (max-width: 576px) {
+
+@media (max-width: 480px) {
   .ultra-luxury-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 cards per row on small mobile */
-    gap: 15px; /* smaller gap for tight screen */
+    grid-template-columns: repeat(2, 1fr); /* force 2 per row, even on very small screens */
+    gap: 10px;
   }
 }
 
@@ -179,32 +179,29 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 370px; /* Ensures all cards stack evenly */
   box-sizing: border-box;
   height: 100%;
-  min-height: 350px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.13);
-  overflow: hidden;
 }
 
-/* Product Image Wrapper with Aspect Ratio */
-.product-image-wrapper { 
+/* Maintain strict card height with some consistency: */
+.product-image-wrapper {
   width: 100%;
-  aspect-ratio: 1/1;       /* Make the image always a square (modern, very responsive) */
-  position: relative; 
-  border-radius: 15px;
-  overflow: hidden; 
-  background: #222;         /* fallback bg if image not loaded */
+  aspect-ratio: 1 / 1.1; /* GOLD! Keeps all image wrappers equal height. 1:1 or 1:1.1 works best */
+  background: #222;
+  border-radius: 12px;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.product-image-wrapper img { 
-  width: 100%; 
+.product-image-wrapper img {
+  width: 100%;
   height: 100%;
-  object-fit: cover;        /* makes sure image always completely fills the box */
-  transition: transform 0.3s;
+  object-fit: cover;
   display: block;
+  transition: transform 0.3s;
 }
 
 .ultra-luxury-product-card:hover img { 
