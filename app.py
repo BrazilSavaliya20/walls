@@ -20,7 +20,7 @@ import logging
 from typing import List, Dict, Any, Tuple
 from flask import Flask, request
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, storage
 from dotenv import load_dotenv
 
 # -------------------------------------------------------------------
@@ -63,18 +63,22 @@ def init_firestore():
     firebase_key_json = os.environ.get("FIREBASE_KEY")
     if not firebase_key_json:
         raise Exception("FIREBASE_KEY environment variable not set!")
-
     firebase_key_dict = json.loads(firebase_key_json)
-
-    if not firebase_admin._apps:  # prevents re-initialization
+    if not firebase_admin._apps:
         cred = credentials.Certificate(firebase_key_dict)
         firebase_admin.initialize_app(cred, {
             "storageBucket": "project-7527910338923540672.appspot.com"
         })
-
     return firestore.client(), storage.bucket()
 
 db, bucket = init_firestore()
+def upload_image_to_storage(file, filename):
+    """Uploads a file object to Firebase storage. Returns the public URL."""
+    blob = bucket.blob(f"product_images/{filename}")
+    blob.upload_from_file(file, content_type=file.content_type)
+    blob.make_public()  # Make the file public (or set ACL if needed)
+    return blob.public_url
+
 
 # -------------------------------------------------------------------
 # Helpers
@@ -293,67 +297,61 @@ def process_order():
 # -------------------------------------------------------------------
 # Admin Panel (basic, NOT authenticated!)
 # -------------------------------------------------------------------
-@app.route("/secret-admin", methods=["GET", "POST"])
+@app.route('/secret-admin', methods=['GET', 'POST'])
 def secret_admin():
     global products
 
-    if request.method == "POST":
-        action = request.form.get("action")
+    if request.method == 'POST':
+        action = request.form.get('action')
 
-        # ADD PRODUCT
-        if action == "add":
-            file = request.files.get("img_file")
+        if action == 'add':
+            file = request.files.get('img_file')
             if not file or not allowed_file(file.filename):
-                flash("Invalid or no image uploaded for new product!", "danger")
-                return redirect(url_for("secret_admin"))
-
+                flash('Invalid or no image uploaded for new product!', "danger")
+                return redirect(url_for('secret_admin'))
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
+            # upload to firebase storage
+            image_url = upload_image_to_storage(file, filename)
             new_id = max([p['id'] for p in products], default=0) + 1
             products.append({
-                "id": new_id,
-                "img": filename,
-                "name": request.form.get("name"),
-                "desc": request.form.get("desc"),
-                "old": request.form.get("old"),
-                "new": request.form.get("new")
+                'id': new_id,
+                'img': image_url,  # Store the URL, not the filename
+                'name': request.form.get('name'),
+                'desc': request.form.get('desc'),
+                'old': request.form.get('old'),
+                'new': request.form.get('new')
             })
             save_products(products)
-            flash("✅ Product added successfully!", "success")
+            flash('Product added successfully.', "success")
 
-        # UPDATE PRODUCT
-        elif action == "update":
-            pid = int(request.form.get("id"))
+        elif action == 'update':
+            pid = int(request.form.get('id'))
             product = next((p for p in products if p['id'] == pid), None)
             if not product:
-                flash("Product not found.", "danger")
-                return redirect(url_for("secret_admin"))
-
-            product["name"] = request.form.get("name")
-            product["desc"] = request.form.get("desc")
-            product["old"] = request.form.get("old")
-            product["new"] = request.form.get("new")
-
-            file = request.files.get("img_file")
+                flash('Product not found.', "danger")
+                return redirect(url_for('secret_admin'))
+            product['name'] = request.form.get('name')
+            product['desc'] = request.form.get('desc')
+            product['old'] = request.form.get('old')
+            product['new'] = request.form.get('new')
+            file = request.files.get('img_file')
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                product["img"] = filename
-
+                image_url = upload_image_to_storage(file, filename)
+                product['img'] = image_url  # Update with new image URL
             save_products(products)
-            flash("✏️ Product updated successfully!", "success")
+            flash('Product updated successfully.', "success")
 
-        # DELETE PRODUCT
-        elif action == "delete":
-            pid = int(request.form.get("id"))
+        elif action == 'delete':
+            pid = int(request.form.get('id'))
             products = [p for p in products if p['id'] != pid]
             save_products(products)
-            flash("🗑️ Product deleted successfully!", "success")
+            flash('Product deleted successfully.', "success")
+        return redirect(url_for('secret_admin'))
 
-        return redirect(url_for("secret_admin"))
+    return render_template('admin_panel.html', products=products)
 
-    return render_template("admin_panel.html", products=products)
+
 # -------------------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
