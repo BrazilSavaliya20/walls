@@ -566,7 +566,8 @@ function toggleMenu(x) {
     <tbody>
       {% for item in cart_items %}
       <tr>
-        <td data-label="Preview"><img src="{{ url_for('static', filename='images/' + item.img) }}" class="cart-img" alt="{{ item.name }}"></td>
+
+        <td data-label="Preview"><img src="{{ product.img }}" alt="{{ product.name }}" class="cart-img" alt="{{ item.name }}"></td>
         <td data-label="Product">{{ item.name }}</td>
         <td data-label="Price">₹{{ item.price }}</td>
         <td data-label="Quantity">
