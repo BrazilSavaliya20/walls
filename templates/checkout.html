@@ -333,6 +333,18 @@ footer {
         font-weight: bold;
         color: #d4af37;
       }
+      .cart-img {
+  max-width: 60px;
+  max-height: 60px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: block;
+  margin: 0 auto;
+}
+
     }
   </style>
 </head>
@@ -382,7 +394,8 @@ function toggleMenu(x) {
     <tbody>
       {% for item in cart_items %}
       <tr>
-<td data-label="Preview"><img src="{{ item.img }}" alt="{{ item.name }}"></td>
+        <td data-label="Preview"><img src="{{ item.img }}" alt="{{ item.name }}" class="cart-img">
+</td>
         <td data-label="Product">{{ item.name }}</td>
         <td data-label="Price">₹{{ item.price }}</td>
         <td data-label="Qty">{{ item.qty }}</td>
