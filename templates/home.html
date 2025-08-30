@@ -143,57 +143,110 @@
     }
 
     /* Product Grid */
-    .ultra-luxury-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr); /* desktop default */
-      gap: 25px;
-    }
-    @media (max-width: 992px) {
-      .ultra-luxury-grid {
-        grid-template-columns: repeat(3, 1fr); /* tablet */
-      }
-    }
-    @media (max-width: 576px) {
-      .ultra-luxury-grid {
-        grid-template-columns: repeat(2, 1fr); /* mobile */
-      }
-    }
+    /* Product Grid */
+.ultra-luxury-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* desktop default */
+  gap: 25px;
+}
 
-    /* Product Card */
-    .ultra-luxury-product-card {
-      background: #1a1a1a;
-      border-radius: 15px;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      height: 100%; 
-    }
-    .product-image-wrapper { 
-      position: relative; 
-      border-radius: 15px; 
-      overflow: hidden; 
-      width: 100%;
-      height: 220px; /* fixed size */
-    }
-    .product-image-wrapper img { 
-      width: 100%; 
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s; 
-    }
-    .ultra-luxury-product-card:hover img { transform: scale(1.05); }
-    .discount-badge {
-      position: absolute; top: 15px; left: 15px;
-      background: #d4af37; color: #000; font-weight: 700; font-size: 0.85rem;
-      padding: 5px 10px; border-radius: 30px;
-    }
-    .product-info { flex-grow: 1; margin-top: 15px; text-align: center; }
-    .product-name { font-family: 'Cinzel', serif; font-weight: 900; font-size: 1.3rem; margin-bottom: 10px; color: #f4e7c1; }
-    .description { font-size: 0.9rem; color: #bfbfbf; margin-bottom: 15px; min-height: 40px; }
-    .price { margin-bottom: 15px; }
-    .old-price { text-decoration: line-through; color: #666; margin-right: 8px; }
-    .new-price { color: #d4af37; font-weight: 700; font-size: 1.1rem; }
+@media (max-width: 992px) {
+  .ultra-luxury-grid {
+    grid-template-columns: repeat(3, 1fr); /* tablet */
+  }
+}
+
+@media (max-width: 576px) {
+  .ultra-luxury-grid {
+    grid-template-columns: repeat(2, 1fr); /* mobile */
+    gap: 15px; /* tighter spacing for small screens */
+  }
+}
+
+/* Product Card */
+.ultra-luxury-product-card {
+  background: #1a1a1a;
+  border-radius: 15px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-height: 360px;   /* fix height for uniformity */
+  max-height: 360px;
+}
+
+/* Image Wrapper */
+.product-image-wrapper {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  width: 100%;
+  height: 220px; /* fixed image height */
+  flex-shrink: 0;
+}
+
+.product-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.ultra-luxury-product-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Discount Badge */
+.discount-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: #d4af37;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 5px 10px;
+  border-radius: 30px;
+}
+
+/* Product Info */
+.product-info {
+  flex-grow: 1;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.product-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #f4e7c1;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: #bfbfbf;
+  margin-bottom: 15px;
+  min-height: 40px;
+}
+
+.price {
+  margin-bottom: 15px;
+}
+
+.old-price {
+  text-decoration: line-through;
+  color: #666;
+  margin-right: 8px;
+}
+
+.new-price {
+  color: #d4af37;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
 
     /* Buttons */
     .btn-secondary {
