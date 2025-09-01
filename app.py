@@ -256,7 +256,7 @@ def checkout():
 
 @app.route('/shop')
 def shop():
-    return render_template('shop.html', products=products)
+    return render_template("shop.html")
 
 
 @app.route("/process_order", methods=["POST"])
