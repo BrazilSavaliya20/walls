@@ -163,7 +163,16 @@ def inject_request():
 # -------------------------------------------------------------------
 @app.route('/')
 def home():
-    return render_template('home.html', products=products)
+    products_list = products  # your existing products
+    # Fetch reviews ordered by newest first
+    try:
+        reviews_ref = db.collection('reviews').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
+        reviews_list = [{"customer_name": r.get("customer_name"), "review_text": r.get("review_text")} for r in reviews_ref]
+    except Exception as e:
+        logger.error(f"Failed to fetch reviews: {e}")
+        reviews_list = []
+
+    return render_template('home.html', products=products_list, reviews=reviews_list)
 
 @app.route('/about')
 def about():
@@ -324,6 +333,31 @@ def process_order():
         return redirect(url_for("checkout"))
 
 
+@app.route('/submit-review', methods=['POST'])
+def submit_review():
+    if db is None:
+        flash("⚠️ Firestore is not initialized.", "danger")
+        return redirect(url_for("order_success"))
+
+    name = request.form.get('name')
+    review = request.form.get('review')
+
+    if not name or not review:
+        flash("⚠️ Please provide both name and review.", "warning")
+        return redirect(url_for("order_success"))
+
+    try:
+        db.collection("reviews").add({
+            "customer_name": name,
+            "review_text": review,
+            "timestamp": datetime.utcnow()
+        })
+        flash("✅ Thank you for your review!")
+    except Exception as e:
+        logger.error(f"Failed to save review: {e}")
+        flash("⚠️ Failed to submit review. Please try again.", "danger")
+
+    return redirect(url_for("order_success"))
 
 # -------------------------------------------------------------------
 # Admin Panel (basic, NOT authenticated!)

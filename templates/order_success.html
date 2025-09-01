@@ -104,6 +104,19 @@
       </tbody>
     </table>
     <p class="total">Total: ₹{{ total }}</p>
+    <div class="add-review-section" style="max-width: 800px; margin: 0 auto; background: #1a1a1a; padding: 20px; border-radius: 10px; text-align: left; color: #f4e7c1;">
+  <h2>Add Your Review</h2>
+  <form method="POST" action="{{ url_for('submit_review') }}">
+    <label for="name" style="display:block; margin-bottom:6px; font-weight:bold;">Name:</label>
+    <input type="text" id="name" name="name" required style="width: 100%; padding: 10px; border-radius:6px; border:none; margin-bottom: 12px; background: #333; color:#f4e7c1;">
+
+    <label for="review" style="display:block; margin-bottom:6px; font-weight:bold;">Review:</label>
+    <textarea id="review" name="review" rows="4" required style="width: 100%; padding: 10px; border-radius:6px; border:none; background: #333; color:#f4e7c1; margin-bottom: 16px;"></textarea>
+
+    <button type="submit" style="background: #d4af37; color:#000; padding: 10px 20px; border:none; border-radius: 8px; font-weight: bold; cursor: pointer;">Submit Review</button>
+  </form>
+</div>
+
   </div>
 
   <a href="{{ url_for('home') }}">Go Back to Home</a>
