@@ -257,6 +257,9 @@ def update_cart():
     session["cart"] = cart_data
     return redirect(url_for("cart"))
 
+from flask import Flask, render_template, session, redirect, url_for, flash, request
+from datetime import datetime
+
 @app.route("/checkout", methods=["GET"])
 def checkout():
     cart_data = session.get("cart", {})
@@ -273,6 +276,11 @@ def process_order():
         flash("⚠️ Firestore is not initialized.", "danger")
         return redirect(url_for("checkout"))
 
+    cart_data = session.get("cart", {})
+    if not isinstance(cart_data, dict) or not cart_data:
+        flash("Your cart is empty. Please add items before checkout.", "warning")
+        return redirect(url_for("shop"))
+
     order_data = {
         "name": request.form.get("name"),
         "mobile": request.form.get("mobile"),
@@ -283,33 +291,32 @@ def process_order():
         "timestamp": datetime.utcnow()
     }
 
-    cart_data = session.get("cart", {})
-
     try:
         for pid, qty in cart_data.items():
             product = next((p for p in products if p["id"] == int(pid)), None)
-            if product:
-                price = money_to_int(product.get("new"))
-                subtotal = price * qty
-                order_data["total"] += subtotal
-                order_data["items"].append({
-                    "product_id": product["id"],
-                    "name": product["name"],
-                    "img": product["img"],
-                    "price": price,
-                    "quantity": qty,
-                    "subtotal": subtotal
-                })
+            if not product:
+                continue  # Skip any missing products - optionally flash a warning here
+            price = money_to_int(product.get("new"))
+            subtotal = price * qty
+            order_data["total"] += subtotal
+            order_data["items"].append({
+                "product_id": product["id"],
+                "name": product["name"],
+                "img": product["img"],
+                "price": price,
+                "quantity": qty,
+                "subtotal": subtotal
+            })
 
         db.collection("orders").add(order_data)
         session.pop("cart", None)
-
         return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
 
     except Exception as e:
         logger.error(f"Failed to save order data: {e}")
-        flash("Failed to process your order. Please try again later.", "danger")
+        flash(f"Failed to process your order. Error: {e}", "danger")
         return redirect(url_for("checkout"))
+
 
 # -------------------------------------------------------------------
 # Admin Panel (basic, NOT authenticated!)
