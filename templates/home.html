@@ -532,7 +532,22 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="customer-reviews-grid">
       {% for review in reviews %}
         <div class="review-card">
+          
+          <!-- Star Rating -->
+          <div class="star-rating">
+            {% for i in range(1, 6) %}
+              {% if i <= review.rating %}
+                <i class="fa-solid fa-star"></i>
+              {% else %}
+                <i class="fa-regular fa-star"></i>
+              {% endif %}
+            {% endfor %}
+          </div>
+          
+          <!-- Review Text -->
           <p>"{{ review.review_text }}"</p>
+          
+          <!-- Customer Name -->
           <p class="customer-name">- {{ review.customer_name }}</p>
         </div>
       {% endfor %}
@@ -541,6 +556,9 @@ document.addEventListener("DOMContentLoaded", () => {
     <p class="no-reviews">No reviews yet. Be the first to add one!</p>
   {% endif %}
 </section>
+
+<!-- Load Font Awesome for stars -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
 <style>
 .customer-reviews {
@@ -589,6 +607,13 @@ document.addEventListener("DOMContentLoaded", () => {
   margin-top: 12px;
 }
 
+/* Star Rating */
+.star-rating {
+  color: #FFD700; /* Gold stars */
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
 /* Hover effect */
 .review-card:hover {
   transform: translateY(-5px);
@@ -619,6 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 }
 </style>
+
 
 
 <footer>
