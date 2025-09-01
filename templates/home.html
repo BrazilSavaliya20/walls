@@ -509,17 +509,6 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
   </div>
 </section>
-<section class="reviews">
-  <h2>What Our Customers Say</h2>
-  {% for r in reviews %}
-    <div class="review-card">
-      <h4>{{ r.name }}</h4>
-      <p>"{{ r.review }}"</p>
-    </div>
-  {% else %}
-    <p>No reviews yet. Be the first to leave one!</p>
-  {% endfor %}
-</section>
 
 
 <footer>

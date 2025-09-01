@@ -142,35 +142,9 @@ def inject_request():
 from flask import render_template, request, redirect, url_for, flash, session
 from datetime import datetime
 
-
-db = init_firestore()
-
-@app.route("/submit_review", methods=["POST"])
-def submit_review():
-    name = request.form.get("name")
-    review_text = request.form.get("review")
-
-    if not name or not review_text:
-        flash("Please provide both name and review.", "danger")
-        return redirect(url_for("home"))
-
-    review_data = {
-        "name": name,
-        "review": review_text,
-        "timestamp": firestore.SERVER_TIMESTAMP
-    }
-
-    db.collection("reviews").add(review_data)
-
-    flash("Thank you! Your review has been submitted.", "success")
-    return redirect(url_for("home"))
-
-@app.route("/")
+@app.route('/')
 def home():
-    reviews_ref = db.collection("reviews").order_by("timestamp", direction=firestore.Query.DESCENDING).stream()
-    reviews = [{"id": r.id, **r.to_dict()} for r in reviews_ref]
-    return render_template("home.html", reviews=reviews)
-
+    return render_template('home.html', products=products)
 
 
 @app.route('/about')
@@ -415,32 +389,6 @@ def secret_admin():
         return redirect(url_for('secret_admin'))
 
     return render_template('admin_panel.html', products=products)
-
-@app.route("/admin/reviews", methods=["GET", "POST"])
-def admin_reviews():
-    if request.method == "POST":
-        action = request.form.get("action")
-
-        if action == "delete":
-            rid = request.form.get("id")
-            db.collection("reviews").document(rid).delete()
-            flash("Review deleted.", "success")
-
-        elif action == "update":
-            rid = request.form.get("id")
-            new_name = request.form.get("name")
-            new_review = request.form.get("review")
-            db.collection("reviews").document(rid).update({
-                "name": new_name,
-                "review": new_review
-            })
-            flash("Review updated.", "success")
-
-    reviews_ref = db.collection("reviews").order_by("timestamp", direction=firestore.Query.DESCENDING).stream()
-    reviews = [{"id": r.id, **r.to_dict()} for r in reviews_ref]
-
-    return render_template("admin_reviews.html", reviews=reviews)
-
 
 # -------------------------------------------------------------------
 if __name__ == "__main__":
