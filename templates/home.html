@@ -717,9 +717,12 @@
 </section>
 
 <!-- Customer Reviews Section -->
+
 <section class="customer-reviews">
   <h2>Customer Reviews</h2>
-  {% if reviews %}
+  <pre>{{ reviews | tojson(indent=2) }}</pre>  <!-- Debug output -->
+
+  {% if reviews and reviews|length > 0 %}
   <div class="customer-reviews-grid">
     {% for review in reviews %}
     <div class="review-card">
