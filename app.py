@@ -5,60 +5,51 @@ from typing import List, Dict, Any, Tuple
 from flask import Flask, render_template, request, session, flash, redirect, url_for
 from datetime import datetime
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv  # <-- this is missing
-
-import firebase_admin
-from firebase_admin import credentials, firestore
-
-# ---------------------------------------------------------------------
-# App & Config
-# ---------------------------------------------------------------------
-# Load .env
-import os
-import json
-import logging
-from typing import List, Dict, Any, Tuple
-from flask import Flask, request
-import firebase_admin
-from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
 
-# -------------------------------------------------------------------
-# Load environment variables
-# -------------------------------------------------------------------
+import firebase_admin
+from firebase_admin import credentials, firestore
+import requests
+
+# ---------------------------------------------------------------------
+# Load environment variables from .env
+# ---------------------------------------------------------------------
 load_dotenv()
 
-# Base directories
+# ---------------------------------------------------------------------
+# Base directories and config
+# ---------------------------------------------------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PRIVATE_DIR = os.path.join(BASE_DIR, "private")
 os.makedirs(PRIVATE_DIR, exist_ok=True)
 
-# Flask app
-app = Flask(__name__, static_folder="public", static_url_path="/static")
-
-# Flask secret key
-app.secret_key = os.environ.get("SECRET_KEY", "8141@#Kaswala")
-
-# Upload folder
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "public", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# ---------------------------------------------------------------------
+# Flask app initialization
+# ---------------------------------------------------------------------
+app = Flask(__name__, static_folder="public", static_url_path="/static")
+app.secret_key = os.environ.get("SECRET_KEY", "8141@#Kaswala")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Products file path
+# ---------------------------------------------------------------------
+# Files and logging
+# ---------------------------------------------------------------------
 products_file = os.path.join(PRIVATE_DIR, "products.json")
-
-# Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("wallcraft")
 
-# Allowed image types
+# ---------------------------------------------------------------------
+# Allowed image extensions helper
+# ---------------------------------------------------------------------
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# -------------------------------------------------------------------
-# Firebase Init (from environment variable)
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# Firebase Firestore Initialization
+# ---------------------------------------------------------------------
 def init_firestore():
     firebase_key_json = os.environ.get("FIREBASE_KEY")
     if not firebase_key_json:
@@ -72,15 +63,19 @@ def init_firestore():
 
     return firestore.client()
 
-db = init_firestore()
+db = None
+try:
+    db = init_firestore()
+except Exception as e:
+    logger.error(f"Firestore initialization failed: {e}")
 
-
-import requests
-
+# ---------------------------------------------------------------------
+# ImgBB API Key and upload function
+# ---------------------------------------------------------------------
 IMGBB_API_KEY = "49c929b174cd1008c4379f46285ac846"
 
 def upload_to_imgbb(file):
-    """Upload image to ImgBB and return URL."""
+    """Upload image file to ImgBB and return the image URL or None."""
     try:
         response = requests.post(
             "https://api.imgbb.com/1/upload",
@@ -97,9 +92,9 @@ def upload_to_imgbb(file):
         logger.error(f"ImgBB upload error: {e}")
         return None
 
-# -------------------------------------------------------------------
-# Helpers
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# Product data helpers
+# ---------------------------------------------------------------------
 def money_to_int(val: str) -> int:
     if not val:
         return 0
@@ -120,12 +115,15 @@ def load_products() -> List[Dict[str, Any]]:
         except Exception as e:
             logger.error(f"Failed to read products file: {e}")
 
-    # Seed default product if file missing
+    # Seed default product if file is missing
     products_seed = [
         {
-            'id': 1, 'img': 'product1.jpg', 'name': 'Golden Glow Panel',
+            'id': 1,
+            'img': 'product1.jpg',
+            'name': 'Golden Glow Panel',
             'desc': 'Handcrafted golden-accent Wall Craft panel.',
-            'old': '₹12,999', 'new': '₹9,999'
+            'old': '₹12,999',
+            'new': '₹9,999'
         }
     ]
     save_products(products_seed)
@@ -142,41 +140,31 @@ def get_cart_items_and_total(cart: Dict[str, int], products: List[Dict[str, Any]
         subtotal = price * qty
         total += subtotal
         items.append({
-            "id": product["id"], "name": product["name"],
-            "img": product["img"], "price": price,
-            "qty": qty, "subtotal": subtotal
+            "id": product["id"],
+            "name": product["name"],
+            "img": product["img"],
+            "price": price,
+            "qty": qty,
+            "subtotal": subtotal
         })
     return items, total
 
-# Load products
+# Load products on app startup
 products = load_products()
 
-# -------------------------------------------------------------------
-# Context
-# -------------------------------------------------------------------
+# Inject request into templates for active nav state
 @app.context_processor
 def inject_request():
     return dict(request=request)
 
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # Routes
-# -------------------------------------------------------------------
-logger = logging.getLogger(__name__)
-
-# Initialize Firestore DB here (or import from your config)
-try:
-    db = firestore.Client()
-except Exception as e:
-    logger.error(f"Firestore initialization failed: {e}")
-    db = None
-
-products = [...]  # Your existing products data list/dict
-
+# ---------------------------------------------------------------------
 @app.route('/')
 def home():
     products_list = products
-
     reviews_list = []
+
     if db:
         try:
             reviews_ref = (
@@ -291,9 +279,6 @@ def update_cart():
     session["cart"] = cart_data
     return redirect(url_for("cart"))
 
-from flask import Flask, render_template, session, redirect, url_for, flash, request
-from datetime import datetime
-
 @app.route("/checkout", methods=["GET"])
 def checkout():
     cart_data = session.get("cart", {})
@@ -310,10 +295,9 @@ def process_order():
         flash("⚠️ Firestore is not initialized.", "danger")
         return redirect(url_for("checkout"))
 
-    # Check session immediately
     cart_data = session.get("cart")
     if not isinstance(cart_data, dict) or not cart_data:
-        logger.warning("Process Order: Cart is empty or not a dict. session[cart]=%r", cart_data)
+        logger.warning("Process Order: Cart empty or invalid in session: %r", cart_data)
         flash("Your cart is empty. Please add items before checkout.", "warning")
         return redirect(url_for("shop"))
 
@@ -348,15 +332,16 @@ def process_order():
 
         logger.info("Saving order to Firestore: data=%r", order_data)
         db.collection("orders").add(order_data)
+
         session.pop("cart", None)
         session.modified = True
+
         return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
 
     except Exception as e:
         logger.error(f"Failed to save order data: {e}", exc_info=True)
         flash(f"Failed to process your order. Error: {e}", "danger")
         return redirect(url_for("checkout"))
-
 
 @app.route('/submit-review', methods=['POST'])
 def submit_review():
@@ -370,7 +355,6 @@ def submit_review():
 
     if not name or not review or not rating:
         flash("⚠️ Please provide name, review, and rating.", "warning")
-        # Redirect back to order_success page if came from there
         referrer = request.referrer or url_for("home")
         return redirect(referrer)
 
@@ -386,13 +370,11 @@ def submit_review():
         logger.error(f"Failed to save review: {e}")
         flash("⚠️ Failed to submit review. Please try again.", "danger")
 
-    # Redirect back to home to show updated reviews
     return redirect(url_for("home"))
 
-
-# -------------------------------------------------------------------
-# Admin Panel (basic, NOT authenticated!)
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# Basic Admin Panel (UNAUTHENTICATED - for demo only)
+# ---------------------------------------------------------------------
 @app.route('/secret-admin', methods=['GET', 'POST'])
 def secret_admin():
     global products
@@ -414,7 +396,7 @@ def secret_admin():
             new_id = max([p['id'] for p in products], default=0) + 1
             products.append({
                 'id': new_id,
-                'img': img_url,  # ✅ Use hosted URL
+                'img': img_url,
                 'name': request.form.get('name'),
                 'desc': request.form.get('desc'),
                 'old': request.form.get('old'),
@@ -454,8 +436,8 @@ def secret_admin():
 
     return render_template('admin_panel.html', products=products)
 
-
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# Run app
+# ---------------------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
