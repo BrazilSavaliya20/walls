@@ -667,44 +667,43 @@
 </script>
 
 <!-- Featured Section -->
+<!-- Featured Section -->
 <section class="featured ultra-luxury-featured">
-  <h2>Featured Creations</h2>
-  <div class="product-grid ultra-luxury-grid">
-    {% for product in products %}
-    <div class="product-card ultra-luxury-product-card">
-      <div class="product-image-wrapper">
-        <img src="{{ product.img }}" alt="{{ product.name }}" loading="lazy" />
-        {% if product.old and (product.old|float) != 0 %}
-        <div class="discount-badge">
-          -{{ (((product.old|float) - (product.new|float)) / (product.old|float) * 100) | round(0) }}%
-        </div>
-        {% endif %}
-      </div>
-      <div class="product-info">
-        <h3 class="product-name">{{ product.name }}</h3>
-        <p class="description">{{ product.desc }}</p>
-        <div class="price">
-          {% if product.old and (product.old|float) != 0 %}
-          <span class="old-price">₹{{ product.old }}</span>
-          {% endif %}
-          <span class="new-price">₹{{ product.new }}</span>
-        </div>
-        <div class="product-buttons">
-          <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
-            <input type="hidden" name="product_id" value="{{ product.id }}">
-            <input type="hidden" name="quantity" value="1" class="quantity-field">
-            <div class="quantity-control">
-              <button type="button" class="decrease">-</button>
-              <span class="quantity-display">1</span>
-              <button type="button" class="increase">+</button>
-            </div>
-            <button type="submit" class="btn-secondary add-to-cart-btn">Add to Cart</button>
-          </form>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
+  <h2>Featured Creations</h2>
+  <div class="product-grid ultra-luxury-grid">
+    {% for product in products %}
+    <div class="product-card ultra-luxury-product-card">
+      <div class="product-image-wrapper">
+        <img src="{{ product.img }}" alt="{{ product.name }}" loading="lazy" />
+        {% if product.old and (product.old|float) != 0 %}
+        <div class="discount-badge">-{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%</div>
+        {% endif %}
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="description">{{ product.desc }}</p>
+        <div class="price">
+          {% if product.old and (product.old|float) != 0 %}
+          <span class="old-price">₹{{ product.old }}</span>
+          {% endif %}
+          <span class="new-price">₹{{ product.new }}</span>
+        </div>
+        <div class="product-buttons">
+          <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <input type="hidden" name="quantity" value="1" class="quantity-field">
+            <div class="quantity-control">
+              <button type="button" class="decrease">-</button>
+              <span class="quantity-display">1</span>
+              <button type="button" class="increase">+</button>
+            </div>
+            <button type="submit" class="btn-secondary add-to-cart-btn">Add to Cart</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
 </section>
 <!-- Toast Popup -->
 <div id="cart-toast" class="cart-toast">
