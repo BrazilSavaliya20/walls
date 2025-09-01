@@ -168,22 +168,22 @@ def home():
     if db:
         try:
             reviews_ref = db.collection('reviews').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
-            for r in reviews_ref:
-                review_dict = {
-                    "customer_name": r.get("customer_name"),
-                    "review_text": r.get("review_text"),
-                    "rating": int(r.get("rating", 0))  # ensure int rating
+            reviews_list = [
+                {
+                    "customer_name": r.get("customer_name", default="Anonymous"),
+                    "review_text": r.get("review_text", default=""),
+                    "rating": int(r.get("rating", default=0))
                 }
-                logger.info(f"Loaded review: {review_dict}")
-                reviews_list.append(review_dict)
+                for r in reviews_ref
+            ]
         except Exception as e:
             logger.error(f"Failed to fetch reviews: {e}")
     else:
         logger.error("Firestore DB is not initialized.")
 
     logger.info(f"Total reviews loaded: {len(reviews_list)}")
-
     return render_template('home.html', products=products_list, reviews=reviews_list)
+
 
 
 
