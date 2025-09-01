@@ -104,18 +104,35 @@
       </tbody>
     </table>
     <p class="total">Total: ₹{{ total }}</p>
-    <div class="add-review-section" style="max-width: 800px; margin: 0 auto; background: #1a1a1a; padding: 20px; border-radius: 10px; text-align: left; color: #f4e7c1;">
-  <h2>Add Your Review</h2>
-  <form method="POST" action="{{ url_for('submit_review') }}">
+<div class="add-review-section" style="max-width: 800px; margin: 0 auto; background: #1a1a1a; padding: 25px; border-radius: 10px; text-align: left; color: #f4e7c1; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+  <h2 style="font-family: 'Cinzel', serif; font-weight: 700; margin-bottom: 20px;">Add Your Review</h2>
+  <form id="reviewForm" method="POST" action="{{ url_for('submit_review') }}">
     <label for="name" style="display:block; margin-bottom:6px; font-weight:bold;">Name:</label>
     <input type="text" id="name" name="name" required style="width: 100%; padding: 10px; border-radius:6px; border:none; margin-bottom: 12px; background: #333; color:#f4e7c1;">
 
     <label for="review" style="display:block; margin-bottom:6px; font-weight:bold;">Review:</label>
     <textarea id="review" name="review" rows="4" required style="width: 100%; padding: 10px; border-radius:6px; border:none; background: #333; color:#f4e7c1; margin-bottom: 16px;"></textarea>
 
-    <button type="submit" style="background: #d4af37; color:#000; padding: 10px 20px; border:none; border-radius: 8px; font-weight: bold; cursor: pointer;">Submit Review</button>
+    <button type="submit" style="background: #d4af37; color:#000; padding: 12px 25px; border:none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s;">Submit Review</button>
   </form>
 </div>
+
+<script>
+  // Get the form element
+  const reviewForm = document.getElementById('reviewForm');
+
+  // Add submit event listener
+  reviewForm.addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    // Show thank you popup
+    alert('Thank you for your review!');
+
+    // Optionally, submit the form after the alert
+    reviewForm.submit();
+  });
+</script>
+
 
   </div>
 

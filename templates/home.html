@@ -510,22 +510,54 @@ document.addEventListener("DOMContentLoaded", () => {
   </div>
 </section>
 
-<section class="customer-reviews" style="padding: 40px 5%; background: #121212; color: #f4e7c1; max-width: 900px; margin: 40px auto; border-radius: 10px;">
-  <h2 style="text-align: center; font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.8rem; margin-bottom: 20px;">Customer Reviews</h2>
+<section class="customer-reviews" style="padding: 40px 5%; background: #121212; color: #f4e7c1; max-width: 900px; margin: 40px auto; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+  <h2 style="text-align: center; font-family: 'Cinzel', serif; font-weight: 700; font-size: 2rem; margin-bottom: 30px;">Customer Reviews</h2>
   
   {% if reviews %}
-    <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="reviews-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
       {% for review in reviews %}
-        <div style="background: #1a1a1a; padding: 15px 20px; border-radius: 8px;">
-          <p style="font-style: italic; font-size: 1rem;">"{{ review.review_text }}"</p>
-          <p style="text-align: right; font-weight: bold; margin-top: 8px;">- {{ review.customer_name }}</p>
+        <div class="review-card" style="background: #1a1a1a; padding: 20px; border-radius: 10px; transition: transform 0.3s, box-shadow 0.3s;">
+          <p style="font-style: italic; font-size: 1rem; line-height: 1.5;">"{{ review.review_text }}"</p>
+          <p style="text-align: right; font-weight: bold; margin-top: 12px;">- {{ review.customer_name }}</p>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <p style="text-align: center; font-style: italic;">No reviews yet. Be the first to add one!</p>
+    <p style="text-align: center; font-style: italic; font-size: 1.1rem;">No reviews yet. Be the first to add one!</p>
   {% endif %}
 </section>
+
+<style>
+  /* Responsive Grid */
+  @media (max-width: 1024px) {
+    .reviews-grid {
+      grid-template-columns: repeat(3, 1fr) !important;
+    }
+  }
+  @media (max-width: 768px) {
+    .reviews-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+  @media (max-width: 480px) {
+    .reviews-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  /* Hover effect on cards */
+  .review-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  }
+
+  /* Smooth text */
+  .customer-reviews p {
+    color: #f4e7c1;
+    font-family: 'Roboto', sans-serif;
+  }
+</style>
+
 
 
 <footer>
