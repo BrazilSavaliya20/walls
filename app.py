@@ -163,8 +163,8 @@ def inject_request():
 @app.route('/')
 def home():
     products_list = products
-    reviews_list = []
 
+    reviews_list = []
     if db:
         try:
             reviews_ref = (
@@ -180,12 +180,14 @@ def home():
                 }
                 for r in reviews_ref
             ]
+            logger.info(f"Loaded {len(reviews_list)} reviews from Firestore.")
         except Exception as e:
             logger.error(f"Failed to fetch reviews: {e}")
     else:
         logger.error("Firestore DB is not initialized.")
 
     return render_template('home.html', products=products_list, reviews=reviews_list)
+
 
 @app.route('/about')
 def about():
