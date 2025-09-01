@@ -74,6 +74,29 @@ def init_firestore():
 
 db = init_firestore()
 
+
+import requests
+
+IMGBB_API_KEY = "49c929b174cd1008c4379f46285ac846"
+
+def upload_to_imgbb(file):
+    """Upload image to ImgBB and return URL."""
+    try:
+        response = requests.post(
+            "https://api.imgbb.com/1/upload",
+            params={"key": IMGBB_API_KEY},
+            files={"image": file}
+        )
+        result = response.json()
+        if result.get("success"):
+            return result["data"]["url"]
+        else:
+            logger.error(f"ImgBB upload failed: {result}")
+            return None
+    except Exception as e:
+        logger.error(f"ImgBB upload error: {e}")
+        return None
+
 # -------------------------------------------------------------------
 # Helpers
 # -------------------------------------------------------------------
@@ -300,17 +323,19 @@ def secret_admin():
 
         if action == 'add':
             file = request.files.get('img_file')
-            if not file or not allowed_file(file.filename):
-                flash('Invalid or no image uploaded for new product!', "danger")
+            if not file:
+                flash('No image uploaded!', "danger")
                 return redirect(url_for('secret_admin'))
 
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            img_url = upload_to_imgbb(file)
+            if not img_url:
+                flash('Image upload failed!', "danger")
+                return redirect(url_for('secret_admin'))
 
             new_id = max([p['id'] for p in products], default=0) + 1
             products.append({
                 'id': new_id,
-                'img': filename,
+                'img': img_url,  # ✅ Use hosted URL
                 'name': request.form.get('name'),
                 'desc': request.form.get('desc'),
                 'old': request.form.get('old'),
@@ -332,10 +357,10 @@ def secret_admin():
             product['new'] = request.form.get('new')
 
             file = request.files.get('img_file')
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                product['img'] = filename
+            if file:
+                img_url = upload_to_imgbb(file)
+                if img_url:
+                    product['img'] = img_url
 
             save_products(products)
             flash('Product updated successfully.', "success")
@@ -349,6 +374,7 @@ def secret_admin():
         return redirect(url_for('secret_admin'))
 
     return render_template('admin_panel.html', products=products)
+
 
 # -------------------------------------------------------------------
 if __name__ == "__main__":
