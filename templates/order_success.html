@@ -197,8 +197,13 @@
     }
   }
 </style>
+
+<!-- Load Font Awesome for star icons if needed -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+
 </head>
 <body>
+
   <h1>🎉 Order Placed Successfully!</h1>
   <p>Thank you for shopping with <strong>Wall Craft</strong>.<br>Your order has been received and will be processed shortly.</p>
 
@@ -233,7 +238,7 @@
     <h2>Add Your Review</h2>
     <form id="reviewForm" method="POST" action="{{ url_for('submit_review') }}">
       <label for="name">Name:</label>
-      <input type="text" id="name" name="name" required placeholder="Your Name">
+      <input type="text" id="name" name="name" required placeholder="Your Name" />
 
       <label for="review">Review:</label>
       <textarea id="review" name="review" rows="4" required placeholder="Write your review here..."></textarea>
@@ -246,7 +251,7 @@
         <span data-value="4">&#9733;</span>
         <span data-value="5">&#9733;</span>
       </div>
-      <input type="hidden" name="rating" id="rating-value" required>
+      <input type="hidden" name="rating" id="rating-value" required />
 
       <button type="submit">Submit Review</button>
     </form>
@@ -256,36 +261,35 @@
 
   <div id="toast" class="toast">Thank you for your review!</div>
 
-<script>
-  const stars = document.querySelectorAll('#star-rating span');
-  const ratingInput = document.getElementById('rating-value');
+  <script>
+    const stars = document.querySelectorAll('#star-rating span');
+    const ratingInput = document.getElementById('rating-value');
+    const reviewForm = document.getElementById('reviewForm');
+    const toast = document.getElementById('toast');
 
-  stars.forEach(star => {
-    star.addEventListener('click', () => {
-      const rating = star.getAttribute('data-value');
-      ratingInput.value = rating;
-      stars.forEach(s => s.classList.toggle('selected', s.getAttribute('data-value') <= rating));
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        const rating = star.getAttribute('data-value');
+        ratingInput.value = rating;
+        stars.forEach(s => s.classList.toggle('selected', s.getAttribute('data-value') <= rating));
+      });
+      star.addEventListener('mouseover', () => {
+        const hoverValue = star.getAttribute('data-value');
+        stars.forEach(s => s.classList.toggle('hovered', s.getAttribute('data-value') <= hoverValue));
+      });
+      star.addEventListener('mouseout', () => stars.forEach(s => s.classList.remove('hovered')));
     });
-    star.addEventListener('mouseover', () => {
-      const hoverValue = star.getAttribute('data-value');
-      stars.forEach(s => s.classList.toggle('hovered', s.getAttribute('data-value') <= hoverValue));
+
+    reviewForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // Show toast notification
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+
+      // Submit form after a short delay
+      setTimeout(() => reviewForm.submit(), 500);
     });
-    star.addEventListener('mouseout', () => stars.forEach(s => s.classList.remove('hovered')));
-  });
-
-  const reviewForm = document.getElementById('reviewForm');
-  const toast = document.getElementById('toast');
-
-  reviewForm.addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    // Show toast
-    toast.style.display = 'block';
-    setTimeout(() => { toast.style.display = 'none'; }, 3000);
-
-    // Submit form after a short delay
-    setTimeout(() => reviewForm.submit(), 500);
-  });
-</script>
+  </script>
 </body>
 </html>

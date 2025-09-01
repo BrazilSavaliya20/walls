@@ -518,8 +518,6 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="customer-reviews-grid">
       {% for review in reviews %}
         <div class="review-card">
-          
-          <!-- Star Rating -->
           <div class="star-rating">
             {% for i in range(1, 6) %}
               {% if i <= review.rating %}
@@ -529,11 +527,7 @@ document.addEventListener("DOMContentLoaded", () => {
               {% endif %}
             {% endfor %}
           </div>
-          
-          <!-- Review Text -->
           <p class="review-text">"{{ review.review_text }}"</p>
-          
-          <!-- Customer Name -->
           <p class="customer-name">— {{ review.customer_name }}</p>
         </div>
       {% endfor %}
@@ -543,8 +537,9 @@ document.addEventListener("DOMContentLoaded", () => {
   {% endif %}
 </section>
 
-<!-- Load Font Awesome for stars -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+
+
 
 <style>
 /* Section Wrapper */

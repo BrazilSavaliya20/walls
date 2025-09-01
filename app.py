@@ -161,6 +161,17 @@ def inject_request():
 # -------------------------------------------------------------------
 # Routes
 # -------------------------------------------------------------------
+logger = logging.getLogger(__name__)
+
+# Initialize Firestore DB here (or import from your config)
+try:
+    db = firestore.Client()
+except Exception as e:
+    logger.error(f"Firestore initialization failed: {e}")
+    db = None
+
+products = [...]  # Your existing products data list/dict
+
 @app.route('/')
 def home():
     products_list = products
@@ -359,7 +370,9 @@ def submit_review():
 
     if not name or not review or not rating:
         flash("⚠️ Please provide name, review, and rating.", "warning")
-        return redirect(url_for("home"))
+        # Redirect back to order_success page if came from there
+        referrer = request.referrer or url_for("home")
+        return redirect(referrer)
 
     try:
         db.collection("reviews").add({
@@ -373,6 +386,7 @@ def submit_review():
         logger.error(f"Failed to save review: {e}")
         flash("⚠️ Failed to submit review. Please try again.", "danger")
 
+    # Redirect back to home to show updated reviews
     return redirect(url_for("home"))
 
 
