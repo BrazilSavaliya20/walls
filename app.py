@@ -276,8 +276,10 @@ def process_order():
         flash("⚠️ Firestore is not initialized.", "danger")
         return redirect(url_for("checkout"))
 
-    cart_data = session.get("cart", {})
+    # Check session immediately
+    cart_data = session.get("cart")
     if not isinstance(cart_data, dict) or not cart_data:
+        logger.warning("Process Order: Cart is empty or not a dict. session[cart]=%r", cart_data)
         flash("Your cart is empty. Please add items before checkout.", "warning")
         return redirect(url_for("shop"))
 
@@ -293,9 +295,11 @@ def process_order():
 
     try:
         for pid, qty in cart_data.items():
+            logger.info(f"Processing cart item: pid={pid}, qty={qty}")
             product = next((p for p in products if p["id"] == int(pid)), None)
             if not product:
-                continue  # Skip any missing products - optionally flash a warning here
+                logger.warning(f"No product found for id {pid}.")
+                continue
             price = money_to_int(product.get("new"))
             subtotal = price * qty
             order_data["total"] += subtotal
@@ -308,14 +312,17 @@ def process_order():
                 "subtotal": subtotal
             })
 
+        logger.info("Saving order to Firestore: data=%r", order_data)
         db.collection("orders").add(order_data)
         session.pop("cart", None)
+        session.modified = True
         return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
 
     except Exception as e:
-        logger.error(f"Failed to save order data: {e}")
+        logger.error(f"Failed to save order data: {e}", exc_info=True)
         flash(f"Failed to process your order. Error: {e}", "danger")
         return redirect(url_for("checkout"))
+
 
 
 # -------------------------------------------------------------------
