@@ -337,14 +337,14 @@ def process_order():
 def submit_review():
     if db is None:
         flash("⚠️ Firestore is not initialized.", "danger")
-        return redirect(url_for("order_success"))
+        return redirect(url_for("home"))  # Redirect to homepage
 
     name = request.form.get('name')
     review = request.form.get('review')
 
     if not name or not review:
         flash("⚠️ Please provide both name and review.", "warning")
-        return redirect(url_for("order_success"))
+        return redirect(url_for("home"))  # Redirect to homepage
 
     try:
         db.collection("reviews").add({
@@ -352,12 +352,13 @@ def submit_review():
             "review_text": review,
             "timestamp": datetime.utcnow()
         })
-        flash("✅ Thank you for your review!")
+        flash("✅ Thank you for your review!")  # Flash message
     except Exception as e:
         logger.error(f"Failed to save review: {e}")
         flash("⚠️ Failed to submit review. Please try again.", "danger")
 
-    return redirect(url_for("order_success"))
+    return redirect(url_for("home"))  # Redirect back to homepage
+
 
 # -------------------------------------------------------------------
 # Admin Panel (basic, NOT authenticated!)
