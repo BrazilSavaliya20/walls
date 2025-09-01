@@ -426,10 +426,28 @@
       color: #d4af37; /* Gold highlight */
     }
     .star-rating {
-      color: #FFD700; /* Gold */
-      margin-bottom: 10px;
-      font-size: 1.2rem;
-    }
+  display: flex;
+  gap: 2px;
+  margin-bottom: 10px;
+  font-size: 1.6rem;           /* Make the stars bigger */
+  justify-content: center;
+  /* Add a little text-shadow for luxury effect */
+  text-shadow: 0 2px 6px #222, 0 2px 20px #d4af37cc;
+}
+.star-rating .fa-star {
+  background: linear-gradient(90deg, #ffe680 0%, #f6d365 40%, #d4af37 100%);
+  color: transparent; /* fallback */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.star-rating .fa-regular.fa-star {
+  color: #444; opacity: 0.35; /* Outlined stars dimmer for contrast */
+  background: none !important;
+  -webkit-text-fill-color: unset;
+}
+
     .no-reviews {
       text-align: center;
       font-style: italic;
@@ -720,7 +738,7 @@
 
 <section class="customer-reviews">
   <h2>Customer Reviews</h2>
-  <pre>{{ reviews | tojson(indent=2) }}</pre>  <!-- Debug output -->
+  
 
   {% if reviews and reviews|length > 0 %}
   <div class="customer-reviews-grid">
