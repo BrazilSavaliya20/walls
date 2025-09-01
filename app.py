@@ -167,20 +167,15 @@ def home():
     reviews_list = []
     if db:
         try:
-            reviews_ref = (
-                db.collection('reviews')
-                .order_by('timestamp', direction=firestore.Query.DESCENDING)
-                .stream()
-            )
-            reviews_list = [
-                {
-                    "customer_name": r.get("customer_name"),
-                    "review_text": r.get("review_text"),
-                    "rating": r.get("rating", 0)
-                }
-                for r in reviews_ref
-            ]
-            logger.info(f"Loaded {len(reviews_list)} reviews from Firestore.")
+            reviews_ref = db.collection('reviews').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
+            reviews_list = [{
+                "customer_name": r.get("customer_name"),
+                "review_text": r.get("review_text"),
+                "rating": r.get("rating", 0)
+            } for r in reviews_ref]
+            logger.info(f"Fetched {len(reviews_list)} reviews")
+            for r in reviews_list:
+                logger.info(r)
         except Exception as e:
             logger.error(f"Failed to fetch reviews: {e}")
     else:
