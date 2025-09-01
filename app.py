@@ -263,19 +263,35 @@ def process_order():
         flash("⚠️ Firestore is not initialized.", "danger")
         return redirect(url_for("checkout"))
 
+    # Collect form data
+    name = request.form.get("name")
+    mobile = request.form.get("mobile")
+    email = request.form.get("email")
+    address = request.form.get("address")
+
+    if not name or not mobile or not email or not address:
+        flash("⚠️ Please fill all required fields.", "danger")
+        return redirect(url_for("checkout"))
+
+    # Build order data
     order_data = {
-        "name": request.form.get("name"),
-        "mobile": request.form.get("mobile"),
-        "email": request.form.get("email"),
-        "address": request.form.get("address"),
+        "name": name,
+        "mobile": mobile,
+        "email": email,
+        "address": address,
         "items": [],
         "total": 0,
         "timestamp": datetime.utcnow()
     }
 
+    # Get cart from session
     cart_data = session.get("cart", {})
+    if not cart_data:
+        flash("⚠️ Your cart is empty.", "warning")
+        return redirect(url_for("shop"))
 
     try:
+        # Process cart items
         for pid, qty in cart_data.items():
             product = next((p for p in products if p["id"] == int(pid)), None)
             if product:
@@ -291,14 +307,22 @@ def process_order():
                     "subtotal": subtotal
                 })
 
+        # Save order in Firestore
         db.collection("orders").add(order_data)
+
+        # Clear the cart
         session.pop("cart", None)
 
-        return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
+        # ✅ Redirect to order success page
+        return render_template(
+            "order_success.html",
+            order_items=order_data["items"],
+            total=order_data["total"]
+        )
 
     except Exception as e:
         logger.error(f"Failed to save order data: {e}")
-        flash("Failed to process your order. Please try again later.", "danger")
+        flash("❌ Failed to process your order. Please try again later.", "danger")
         return redirect(url_for("checkout"))
 
 # -------------------------------------------------------------------
