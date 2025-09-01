@@ -128,57 +128,122 @@
       }
     }
 
-    /* ===== Product Card ===== */
-    .product-card {
-      background: #1a1a1a;
-      border-radius: 14px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-      overflow: hidden;
-      transition: 0.35s;
-      display: flex;
-      flex-direction: column;
-      padding-bottom: 18px;
-    }
-    .product-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8);
-    }
-    .product-card img {
-      width: 100%;
-      height: 230px;
-      object-fit: cover;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .product-info {
-      padding: 18px;
-      flex-grow: 1;
-    }
-    .product-info h3 {
-      font-size: 20px;
-      color: #f5f5f5;
-      margin: 8px 0;
-      font-weight: 600;
-    }
-    .product-info p {
-      font-size: 14px;
-      color: #aaa;
-      margin-bottom: 14px;
+    /* ===== Featured Section ===== */
+    .ultra-luxury-featured { 
+      padding: 20px 5%;
+      background: linear-gradient(135deg, #0a0a0a, #121212); 
+      color: white; 
     }
 
-    /* ===== Prices ===== */
-    .price {
-      margin-bottom: 14px;
+    .ultra-luxury-featured h2 {
+      font-family: 'Cinzel', serif; 
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: #f4e7c1; 
+      text-align: center; 
+      margin-bottom: 20px;
     }
+
+    /* Grid System */
+    .ultra-luxury-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    @media (max-width: 992px) {
+      .ultra-luxury-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .ultra-luxury-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    }
+
+    @media (max-width: 480px) {
+      .ultra-luxury-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    }
+
+    /* Product Card */
+    .ultra-luxury-product-card {
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 260px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    /* Image */
+    .product-image-wrapper {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #222;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Discount badge */
+    .discount-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #d4af37;
+      color: #000;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 4px 6px;
+      border-radius: 6px;
+      user-select: none;
+    }
+
+    .product-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Info */
+    .product-info {
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    .product-name {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+      color: #f4e7c1;
+    }
+
+    .description {
+      font-size: 0.7rem;
+      color: #aaa;
+      margin-bottom: 4px;
+      line-height: 1.1;
+    }
+
+    .price {
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+    }
+
     .old-price {
       text-decoration: line-through;
       color: #666;
-      margin-right: 10px;
-      font-size: 14px;
+      margin-right: 4px;
+      font-size: 0.75rem;
     }
+
     .new-price {
       color: #d4af37;
-      font-weight: bold;
-      font-size: 18px;
+      font-weight: 700;
+      font-size: 0.9rem;
     }
 
     /* ===== Buttons ===== */
@@ -419,79 +484,91 @@ function toggleMenu(x) {
 }
 </script>
 
-<div class="shop-container">
-  <h2>Our Luxury Collection</h2>
-  <div class="product-grid">
+<!-- Featured Section -->
+<section class="featured ultra-luxury-featured">
+  <h2>Featured Creations</h2>
+  <div class="product-grid ultra-luxury-grid">
     {% for product in products %}
-    <div class="product-card">
-      <img src="{{ product.img or url_for('static', filename='images/default.png') }}" alt="{{ product.name or 'Unnamed' }}" />
+    <div class="product-card ultra-luxury-product-card">
+      <div class="product-image-wrapper">
+        <img src="{{ product.img }}" alt="{{ product.name }}" loading="lazy" />
+        {% if product.old and (product.old|float) != 0 %}
+        <div class="discount-badge">-{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%</div>
+        {% endif %}
+      </div>
       <div class="product-info">
-        <h3>{{ product.name or 'Unnamed Product' }}</h3>
-        <p>{{ product.desc or '' }}</p>
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="description">{{ product.desc }}</p>
         <div class="price">
-          {% if product.old %}<span class="old-price">{{ product.old }}</span>{% endif %}
-          <span class="new-price">{{ product.new or '' }}</span>
+          {% if product.old and (product.old|float) != 0 %}
+          <span class="old-price">₹{{ product.old }}</span>
+          {% endif %}
+          <span class="new-price">₹{{ product.new }}</span>
         </div>
-        <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
-          <input type="hidden" name="product_id" value="{{ product.id }}" />
-          <input type="hidden" name="product_name" value="{{ product.name }}" />
-          <div class="quantity-control">
-            <button type="button" class="decrease">-</button>
-            <input type="number" name="quantity" value="1" min="1" />
-            <button type="button" class="increase">+</button>
-          </div>
-          <button type="submit" class="btn-secondary">Add to Cart</button>
-        </form>
+        <div class="product-buttons">
+          <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <input type="hidden" name="quantity" value="1" class="quantity-field">
+            <div class="quantity-control">
+              <button type="button" class="decrease">-</button>
+              <span class="quantity-display">1</span>
+              <button type="button" class="increase">+</button>
+            </div>
+            <button type="submit" class="btn-secondary add-to-cart-btn">Add to Cart</button>
+          </form>
+        </div>
       </div>
     </div>
     {% endfor %}
   </div>
+</section>
+
+<!-- Toast Popup -->
+<div id="cart-toast" class="cart-toast">
+  <span id="toast-message"></span>
+  <a href="{{ url_for('cart') }}" class="go-cart-btn">Go to Cart</a>
 </div>
 
-<div id="popup" class="popup"></div>
-
 <script>
-document.querySelectorAll(".product-card").forEach(card => {
-  const addBtn = card.querySelector(".btn-secondary"),
-    qty = card.querySelector(".quantity-control"),
-    dec = card.querySelector(".decrease"),
-    inc = card.querySelector(".increase"),
-    input = card.querySelector("input[name='quantity']"),
-    form = card.querySelector(".cart-form"),
-    productName = card.querySelector("input[name='product_name']").value;
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".cart-form").forEach(form => {
+      let addBtn = form.querySelector(".add-to-cart-btn");
+      let qtyControl = form.querySelector(".quantity-control");
+      let qtyDisplay = form.querySelector(".quantity-display");
+      let qtyField = form.querySelector(".quantity-field");
+      let productName = form.closest(".product-card").querySelector(".product-name").innerText;
+      let opened = false;
 
-  addBtn.addEventListener("click", e => {
-    if (qty.style.display === "none" || qty.style.display === "") {
-      e.preventDefault();
-      qty.style.display = "flex";
+      addBtn.addEventListener("click", (e) => {
+        if (!opened) {
+          e.preventDefault();
+          qtyControl.style.display = "flex";
+          opened = true;
+          return;
+        }
+        e.preventDefault();
+        fetch(form.action, { method: "POST", body: new FormData(form) })
+          .then(() => showToast(productName + " has been added to your cart"));
+      });
+
+      form.querySelector(".increase").addEventListener("click", () => {
+        let qty = parseInt(qtyDisplay.innerText);
+        qty++; qtyDisplay.innerText = qty; qtyField.value = qty;
+      });
+      form.querySelector(".decrease").addEventListener("click", () => {
+        let qty = parseInt(qtyDisplay.innerText);
+        if (qty > 1) { qty--; qtyDisplay.innerText = qty; qtyField.value = qty; }
+      });
+    });
+
+    function showToast(message) {
+      let toast = document.getElementById("cart-toast");
+      let msg = document.getElementById("toast-message");
+      msg.innerText = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2500);
     }
   });
-
-  dec.addEventListener("click", () => {
-    let v = parseInt(input.value);
-    if (v > 1) input.value = v - 1;
-  });
-
-  inc.addEventListener("click", () => {
-    input.value = parseInt(input.value) + 1;
-  });
-
-  form.addEventListener("submit", e => {
-    e.preventDefault();
-    fetch(form.action, { method: "POST", body: new FormData(form) }).then(res => {
-      if (res.ok) {
-        showPopup("✨ " + productName + " added to cart!");
-      }
-    });
-  });
-});
-
-function showPopup(msg) {
-  const popup = document.getElementById("popup");
-  popup.innerHTML = `<p>${msg}</p><a href="{{ url_for('cart') }}" class="go-to-cart">Go to Cart</a>`;
-  popup.classList.add("show");
-  setTimeout(() => popup.classList.remove("show"), 4000);
-}
 </script>
 
 <footer>
