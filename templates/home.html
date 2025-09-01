@@ -451,15 +451,17 @@
     }
 
     /* Responsive Breakpoints for reviews */
-    @media (max-width: 1200px) {
-      .customer-reviews-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-    @media (max-width: 900px) {
-      .customer-reviews-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 600px) {
-      .customer-reviews-grid { grid-template-columns: 1fr; }
-    }
+@media (max-width: 1200px) {
+ .customer-reviews-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {  .customer-reviews-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {  .customer-reviews-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 400px) {
+ .customer-reviews-grid { grid-template-columns: 1fr; }
+}
+
 
     /* ===== Footer ===== */
     footer {
