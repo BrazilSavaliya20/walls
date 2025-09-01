@@ -531,10 +531,10 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
           
           <!-- Review Text -->
-          <p>"{{ review.review_text }}"</p>
+          <p class="review-text">"{{ review.review_text }}"</p>
           
           <!-- Customer Name -->
-          <p class="customer-name">- {{ review.customer_name }}</p>
+          <p class="customer-name">— {{ review.customer_name }}</p>
         </div>
       {% endfor %}
     </div>
@@ -547,73 +547,83 @@ document.addEventListener("DOMContentLoaded", () => {
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
 <style>
+/* Section Wrapper */
 .customer-reviews {
   padding: 40px 5%;
   background: #121212;
   color: #f4e7c1;
   max-width: 1700px;
   margin: 40px auto;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   font-family: 'Roboto', sans-serif;
 }
 
+/* Section Title */
 .customer-reviews h2 {
   text-align: center;
   font-family: 'Cinzel', serif;
   font-weight: 700;
   font-size: 2rem;
   margin-bottom: 30px;
+  color: #f4e7c1;
 }
 
+/* Grid Layout */
 .customer-reviews-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
 
-/* Individual review card */
+/* Review Card */
 .review-card {
   background: #1a1a1a;
   padding: 20px;
-  border-radius: 10px;
-  transition: transform 0.3s, box-shadow 0.3s;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.review-card p {
+/* Review Text */
+.review-card .review-text {
   margin: 0;
   font-style: italic;
   font-size: 1rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  color: #f4e7c1;
 }
 
+/* Customer Name */
 .review-card .customer-name {
   text-align: right;
   font-weight: bold;
   margin-top: 12px;
+  font-size: 0.95rem;
+  color: #d4af37; /* Gold highlight */
 }
 
 /* Star Rating */
 .star-rating {
-  color: #FFD700; /* Gold stars */
+  color: #FFD700; /* Gold */
   margin-bottom: 10px;
   font-size: 1.2rem;
 }
 
 /* Hover effect */
 .review-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.6);
 }
 
-/* No reviews message */
+/* No reviews */
 .no-reviews {
   text-align: center;
   font-style: italic;
   font-size: 1.1rem;
+  margin-top: 20px;
 }
 
-/* Responsive breakpoints */
+/* Responsive Breakpoints */
 @media (max-width: 1200px) {
   .customer-reviews-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -630,6 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 }
 </style>
+
 
 
 
