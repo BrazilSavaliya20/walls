@@ -425,23 +425,22 @@
       font-size: 0.95rem;
       color: #d4af37; /* Gold highlight */
     }
-    .star-rating {
+.star-rating {
   display: flex;
-  gap: 2px;
+  gap: 4px;
   margin-bottom: 10px;
-  font-size: 1.6rem;           /* Make the stars bigger */
-  justify-content: center;
-  /* Add a little text-shadow for luxury effect */
-  text-shadow: 0 2px 6px #222, 0 2px 20px #d4af37cc;
-}
-.star-rating .fa-star {
-  background: linear-gradient(90deg, #ffe680 0%, #f6d365 40%, #d4af37 100%);
-  color: transparent; /* fallback */
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 1.4rem;       /* Moderate size */
+  color: #d4af37;          /* Classic gold color */
 }
 
+.star-rating .fa-star {
+  /* Solid stars use this gold color */
+}
+
+.star-rating .fa-regular.fa-star {
+  color: #ccc;             /* Light gray for empty stars */
+  opacity: 0.6;
+}
 
 
     .no-reviews {
