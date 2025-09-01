@@ -132,174 +132,179 @@
     }
 
     /* ===== Featured Section ===== */
-    .ultra-luxury-featured { 
-      padding: 20px 5%;
-      background: linear-gradient(135deg, #0a0a0a, #121212); 
-      color: white; 
-    }
-
-    .ultra-luxury-featured h2 {
-      font-family: 'Cinzel', serif; 
-      font-weight: 700;
-      font-size: 1.8rem;
-      color: #f4e7c1; 
-      text-align: center; 
-      margin-bottom: 20px;
-    }
-
-    /* Grid System */
-    .ultra-luxury-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      width: 100%;
-    }
-
-    @media (max-width: 992px) {
-      .ultra-luxury-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-
-    @media (max-width: 768px) {
-      .ultra-luxury-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    }
-
-    @media (max-width: 480px) {
-      .ultra-luxury-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-    }
-
-    /* Product Card */
-    .ultra-luxury-product-card {
-      background: #1a1a1a;
-      border-radius: 8px;
-      padding: 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 260px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-
-    /* Image */
-    .product-image-wrapper {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      background: #222;
-      border-radius: 6px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Discount badge */
-    .discount-badge {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: #d4af37;
-      color: #000;
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 4px 6px;
-      border-radius: 6px;
-      user-select: none;
-    }
-
-    .product-image-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    /* Info */
-    .product-info {
-      margin-top: 6px;
-      text-align: center;
-    }
-
-    .product-name {
-      font-family: 'Cinzel', serif;
-      font-weight: 600;
-      font-size: 0.9rem;
-      margin-bottom: 4px;
-      color: #f4e7c1;
-    }
-
-    .description {
-      font-size: 0.7rem;
-      color: #aaa;
-      margin-bottom: 4px;
-      line-height: 1.1;
-    }
-
-    .price {
-      margin-bottom: 4px;
-      font-size: 0.85rem;
-    }
-
-    .old-price {
-      text-decoration: line-through;
-      color: #666;
-      margin-right: 4px;
-      font-size: 0.75rem;
-    }
-
-    .new-price {
-      color: #d4af37;
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-
-    /* Buttons */
-    .product-card {
+/* Product Card Styling */
+.ultra-luxury-product-card {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 260px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
   width: 100%;
   box-sizing: border-box;
 }
+
+/* Image Wrapper */
+.product-image-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #222;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.product-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Discount Badge */
+.discount-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #d4af37;
+  color: #000;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  user-select: none;
+}
+
+/* Product Info */
 .product-info {
+  margin-top: 6px;
+  text-align: center;
   width: 100%;
 }
+
+.product-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+  color: #f4e7c1;
+}
+
+.description {
+  font-size: 0.7rem;
+  color: #aaa;
+  margin-bottom: 4px;
+  line-height: 1.1;
+}
+
+/* Price */
+.price {
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+}
+.old-price {
+  text-decoration: line-through;
+  color: #666;
+  margin-right: 4px;
+  font-size: 0.75rem;
+}
+.new-price {
+  color: #d4af37;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Buttons/Form */
+.product-buttons {
+  width: 100%;
+}
+
 .cart-form {
   width: 100%;
   display: flex;
   flex-direction: column;
 }
-    .btn-secondary {
-      background: #2a2a2a;
-      color: #f4e7c1;
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.3s;
-    }
-    .btn-secondary:hover {
-      background: #d4af37;
-      color: #000;
-    }
 
-    .quantity-control {
+.quantity-control {
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
+
+.quantity-control button {
+  background: #333;
+  color: #f4e7c1;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+  user-select: none;
+}
+.quantity-control button:hover {
+  background: #b8860b;
+  color: #222;
+}
+
+.quantity-display {
+  min-width: 30px;
+  text-align: center;
+  font-weight: bold;
+  color: #f4e7c1;
+  user-select: none;
+  line-height: 1.7;
+}
+
+/* Add to Cart Button */
 .btn-secondary {
+  background: #2a2a2a;
+  color: #f4e7c1;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+.btn-secondary:hover {
+  background: #d4af37;
+  color: #000;
+}
+
+/* Responsive Grid */
+.ultra-luxury-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
   width: 100%;
   box-sizing: border-box;
-  display: block;
-  margin-top: 10px;
 }
-    .quantity-control button:hover {
-      background: #b8860b;
-      color: #222;
-    }
-    .quantity-display {
-      min-width: 30px;
-      text-align: center;
-      font-weight: bold;
-      color: #f4e7c1;
-    }
+
+@media (max-width: 992px) {
+  .ultra-luxury-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .ultra-luxury-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+@media (max-width: 480px) {
+  .ultra-luxury-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
 
     /* Toast Popup */
     .cart-toast {
@@ -670,7 +675,9 @@
       <div class="product-image-wrapper">
         <img src="{{ product.img }}" alt="{{ product.name }}" loading="lazy" />
         {% if product.old and (product.old|float) != 0 %}
-        <div class="discount-badge">-{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%</div>
+        <div class="discount-badge">
+          -{{ (((product.old|float) - (product.new|float)) / (product.old|float) * 100) | round(0) }}%
+        </div>
         {% endif %}
       </div>
       <div class="product-info">
@@ -699,7 +706,6 @@
     {% endfor %}
   </div>
 </section>
-
 <!-- Toast Popup -->
 <div id="cart-toast" class="cart-toast">
   <span id="toast-message"></span>
@@ -707,47 +713,49 @@
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".cart-form").forEach(form => {
-      let addBtn = form.querySelector(".add-to-cart-btn");
-      let qtyControl = form.querySelector(".quantity-control");
-      let qtyDisplay = form.querySelector(".quantity-display");
-      let qtyField = form.querySelector(".quantity-field");
-      let productName = form.closest(".product-card").querySelector(".product-name").innerText;
-      let opened = false;
+document.querySelectorAll(".ultra-luxury-product-card").forEach(card => {
+  const decreaseBtn = card.querySelector(".decrease");
+  const increaseBtn = card.querySelector(".increase");
+  const qtyDisplay = card.querySelector(".quantity-display");
+  const qtyField = card.querySelector(".quantity-field");
+  const form = card.querySelector(".cart-form");
+  const addToCartBtn = card.querySelector(".btn-secondary");
+  const quantityControl = card.querySelector(".quantity-control");
 
-      addBtn.addEventListener("click", (e) => {
-        if (!opened) {
-          e.preventDefault();
-          qtyControl.style.display = "flex";
-          opened = true;
-          return;
-        }
-        e.preventDefault();
-        fetch(form.action, { method: "POST", body: new FormData(form) })
-          .then(() => showToast(productName + " has been added to your cart"));
-      });
+  // Initially hide quantity controls; show only when clicking "Add to Cart" first time
+  quantityControl.style.display = "none";
 
-      form.querySelector(".increase").addEventListener("click", () => {
-        let qty = parseInt(qtyDisplay.innerText);
-        qty++; qtyDisplay.innerText = qty; qtyField.value = qty;
-      });
-      form.querySelector(".decrease").addEventListener("click", () => {
-        let qty = parseInt(qtyDisplay.innerText);
-        if (qty > 1) { qty--; qtyDisplay.innerText = qty; qtyField.value = qty; }
-      });
-    });
-
-    function showToast(message) {
-      let toast = document.getElementById("cart-toast");
-      let msg = document.getElementById("toast-message");
-      msg.innerText = message;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 2500);
+  addToCartBtn.addEventListener("click", e => {
+    if (quantityControl.style.display === "none" || quantityControl.style.display === "") {
+      // Show quantity controls, prevent immediate form submit
+      e.preventDefault();
+      quantityControl.style.display = "flex";
+      addToCartBtn.textContent = "Update Quantity";
+      qtyDisplay.textContent = qtyField.value;
+    } else {
+      // Quantity controls visible: set quantity field value before submit
+      qtyField.value = qtyDisplay.textContent;
+      // Submit form normally
     }
   });
-</script>
 
+  decreaseBtn.addEventListener("click", () => {
+    let currentQty = parseInt(qtyDisplay.textContent);
+    if (currentQty > 1) {
+      currentQty--;
+      qtyDisplay.textContent = currentQty;
+      qtyField.value = currentQty;
+    }
+  });
+
+  increaseBtn.addEventListener("click", () => {
+    let currentQty = parseInt(qtyDisplay.textContent);
+    currentQty++;
+    qtyDisplay.textContent = currentQty;
+    qtyField.value = currentQty;
+  });
+});
+</script>
 <!-- About Section -->
 <section class="about-ultra-luxury">
   <div class="about-container">
