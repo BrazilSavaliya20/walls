@@ -525,21 +525,100 @@ document.addEventListener("DOMContentLoaded", () => {
   </div>
 </section>
 
-<section class="customer-reviews" style="padding: 40px 5%; background: #121212; color: #f4e7c1; max-width: 1700px; margin: 40px auto; border-radius: 10px;">
-  <h2 style="text-align: center; font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.8rem; margin-bottom: 20px;">Customer Reviews</h2>
+<section class="customer-reviews">
+  <h2>Customer Reviews</h2>
+  
   {% if reviews %}
     <div class="customer-reviews-grid">
       {% for review in reviews %}
-        <div style="background: #1a1a1a; padding: 15px 20px; border-radius: 8px;">
-          <p style="font-style: italic; font-size: 1rem;">"{{ review.review_text }}"</p>
-          <p style="text-align: right; font-weight: bold; margin-top: 8px;">- {{ review.customer_name }}</p>
+        <div class="review-card">
+          <p>"{{ review.review_text }}"</p>
+          <p class="customer-name">- {{ review.customer_name }}</p>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <p style="text-align: center; font-style: italic;">No reviews yet. Be the first to add one!</p>
+    <p class="no-reviews">No reviews yet. Be the first to add one!</p>
   {% endif %}
 </section>
+
+<style>
+.customer-reviews {
+  padding: 40px 5%;
+  background: #121212;
+  color: #f4e7c1;
+  max-width: 1700px;
+  margin: 40px auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  font-family: 'Roboto', sans-serif;
+}
+
+.customer-reviews h2 {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 30px;
+}
+
+.customer-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* Individual review card */
+.review-card {
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 10px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.review-card p {
+  margin: 0;
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.review-card .customer-name {
+  text-align: right;
+  font-weight: bold;
+  margin-top: 12px;
+}
+
+/* Hover effect */
+.review-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+/* No reviews message */
+.no-reviews {
+  text-align: center;
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1200px) {
+  .customer-reviews-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .customer-reviews-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .customer-reviews-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
 
 
 <footer>
