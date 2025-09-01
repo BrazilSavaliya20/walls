@@ -254,9 +254,6 @@ def checkout():
     cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("checkout.html", cart_items=cart_items, total=total)
 
-@app.route('/shop')
-def shop():
-    return render_template("shop.html")
 
 
 @app.route("/process_order", methods=["POST"])
