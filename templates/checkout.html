@@ -127,111 +127,224 @@
     form.order-form button:hover {
       background: linear-gradient(135deg, #e6c94d, #c99700);
     }
+/* 🌟 QR Code Section */
+.qr-section {
+  text-align: center;
+  margin-top: 30px;
+}
 
-    /* 🌟 QR Code Section */
-    .qr-section {
-      text-align: center;
-      margin-top: 30px;
-    }
-    .qr-section h3 {
-      color: #d4af37;
-      margin-bottom: 12px;
-      font-size: 20px;
-      text-shadow: 0 0 8px rgba(212,175,55,0.4);
-    }
-    .qr-section img {
-      width: 100%;
-      max-width: 220px;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(212,175,55,0.4);
-      display: block;
-      margin: 0 auto;
-    }
+.qr-section h3 {
+  color: #d4af37;
+  margin-bottom: 12px;
+  font-size: 20px;
+  text-shadow: 0 0 8px rgba(212,175,55,0.4);
+}
+
+/* QR should never stretch beyond a nice size */
+.qr-section img {
+  width: 100%;
+  max-width: 220px;   /* ✅ keep it small on big screens */
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(212,175,55,0.4);
+  display: block;
+  margin: 0 auto;     /* ✅ keeps it centered */
+}
 
     /* 🌟 Footer */
+footer {
+    background: #111;
+    color: #bbb;
+    padding: 60px 6% 25px;
+    font-size: 14px;
+    margin-top: 80px;
+}
+
+/* Footer grid layout */
+.footer-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 40px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+/* About section */
+.footer-about h3 {
+    font-size: 26px;
+    font-weight: 900;
+    color: #f5f5f5;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(212,175,55,0.4);
+}
+.footer-about h3 span {
+    color: #d4af37;
+    text-shadow: 0 0 12px #d4af37;
+}
+.footer-about p {
+    margin-top: 10px;
+    color: #aaa;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Quick Links */
+.footer-links h4 {
+    color: #f4e7c1;
+    margin-bottom: 12px;
+    font-size: 16px;
+    text-shadow: 0 0 8px rgba(212,175,55,0.4);
+}
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+}
+.footer-links ul li {
+    margin-bottom: 8px;
+}
+.footer-links ul li a {
+    text-decoration: none;
+    color: #ccc;
+    transition: all 0.3s ease;
+}
+.footer-links ul li a:hover {
+    color: #d4af37;
+    text-shadow: 0 0 8px #d4af37;
+}
+
+/* Contact */
+.footer-contact h4 {
+    color: #f4e7c1;
+    margin-bottom: 12px;
+}
+.footer-contact p {
+    margin: 6px 0;
+    color: #ccc;
+}
+
+/* Social Icons */
+.footer-social h4 {
+    color: #f4e7c1;
+    margin-bottom: 12px;
+}
+.footer-social .social-icons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.footer-social .social-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #222;
+    color: #d4af37;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+.footer-social .social-icons a:hover {
+    background: #d4af37;
+    color: #111;
+    box-shadow: 0 0 12px #d4af37;
+}
+
+/* Bottom */
+.footer-bottom {
+    text-align: center;
+    border-top: 1px solid #333;
+    padding-top: 15px;
+    color: #888;
+    font-size: 13px;
+}
+.footer-bottom span {
+    color: #d4af37;
+    font-weight: bold;
+}
+
+/* 🌍 Responsiveness */
+@media (max-width: 992px) {
     footer {
-      background: #111;
-      color: #bbb;
-      padding: 60px 6% 25px;
-      font-size: 14px;
-      margin-top: 80px;
+        padding: 50px 5% 20px;
     }
     .footer-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 40px;
-      margin-bottom: 30px;
-      text-align: left;
+        gap: 30px;
     }
-    .footer-about h3 {
-      font-size: 26px;
-      font-weight: 900;
-      color: #f5f5f5;
-      text-transform: uppercase;
-      text-shadow: 0 0 12px rgba(212,175,55,0.4);
-    }
-    .footer-about h3 span {
-      color: #d4af37;
-      text-shadow: 0 0 12px #d4af37;
-    }
-    .footer-about p { margin-top: 10px; color: #aaa; font-size: 14px; line-height: 1.6; }
-    .footer-links h4, .footer-contact h4, .footer-social h4 {
-      color: #f4e7c1;
-      margin-bottom: 12px;
-      font-size: 16px;
-      text-shadow: 0 0 8px rgba(212,175,55,0.4);
-    }
-    .footer-links ul { list-style: none; padding: 0; }
-    .footer-links ul li { margin-bottom: 8px; }
-    .footer-links ul li a {
-      text-decoration: none; color: #ccc; transition: all 0.3s ease;
-    }
-    .footer-links ul li a:hover { color: #d4af37; text-shadow: 0 0 8px #d4af37; }
-    .footer-contact p { margin: 6px 0; color: #ccc; }
-    .footer-social .social-icons {
-      display: flex; gap: 12px; flex-wrap: wrap;
-    }
-    .footer-social .social-icons a {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 38px; height: 38px; border-radius: 50%;
-      background: #222; color: #d4af37; font-size: 18px;
-      transition: all 0.3s ease; text-decoration: none;
-    }
-    .footer-social .social-icons a:hover {
-      background: #d4af37; color: #111; box-shadow: 0 0 12px #d4af37;
-    }
-    .footer-bottom {
-      text-align: center; border-top: 1px solid #333;
-      padding-top: 15px; color: #888; font-size: 13px;
-    }
-    .footer-bottom span { color: #d4af37; font-weight: bold; }
+}
 
-    /* 🌍 Responsive */
+@media (max-width: 768px) {
+    .footer-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+    .footer-links ul li {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .footer-social .social-icons {
+        justify-content: center;
+    }
+}
+
+
+    /* 🌟 Responsive */
+    @media (max-width: 992px) {
+      .checkout-container { margin: 25px; padding: 20px; }
+    }
     @media (max-width: 768px) {
       .hamburger { display: flex; }
       #navMenu { display: none; width: 100%; }
       #navMenu.active { display: block; }
       #navMenu ul {
-        flex-direction: column; gap: 14px; padding: 12px 0;
-        text-align: center; background: #000;
+        flex-direction: column;
+        gap: 14px;
+        padding: 12px 0;
+        text-align: center;
+        background: #000;
       }
+
+      /* Mobile Cart */
       .cart-table thead { display: none; }
       .cart-table tr {
-        display: block; margin-bottom: 15px; border: 1px solid #333;
-        border-radius: 8px; padding: 10px; background: #111;
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 10px;
+        background: #111;
       }
       .cart-table td {
-        display: flex; justify-content: space-between;
-        padding: 8px 0; border: none; font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border: none;
+        font-size: 14px;
       }
       .cart-table td::before {
-        content: attr(data-label); font-weight: bold; color: #d4af37;
+        content: attr(data-label);
+        font-weight: bold;
+        color: #d4af37;
       }
       .cart-img {
-        max-width: 60px; max-height: 60px; object-fit: contain;
-        border-radius: 6px; display: block; margin: 0 auto;
-      }
+  max-width: 60px;
+  max-height: 60px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: block;
+  margin: 0 auto;
+}
+
     }
   </style>
 </head>
@@ -241,9 +354,11 @@
     <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Wall Craft Design" style="height: 50px; border-radius:50%;" />
     <div class="logo">Wall<span>Crafts</span></div>
   </a>
+
   <div class="hamburger" onclick="toggleMenu(this)">
     <span></span><span></span><span></span>
   </div>
+
   <nav id="navMenu">
     <ul>
       <li><a href="{{ url_for('home') }}" class="{% if request.endpoint == 'home' %}active{% endif %}">Home</a></li>
@@ -264,6 +379,7 @@ function toggleMenu(x) {
 
 <div class="checkout-container">
   <h2>Order Summary</h2>
+
   {% if cart_items %}
   <table class="cart-table">
     <thead>
@@ -278,7 +394,8 @@ function toggleMenu(x) {
     <tbody>
       {% for item in cart_items %}
       <tr>
-        <td data-label="Preview"><img src="{{ item.img }}" alt="{{ item.name }}" class="cart-img"></td>
+        <td data-label="Preview"><img src="{{ item.img }}" alt="{{ item.name }}" class="cart-img">
+</td>
         <td data-label="Product">{{ item.name }}</td>
         <td data-label="Price">₹{{ item.price }}</td>
         <td data-label="Qty">{{ item.qty }}</td>
@@ -309,7 +426,6 @@ function toggleMenu(x) {
     <button type="submit">Place Order</button>
   </form>
 </div>
-
 <!-- ✅ QR Code Section -->
 <div class="qr-section">
   <h3>Scan to Pay</h3>
@@ -352,5 +468,6 @@ function toggleMenu(x) {
     <p>&copy; 2025 WallCraft. All rights reserved.</p>
   </div>
 </footer>
+
 </body>
 </html>
