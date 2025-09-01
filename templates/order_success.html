@@ -1,83 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Order Success - Wall Craft</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-  <style>
-    body {
-      background: #0d0d0d;
-      color: #f4e7c1;
-      font-family: 'Segoe UI', sans-serif;
-      text-align: center;
-      padding: 60px 20px;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Order Success - Wall Craft</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+<style>
+  body {
+    background: #0d0d0d;
+    color: #f4e7c1;
+    font-family: 'Segoe UI', sans-serif;
+    text-align: center;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+
+  h1 {
+    color: #d4af37;
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+
+  p {
+    font-size: 18px;
+    margin-bottom: 30px;
+  }
+
+  .order-summary {
+    max-width: 900px;
+    margin: 0 auto 40px;
+    background: #1a1a1a;
+    padding: 25px;
+    border-radius: 10px;
+    text-align: left;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+
+  .order-summary h2 {
+    text-align: center;
+    color: #d4af37;
+    margin-bottom: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+
+  th, td {
+    padding: 12px;
+    border-bottom: 1px solid #333;
+    text-align: center;
+  }
+
+  th {
+    color: #d4af37;
+  }
+
+  td img {
+    width: 60px;
+    border-radius: 6px;
+  }
+
+  .total {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: right;
+    color: #d4af37;
+  }
+
+  a.back-home {
+    display: inline-block;
+    margin-top: 30px;
+    background: linear-gradient(135deg, #d4af37, #b8860b);
+    color: #000;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s;
+  }
+
+  a.back-home:hover {
+    background: linear-gradient(135deg, #e6c94d, #c99700);
+  }
+
+  /* Add Review Section */
+  .add-review-section {
+    max-width: 800px;
+    margin: 30px auto;
+    background: #1a1a1a;
+    padding: 25px;
+    border-radius: 10px;
+    color: #f4e7c1;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+
+  .add-review-section h2 {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .add-review-section label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+  }
+
+  .add-review-section input[type="text"],
+  .add-review-section textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    background: #333;
+    color: #f4e7c1;
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+
+  .add-review-section button {
+    background: #d4af37;
+    color: #000;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .add-review-section button:hover {
+    background: #e6c94d;
+  }
+
+  /* Star Rating */
+  #star-rating {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  #star-rating span {
+    font-size: 28px;
+    color: #666;
+    transition: color 0.3s;
+  }
+
+  #star-rating span.selected,
+  #star-rating span.hovered {
+    color: #d4af37;
+  }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #d4af37;
+    color: #000;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .order-summary, .add-review-section {
+      padding: 20px;
     }
+    table th, table td {
+      padding: 8px;
+    }
+  }
+
+  @media (max-width: 480px) {
     h1 {
-      color: #d4af37;
-      font-size: 36px;
-      margin-bottom: 20px;
+      font-size: 28px;
     }
     p {
-      font-size: 18px;
-      margin-bottom: 30px;
-    }
-    .order-summary {
-      max-width: 800px;
-      margin: 0 auto 40px;
-      background: #1a1a1a;
-      padding: 25px;
-      border-radius: 10px;
-      text-align: left;
-    }
-    .order-summary h2 {
-      text-align: center;
-      color: #d4af37;
-      margin-bottom: 20px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #333;
-      text-align: center;
-    }
-    th {
-      color: #d4af37;
-    }
-    td img {
-      width: 60px;
-      border-radius: 6px;
-    }
-    .total {
-      font-size: 20px;
-      font-weight: bold;
-      text-align: right;
-      color: #d4af37;
-    }
-    a {
-      display: inline-block;
-      background: linear-gradient(135deg, #d4af37, #b8860b);
-      color: #000;
-      padding: 12px 28px;
-      border-radius: 8px;
       font-size: 16px;
-      font-weight: bold;
-      text-decoration: none;
-      transition: 0.3s;
     }
-    a:hover {
-      background: linear-gradient(135deg, #e6c94d, #c99700);
+    #star-rating span {
+      font-size: 24px;
     }
-  </style>
+  }
+</style>
 </head>
 <body>
   <h1>🎉 Order Placed Successfully!</h1>
-  <p>Thank you for shopping with <strong>Wall Craft</strong>.<br>
-     Your order has been received and will be processed shortly.</p>
+  <p>Thank you for shopping with <strong>Wall Craft</strong>.<br>Your order has been received and will be processed shortly.</p>
 
   <div class="order-summary">
     <h2>Your Order Summary</h2>
@@ -104,38 +227,65 @@
       </tbody>
     </table>
     <p class="total">Total: ₹{{ total }}</p>
-<div class="add-review-section" style="max-width: 800px; margin: 0 auto; background: #1a1a1a; padding: 25px; border-radius: 10px; text-align: left; color: #f4e7c1; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-  <h2 style="font-family: 'Cinzel', serif; font-weight: 700; margin-bottom: 20px;">Add Your Review</h2>
-  <form id="reviewForm" method="POST" action="{{ url_for('submit_review') }}">
-    <label for="name" style="display:block; margin-bottom:6px; font-weight:bold;">Name:</label>
-    <input type="text" id="name" name="name" required style="width: 100%; padding: 10px; border-radius:6px; border:none; margin-bottom: 12px; background: #333; color:#f4e7c1;">
-
-    <label for="review" style="display:block; margin-bottom:6px; font-weight:bold;">Review:</label>
-    <textarea id="review" name="review" rows="4" required style="width: 100%; padding: 10px; border-radius:6px; border:none; background: #333; color:#f4e7c1; margin-bottom: 16px;"></textarea>
-
-    <button type="submit" style="background: #d4af37; color:#000; padding: 12px 25px; border:none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s;">Submit Review</button>
-  </form>
-</div>
-
-<script>
-  // Get the form element
-  const reviewForm = document.getElementById('reviewForm');
-
-  // Add submit event listener
-  reviewForm.addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent default form submission
-
-    // Show thank you popup
-    alert('Thank you for your review!');
-
-    // Optionally, submit the form after the alert
-    reviewForm.submit();
-  });
-</script>
-
-
   </div>
 
-  <a href="{{ url_for('home') }}">Go Back to Home</a>
+  <div class="add-review-section">
+    <h2>Add Your Review</h2>
+    <form id="reviewForm" method="POST" action="{{ url_for('submit_review') }}">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required placeholder="Your Name">
+
+      <label for="review">Review:</label>
+      <textarea id="review" name="review" rows="4" required placeholder="Write your review here..."></textarea>
+
+      <label for="rating">Rating:</label>
+      <div id="star-rating">
+        <span data-value="1">&#9733;</span>
+        <span data-value="2">&#9733;</span>
+        <span data-value="3">&#9733;</span>
+        <span data-value="4">&#9733;</span>
+        <span data-value="5">&#9733;</span>
+      </div>
+      <input type="hidden" name="rating" id="rating-value" required>
+
+      <button type="submit">Submit Review</button>
+    </form>
+  </div>
+
+  <a href="{{ url_for('home') }}" class="back-home">Go Back to Home</a>
+
+  <div id="toast" class="toast">Thank you for your review!</div>
+
+<script>
+  const stars = document.querySelectorAll('#star-rating span');
+  const ratingInput = document.getElementById('rating-value');
+
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      const rating = star.getAttribute('data-value');
+      ratingInput.value = rating;
+      stars.forEach(s => s.classList.toggle('selected', s.getAttribute('data-value') <= rating));
+    });
+    star.addEventListener('mouseover', () => {
+      const hoverValue = star.getAttribute('data-value');
+      stars.forEach(s => s.classList.toggle('hovered', s.getAttribute('data-value') <= hoverValue));
+    });
+    star.addEventListener('mouseout', () => stars.forEach(s => s.classList.remove('hovered')));
+  });
+
+  const reviewForm = document.getElementById('reviewForm');
+  const toast = document.getElementById('toast');
+
+  reviewForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    // Show toast
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+
+    // Submit form after a short delay
+    setTimeout(() => reviewForm.submit(), 500);
+  });
+</script>
 </body>
 </html>
