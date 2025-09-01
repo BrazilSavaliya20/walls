@@ -510,9 +510,8 @@ document.addEventListener("DOMContentLoaded", () => {
   </div>
 </section>
 
-<section class="customer-reviews" style="padding: 40px 5%; background: #121212; color: #f4e7c1; max-width: 900px; margin: 40px auto; border-radius: 10px;">
+<section class="customer-reviews" style="padding: 40px 5%; background: #121212; color: #f4e7c1; max-width: 1700px; margin: 40px auto; border-radius: 10px;">
   <h2 style="text-align: center; font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.8rem; margin-bottom: 20px;">Customer Reviews</h2>
-
   {% if reviews %}
     <div class="customer-reviews-grid">
       {% for review in reviews %}
@@ -526,7 +525,6 @@ document.addEventListener("DOMContentLoaded", () => {
     <p style="text-align: center; font-style: italic;">No reviews yet. Be the first to add one!</p>
   {% endif %}
 </section>
-
 
 <style>
 .customer-reviews-grid {
