@@ -68,12 +68,11 @@ def init_firestore():
 
     if not firebase_admin._apps:
         cred = credentials.Certificate(firebase_key_dict)
-        firebase_admin.initialize_app(cred)  # No storageBucket needed
+        firebase_admin.initialize_app(cred)
 
     return firestore.client()
 
 db = init_firestore()
-
 
 # -------------------------------------------------------------------
 # Helpers
@@ -139,26 +138,22 @@ def inject_request():
 # -------------------------------------------------------------------
 # Routes
 # -------------------------------------------------------------------
-from flask import render_template, request, redirect, url_for, flash, session
-from datetime import datetime
-
 @app.route('/')
 def home():
     return render_template('home.html', products=products)
-
 
 @app.route('/about')
 def about():
     return render_template('about.html')
 
-
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
         flash('Thank you for connecting with us! We will get back to you soon.')
         return redirect(url_for('contact'))
     return render_template('contact.html')
-
 
 @app.route('/process_contact', methods=['POST'])
 def process_contact():
@@ -192,12 +187,9 @@ def process_contact():
         flash("⚠️ Failed to send message.", "danger")
         return redirect(url_for("contact"))
 
-
 @app.route('/shop')
 def shop():
     return render_template('shop.html', products=products)
-
-
 
 @app.route('/cart')
 def cart():
@@ -208,7 +200,6 @@ def cart():
 
     cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("cart.html", cart_items=cart_items, total=total)
-
 
 @app.route('/add-to-cart', methods=['POST'])
 def add_to_cart():
@@ -222,7 +213,6 @@ def add_to_cart():
     cart_data[product_id] = cart_data.get(product_id, 0) + quantity
     session["cart"] = cart_data
     return ("", 204)
-
 
 @app.route('/update-cart', methods=['POST'])
 def update_cart():
@@ -244,7 +234,6 @@ def update_cart():
     session["cart"] = cart_data
     return redirect(url_for("cart"))
 
-
 @app.route("/checkout", methods=["GET"])
 def checkout():
     cart_data = session.get("cart", {})
@@ -255,43 +244,25 @@ def checkout():
     cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("checkout.html", cart_items=cart_items, total=total)
 
-
-
 @app.route("/process_order", methods=["POST"])
 def process_order():
     if db is None:
         flash("⚠️ Firestore is not initialized.", "danger")
         return redirect(url_for("checkout"))
 
-    # Collect form data
-    name = request.form.get("name")
-    mobile = request.form.get("mobile")
-    email = request.form.get("email")
-    address = request.form.get("address")
-
-    if not name or not mobile or not email or not address:
-        flash("⚠️ Please fill all required fields.", "danger")
-        return redirect(url_for("checkout"))
-
-    # Build order data
     order_data = {
-        "name": name,
-        "mobile": mobile,
-        "email": email,
-        "address": address,
+        "name": request.form.get("name"),
+        "mobile": request.form.get("mobile"),
+        "email": request.form.get("email"),
+        "address": request.form.get("address"),
         "items": [],
         "total": 0,
         "timestamp": datetime.utcnow()
     }
 
-    # Get cart from session
     cart_data = session.get("cart", {})
-    if not cart_data:
-        flash("⚠️ Your cart is empty.", "warning")
-        return redirect(url_for("shop"))
 
     try:
-        # Process cart items
         for pid, qty in cart_data.items():
             product = next((p for p in products if p["id"] == int(pid)), None)
             if product:
@@ -307,51 +278,19 @@ def process_order():
                     "subtotal": subtotal
                 })
 
-        # Save order in Firestore
         db.collection("orders").add(order_data)
-
-        # Clear the cart
         session.pop("cart", None)
 
-        # ✅ Redirect to order success page
-        return render_template(
-            "order_success.html",
-            order_items=order_data["items"],
-            total=order_data["total"]
-        )
+        return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
 
     except Exception as e:
         logger.error(f"Failed to save order data: {e}")
-        flash("❌ Failed to process your order. Please try again later.", "danger")
+        flash("Failed to process your order. Please try again later.", "danger")
         return redirect(url_for("checkout"))
 
 # -------------------------------------------------------------------
 # Admin Panel (basic, NOT authenticated!)
 # -------------------------------------------------------------------
-import base64
-import requests
-from flask import flash, redirect, url_for
-
-IMGBB_API_KEY = "4daaf1a5f4db5099ddf6cc4035486275"  # Your Imgbb API Key
-IMG_UPLOAD_URL = "https://api.imgbb.com/1/upload"
-
-def upload_image_to_imgbb(file):
-    encoded_image = base64.b64encode(file.read()).decode('utf-8')
-    file.seek(0)  # reset file pointer after reading
-    payload = {
-        'key': IMGBB_API_KEY,
-        'image': encoded_image,
-        'name': file.filename
-    }
-    response = requests.post(IMG_UPLOAD_URL, data=payload)
-    data = response.json()
-    if response.status_code == 200 and data.get('success'):
-        return data['data']['url']
-    else:
-        error_msg = data.get('error', {}).get('message', 'Unknown error during Imgbb upload')
-        raise Exception(f"ImgBB upload failed: {error_msg}")
-
-
 @app.route('/secret-admin', methods=['GET', 'POST'])
 def secret_admin():
     global products
@@ -364,16 +303,14 @@ def secret_admin():
             if not file or not allowed_file(file.filename):
                 flash('Invalid or no image uploaded for new product!', "danger")
                 return redirect(url_for('secret_admin'))
-            try:
-                img_url = upload_image_to_imgbb(file)
-            except Exception as e:
-                flash(str(e), "danger")
-                return redirect(url_for('secret_admin'))
+
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
             new_id = max([p['id'] for p in products], default=0) + 1
             products.append({
                 'id': new_id,
-                'img': img_url,
+                'img': filename,
                 'name': request.form.get('name'),
                 'desc': request.form.get('desc'),
                 'old': request.form.get('old'),
@@ -396,12 +333,9 @@ def secret_admin():
 
             file = request.files.get('img_file')
             if file and allowed_file(file.filename):
-                try:
-                    img_url = upload_image_to_imgbb(file)
-                    product['img'] = img_url
-                except Exception as e:
-                    flash(str(e), 'danger')
-                    return redirect(url_for('secret_admin'))
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                product['img'] = filename
 
             save_products(products)
             flash('Product updated successfully.', "success")
