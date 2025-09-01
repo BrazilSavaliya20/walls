@@ -198,6 +198,7 @@ def shop():
     return render_template('shop.html', products=products)
 
 
+
 @app.route('/cart')
 def cart():
     cart_data = session.get("cart", {})
