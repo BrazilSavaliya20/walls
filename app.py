@@ -163,14 +163,28 @@ def inject_request():
 # -------------------------------------------------------------------
 @app.route('/')
 def home():
-    products_list = products  # your existing products
-    # Fetch reviews ordered by newest first
-    try:
-        reviews_ref = db.collection('reviews').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
-        reviews_list = [{"customer_name": r.get("customer_name"), "review_text": r.get("review_text")} for r in reviews_ref]
-    except Exception as e:
-        logger.error(f"Failed to fetch reviews: {e}")
-        reviews_list = []
+    products_list = products
+
+    reviews_list = []
+    if db:
+        try:
+            reviews_ref = (
+                db.collection('reviews')
+                .order_by('timestamp', direction=firestore.Query.DESCENDING)
+                .stream()
+            )
+            reviews_list = [
+                {
+                    "customer_name": r.get("customer_name"),
+                    "review_text": r.get("review_text"),
+                    "rating": r.get("rating", 0)
+                }
+                for r in reviews_ref
+            ]
+        except Exception as e:
+            logger.error(f"Failed to fetch reviews: {e}")
+    else:
+        logger.error("Firestore DB is not initialized.")
 
     return render_template('home.html', products=products_list, reviews=reviews_list)
 
@@ -337,27 +351,29 @@ def process_order():
 def submit_review():
     if db is None:
         flash("⚠️ Firestore is not initialized.", "danger")
-        return redirect(url_for("home"))  # Redirect to homepage
+        return redirect(url_for("home"))
 
     name = request.form.get('name')
     review = request.form.get('review')
+    rating = request.form.get('rating')
 
-    if not name or not review:
-        flash("⚠️ Please provide both name and review.", "warning")
-        return redirect(url_for("home"))  # Redirect to homepage
+    if not name or not review or not rating:
+        flash("⚠️ Please provide name, review, and rating.", "warning")
+        return redirect(url_for("home"))
 
     try:
         db.collection("reviews").add({
             "customer_name": name,
             "review_text": review,
+            "rating": int(rating),
             "timestamp": datetime.utcnow()
         })
-        flash("✅ Thank you for your review!")  # Flash message
+        flash("✅ Thank you for your review!")
     except Exception as e:
         logger.error(f"Failed to save review: {e}")
         flash("⚠️ Failed to submit review. Please try again.", "danger")
 
-    return redirect(url_for("home"))  # Redirect back to homepage
+    return redirect(url_for("home"))
 
 
 # -------------------------------------------------------------------
