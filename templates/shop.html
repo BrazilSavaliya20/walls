@@ -186,6 +186,7 @@
       overflow: hidden;
       position: relative;
     }
+    
 
     /* Discount badge */
     .discount-badge {
@@ -247,24 +248,27 @@
     }
 
     /* ===== Buttons ===== */
-    .btn-secondary {
-      display: inline-block;
-      background: linear-gradient(135deg, #d4af37, #b8860b);
-      color: black;
-      font-weight: bold;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: 0.25s;
-      width: 100%;
-      margin-top: 10px;
-    }
-    .btn-secondary:hover {
-      background: linear-gradient(135deg, #e6c94d, #c99700);
-      box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
-    }
+    .product-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.btn-secondary {
+  display: inline-block;
+  background: linear-gradient(135deg, #d4af37, #b8860b);
+  color: black;
+  font-weight: bold;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.25s;
+  width: 100%;
+  margin-top: 10px; /* keep for all buttons for consistent spacing */
+  box-sizing: border-box; /* ensure padding included in width */
+}
+
 
     /* ===== Quantity Control ===== */
     .quantity-control {
