@@ -387,6 +387,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   font-family: 'Roboto', sans-serif;
+  box-sizing: border-box;
 }
 
 .customer-reviews h2 {
@@ -402,6 +403,8 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .review-card {
@@ -410,6 +413,9 @@
   border-radius: 12px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   word-break: break-word;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .review-card:hover {
@@ -473,6 +479,14 @@
 @media (max-width: 600px) {
   .customer-reviews-grid {
     grid-template-columns: 1fr 1fr;
+  }
+  .review-card {
+    padding: 12px;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .customer-reviews {
+    padding: 12px 2vw;
   }
 }
 
