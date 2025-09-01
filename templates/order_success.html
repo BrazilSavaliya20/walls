@@ -11,37 +11,37 @@
       color: #f4e7c1;
       font-family: 'Segoe UI', sans-serif;
       text-align: center;
-      padding: 40px 20px;
+      padding: 60px 20px;
     }
     h1 {
       color: #d4af37;
-      font-size: 32px;
-      margin-bottom: 15px;
+      font-size: 36px;
+      margin-bottom: 20px;
     }
     p {
-      font-size: 16px;
-      margin-bottom: 25px;
+      font-size: 18px;
+      margin-bottom: 30px;
     }
     .order-summary {
       max-width: 800px;
-      margin: 0 auto 30px;
+      margin: 0 auto 40px;
       background: #1a1a1a;
-      padding: 20px;
+      padding: 25px;
       border-radius: 10px;
       text-align: left;
     }
     .order-summary h2 {
       text-align: center;
       color: #d4af37;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
     th, td {
-      padding: 10px;
+      padding: 12px;
       border-bottom: 1px solid #333;
       text-align: center;
     }
@@ -49,83 +49,28 @@
       color: #d4af37;
     }
     td img {
-      width: 50px;
+      width: 60px;
       border-radius: 6px;
     }
     .total {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
       text-align: right;
       color: #d4af37;
     }
-    a.button {
+    a {
       display: inline-block;
       background: linear-gradient(135deg, #d4af37, #b8860b);
       color: #000;
-      padding: 12px 24px;
+      padding: 12px 28px;
       border-radius: 8px;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: bold;
       text-decoration: none;
       transition: 0.3s;
-      margin-top: 20px;
     }
-    a.button:hover {
+    a:hover {
       background: linear-gradient(135deg, #e6c94d, #c99700);
-    }
-
-    /* Review Section */
-    .review-section {
-      max-width: 600px;
-      margin: 0 auto;
-      background: #1a1a1a;
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 30px;
-    }
-    .review-section h2 {
-      color: #d4af37;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-    .review-section input,
-    .review-section textarea {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid #444;
-      border-radius: 6px;
-      background: #0d0d0d;
-      color: #f4e7c1;
-      font-size: 14px;
-    }
-    .review-section textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-    .review-section button {
-      background: linear-gradient(135deg, #d4af37, #b8860b);
-      color: #000;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 6px;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-      width: 100%;
-    }
-    .review-section button:hover {
-      background: linear-gradient(135deg, #e6c94d, #c99700);
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      body { padding: 20px 10px; }
-      h1 { font-size: 26px; }
-      .order-summary, .review-section { padding: 15px; }
-      table, th, td { font-size: 13px; }
-      td img { width: 40px; }
     }
   </style>
 </head>
@@ -161,16 +106,6 @@
     <p class="total">Total: ₹{{ total }}</p>
   </div>
 
-  <!-- Review Form -->
-  <div class="review-section">
-    <h2>💬 Share Your Experience</h2>
-    <form method="POST" action="{{ url_for('submit_review') }}">
-      <input type="text" name="name" placeholder="Your Name" required>
-      <textarea name="review" placeholder="Write your review here..." required></textarea>
-      <button type="submit">Submit Review</button>
-    </form>
-  </div>
-
-  <a href="{{ url_for('home') }}" class="button">Go Back to Home</a>
+  <a href="{{ url_for('home') }}">Go Back to Home</a>
 </body>
 </html>
