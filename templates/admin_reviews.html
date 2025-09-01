@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Manage Reviews</title>
+  <style>
+    body {
+      background: #0d0d0d;
+      color: #f4e7c1;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 40px;
+    }
+    h1 {
+      text-align: center;
+      color: #d4af37;
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1a1a1a;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #333;
+      text-align: left;
+    }
+    th {
+      background: #222;
+      color: #d4af37;
+      font-weight: bold;
+    }
+    tr:hover {
+      background: #2a2a2a;
+    }
+    form {
+      display: inline;
+    }
+    input, textarea {
+      background: #111;
+      border: 1px solid #444;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 5px;
+      width: 90%;
+    }
+    textarea {
+      height: 60px;
+      resize: vertical;
+    }
+    button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .update-btn {
+      background: #d4af37;
+      color: #000;
+    }
+    .delete-btn {
+      background: #b22222;
+      color: #fff;
+    }
+    .delete-btn:hover {
+      background: #ff4040;
+    }
+    .update-btn:hover {
+      background: #e6c94d;
+    }
+    .review-table {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Manage Customer Reviews</h1>
+
+  <table class="review-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Review</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in reviews %}
+      <tr>
+        <form method="POST" action="{{ url_for('admin_reviews') }}">
+          <td>
+            <input type="text" name="name" value="{{ r.name }}">
+          </td>
+          <td>
+            <textarea name="review">{{ r.review }}</textarea>
+          </td>
+          <td>
+            <input type="hidden" name="id" value="{{ r.id }}">
+            
+            <!-- Update Button -->
+            <button type="submit" name="action" value="update" class="update-btn">Update</button>
+            
+            <!-- Delete Button -->
+            <button type="submit" name="action" value="delete" class="delete-btn">Delete</button>
+          </td>
+        </form>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="3" style="text-align:center; padding:20px; color:#777;">
+          No reviews yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

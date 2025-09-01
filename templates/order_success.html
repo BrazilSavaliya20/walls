@@ -106,6 +106,21 @@
     </table>
     <p class="total">Total: ₹{{ total }}</p>
   </div>
+<div class="review-section">
+  <h2>Share Your Experience</h2>
+  <form method="POST" action="{{ url_for('submit_review') }}">
+    <input type="text" name="name" placeholder="Your Name" required 
+           style="padding:10px; margin:10px; width:250px; border-radius:5px; border:none;">
+    <br>
+    <textarea name="review" placeholder="Write your review..." required
+              style="padding:10px; margin:10px; width:300px; height:100px; border-radius:5px; border:none;"></textarea>
+    <br>
+    <button type="submit" 
+            style="padding:10px 20px; background:#d4af37; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">
+      Submit Review
+    </button>
+  </form>
+</div>
 
   <a href="{{ url_for('home') }}">Go Back to Home</a>
 </body>
