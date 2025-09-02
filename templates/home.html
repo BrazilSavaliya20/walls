@@ -8,7 +8,6 @@
   <!-- Font Awesome for icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<link href="https://fonts.googleapis.com/css?family=Montserrat:700,900&display=swap" rel="stylesheet">
 
 <style>
 /* ========== Reset & Base ========== */
@@ -475,22 +474,50 @@ footer {
   <h2>Featured Creations</h2>
   <div class="product-grid ultra-luxury-grid">
     {% for product in products %}
-    <div class="ultra-luxury-product-card">
-  <div class="product-image-wrapper">
-    <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
-  </div>
-  <div class="product-info">
-    <div class="product-name">{{ product.name }}</div>
-    <div class="price-range">₹{{ product.price_small }} – ₹{{ product.price_large }}</div>
-    <form method="POST" action="{{ url_for('add_to_cart') }}">
-      <input type="hidden" name="product_id" value="{{ product.id }}">
-      <input type="hidden" name="quantity" value="1">
-      <input type="hidden" name="size" value="medium">
-      <button type="submit" class="buy-now-btn">BUY NOW</button>
-    </form>
-  </div>
-</div>
+    <div class="product-card ultra-luxury-product-card">
+      <div class="product-image-wrapper">
+        <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
 
+
+
+        {% if product.old and (product.old|float) != 0 %}
+        <div class="discount-badge">-{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%</div>
+        {% endif %}
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="description">{{ product.desc }}</p>
+
+        <!-- Size Selector Buttons -->
+        <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+          <input type="hidden" name="quantity" value="1" class="quantity-field">
+          <input type="hidden" name="size" value="medium" class="selected-size-input">
+
+          <div class="size-buttons" data-product-id="{{ product.id }}">
+            <button type="button" class="size-btn" data-size="small" data-price="{{ product.price_small|replace('₹','')|replace(',','') }}">
+              Small<br>₹{{ product.price_small }}
+            </button>
+            <button type="button" class="size-btn active" data-size="medium" data-price="{{ product.price_medium|replace('₹','')|replace(',','') }}">
+              Medium<br>₹{{ product.price_medium }}
+            </button>
+            <button type="button" class="size-btn" data-size="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">
+              Large<br>₹{{ product.price_large }}
+            </button>
+          </div>
+
+          <div class="price">
+            <span class="old-price"></span>
+            <span class="new-price" id="price-display-{{ product.id }}">₹{{ product.price_medium }}</span>
+          </div>
+
+          <div class="quantity-control" style="display:none;">
+            <button type="button" class="decrease">-</button>
+            <span class="quantity-display">1</span>
+            <button type="button" class="increase">+</button>
+          </div>
+
+          <button type="submit" class="btn-secondary add-to-cart-btn">Add to Cart</button>
         </form>
       </div>
     </div>
