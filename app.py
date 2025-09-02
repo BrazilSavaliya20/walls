@@ -119,28 +119,34 @@ def load_products() -> List[Dict[str, Any]]:
     save_products(products_seed)
     return products_seed
 
-def get_cart_items_and_total(cart: Dict[str, Dict[str, Any]], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
+def get_cart_items_and_total(cart: Dict[str, int], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
     items = []
     total = 0
-    for key, data in cart.items():
-        pid, size = key.split(":")
-        qty = data["qty"]
-        product = next((p for p in products if p["id"] == int(pid)), None)
-        if not product:
-            continue
-        price = money_to_int(product.get(f"price_{size}", "0"))
-        subtotal = price * qty
-        total += subtotal
-        items.append({
-            "id": product["id"],
-            "name": product["name"],
-            "img": product["imgs"][0] if product.get("imgs") else "/static/images/placeholder.png",
-            "size": size,
-            "price": price,
-            "qty": qty,
-            "subtotal": subtotal,
-        })
+    for pid, qty in cart.items():
+        try:
+            product = next((p for p in products if p["id"] == int(pid)), None)
+            if not product:
+                continue
+
+            price = money_to_int(product.get("new"))
+            subtotal = price * qty
+            total += subtotal
+
+            # ✅ Handle products that may have either "img" or "imgs"
+            img_url = product.get("img") or (product.get("imgs")[0] if isinstance(product.get("imgs"), list) and product.get("imgs") else "")
+
+            items.append({
+                "id": product["id"],
+                "name": product["name"],
+                "img": img_url,
+                "price": price,
+                "qty": qty,
+                "subtotal": subtotal
+            })
+        except Exception as e:
+            logger.error(f"Error processing cart item {pid}: {e}")
     return items, total
+
 
 products = load_products()
 
