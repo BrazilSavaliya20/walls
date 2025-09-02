@@ -8,6 +8,7 @@
   <!-- Font Awesome for icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link href="https://fonts.googleapis.com/css?family=Montserrat:700,900&display=swap" rel="stylesheet">
 
 <style>
 /* ========== Reset & Base ========== */
@@ -125,210 +126,142 @@ nav ul li a.active {
 }
 
 /* ========== Featured Products ========== */
-.ultra-luxury-featured { 
-  padding: 20px 5%;
-  background: linear-gradient(135deg, #0a0a0a, #121212); 
-  color: white; 
-}
-.ultra-luxury-featured h2 {
-  font-family: 'Cinzel', serif; 
-  font-weight: 700;
-  font-size: 1.8rem;
-  color: #f4e7c1; 
-  text-align: center; 
-  margin-bottom: 20px;
-}
-/* Grid */
+/* Grid: Desktop 4, Mobile 2 per row */
 .ultra-luxury-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 16px; /* More modern, generous gap */
   width: 100%;
 }
-/* Tablet and small desktops: 2 products per row */
 @media (max-width: 992px) {
   .ultra-luxury-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 12px;
   }
 }
-/* Mobile phones: 2 products per row (instead of 1) */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .ultra-luxury-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    gap: 10px;
   }
 }
-/* Product Card */
+
+/* PRODUCT CARD */
 .ultra-luxury-product-card {
-  background: #1a1a1a;
-  border-radius: 8px;
-  padding: 6px;
+  background: #222;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.13);
+  padding: 0 0 18px 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  min-height: 260px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  align-items: stretch;
+  min-height: unset;
   overflow: hidden;
+  border: 2px solid #161616;
 }
-/* Product Image */
+
+/* IMAGE (rounded top corners, fixed height, no aspect ratio squash) */
 .product-image-wrapper {
+  background: #111;
   width: 100%;
-  aspect-ratio: 1 / 1;
-  background: #222;
-  border-radius: 6px;
+  height: 130px;
   overflow: hidden;
-  position: relative;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
 }
 .product-image-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
 }
-/* Discount */
-.discount-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: #d4af37;
-  color: #000;
-  font-weight: 700;
-  font-size: 0.8rem;
-  padding: 4px 6px;
-  border-radius: 6px;
-  user-select: none;
-}
-/* Info */
+
+/* INFO */
 .product-info {
-  margin-top: 6px;
-  text-align: center;
-  width: 100%;
+  padding: 15px 13px 0 13px;
+  text-align: left;
+  flex: 1;
 }
 .product-name {
-  font-family: 'Cinzel', serif;
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 4px;
-  color: #f4e7c1;
+  font-family: 'Montserrat', 'Cinzel', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0 0 4px 0;
+  color: #fff;
+  line-height: 1.18;
 }
 .description {
-  font-size: 0.7rem;
-  color: #aaa;
-  margin-bottom: 4px;
-  line-height: 1.2;
+  font-size: 0.8rem;
+  color: #cbcbcb;
+  margin: 0 0 6px 0;
 }
-.price { font-size: 0.85rem; margin-bottom: 4px; }
-.old-price {
-  text-decoration: line-through;
-  color: #666;
-  margin-right: 4px;
-  font-size: 0.75rem;
-}
-.new-price {
-  color: #d4af37;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-/* Buttons */
-.cart-form { width: 100%; display: flex; flex-direction: column; gap: 6px; }
-.btn-secondary {
-  background: #2a2a2a;
-  color: #f4e7c1;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-.btn-secondary:hover {
-  background: #d4af37;
-  color: #000;
-}
-/* Quantity Control */
-.quantity-control {
-  display: none;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-.quantity-control button {
-  background: #555;
+.price-range, .price {
+  font-size: 1.13rem;
+  font-weight: bold;
   color: #fff;
+  margin-bottom: 14px;
+  margin-top: 7px;
+}
+
+/* BUY NOW BUTTON */
+.btn-secondary, .buy-now-btn {
+  background: #f5f5f5;
+  color: #181818;
+  font-family: 'Montserrat', sans-serif;
   border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  padding: 4px 12px;
-  cursor: pointer;
-}
-.quantity-control button:hover {
-  background: #b8860b;
-  color: #222;
-}
-.quantity-display {
-  min-width: 30px;
-  text-align: center;
+  border-radius: 11px;
   font-weight: bold;
-  color: #f4e7c1;
-}
-/* Size Selector */
-.size-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.size-btn {
-  flex: 1;
-  background: #222;
-  border: 2px solid #d4af37;
-  border-radius: 6px;
-  color: #f4e7c1;
-  font-weight: 600;
-  padding: 8px 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  line-height: 1.2;
-  text-align: center;
-  user-select: none;
-  transition: background 0.3s, color 0.3s;
-}
-.size-btn.active,
-.size-btn:hover {
-  background: #d4af37;
-  color: #222;
-  border-color: #b8860b;
-}
-/* Toast Popup */
-.cart-toast {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  background: rgba(20,20,20,0.95);
-  color: #f4e7c1;
-  padding: 14px 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 12px rgba(212,175,55,0.3);
+  padding: 15px 0;
+  font-size: 1.09rem;
+  letter-spacing: .025em;
+  margin-top: 10px;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 15px;
-  font-weight: 600;
-  transform: translateY(100px);
-  opacity: 0;
-  transition: all 0.4s ease;
-  z-index: 9999;
+  justify-content: center;
+  transition: background .18s, color .18s;
 }
-.cart-toast.show { transform: translateY(0); opacity: 1; }
-.go-cart-btn {
-  background: #d4af37;
-  color: #000;
-  padding: 6px 14px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: bold;
+.btn-secondary:before, .buy-now-btn:before {
+  content: "✓ ";
+  color: #111;
+  font-size: 1.1em;
 }
-.go-cart-btn:hover { background: #b8860b; }
+.btn-secondary:active,
+.btn-secondary:hover,
+.buy-now-btn:active,
+.buy-now-btn:hover {
+  background: #ffe082;
+  color: #111;
+}
+
+.size-buttons, .quantity-control, .old-price, .discount-badge {
+  display: none !important;
+}
+
+/* Reduce blank space at bottom of column */
+@media (max-width: 600px) {
+  .ultra-luxury-product-card {
+    padding-bottom: 10px;
+  }
+  .product-image-wrapper {
+    height: 110px;
+  }
+}
+
+@media (max-width: 430px) {
+  .ultra-luxury-grid {
+    gap: 7px;
+  }
+  .product-info {
+    padding: 12px 6px 0 6px;
+  }
+  .ultra-luxury-product-card { border-radius: 14px; }
+  .product-image-wrapper { border-radius: 14px 14px 0 0; }
+}
+
 
 
 /* ========== About Section ========== */
@@ -542,50 +475,22 @@ footer {
   <h2>Featured Creations</h2>
   <div class="product-grid ultra-luxury-grid">
     {% for product in products %}
-    <div class="product-card ultra-luxury-product-card">
-      <div class="product-image-wrapper">
-        <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
+    <div class="ultra-luxury-product-card">
+  <div class="product-image-wrapper">
+    <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
+  </div>
+  <div class="product-info">
+    <div class="product-name">{{ product.name }}</div>
+    <div class="price-range">₹{{ product.price_small }} – ₹{{ product.price_large }}</div>
+    <form method="POST" action="{{ url_for('add_to_cart') }}">
+      <input type="hidden" name="product_id" value="{{ product.id }}">
+      <input type="hidden" name="quantity" value="1">
+      <input type="hidden" name="size" value="medium">
+      <button type="submit" class="buy-now-btn">BUY NOW</button>
+    </form>
+  </div>
+</div>
 
-
-
-        {% if product.old and (product.old|float) != 0 %}
-        <div class="discount-badge">-{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%</div>
-        {% endif %}
-      </div>
-      <div class="product-info">
-        <h3 class="product-name">{{ product.name }}</h3>
-        <p class="description">{{ product.desc }}</p>
-
-        <!-- Size Selector Buttons -->
-        <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
-          <input type="hidden" name="product_id" value="{{ product.id }}">
-          <input type="hidden" name="quantity" value="1" class="quantity-field">
-          <input type="hidden" name="size" value="medium" class="selected-size-input">
-
-          <div class="size-buttons" data-product-id="{{ product.id }}">
-            <button type="button" class="size-btn" data-size="small" data-price="{{ product.price_small|replace('₹','')|replace(',','') }}">
-              Small<br>₹{{ product.price_small }}
-            </button>
-            <button type="button" class="size-btn active" data-size="medium" data-price="{{ product.price_medium|replace('₹','')|replace(',','') }}">
-              Medium<br>₹{{ product.price_medium }}
-            </button>
-            <button type="button" class="size-btn" data-size="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">
-              Large<br>₹{{ product.price_large }}
-            </button>
-          </div>
-
-          <div class="price">
-            <span class="old-price"></span>
-            <span class="new-price" id="price-display-{{ product.id }}">₹{{ product.price_medium }}</span>
-          </div>
-
-          <div class="quantity-control" style="display:none;">
-            <button type="button" class="decrease">-</button>
-            <span class="quantity-display">1</span>
-            <button type="button" class="increase">+</button>
-          </div>
-
-          <button type="submit" class="btn-secondary add-to-cart-btn">Add to Cart</button>
         </form>
       </div>
     </div>
