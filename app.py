@@ -4,9 +4,7 @@ import logging
 from typing import List, Dict, Any, Tuple
 from flask import Flask, render_template, request, session, flash, redirect, url_for
 from datetime import datetime
-from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
-
 import firebase_admin
 from firebase_admin import credentials, firestore
 import requests
@@ -34,15 +32,26 @@ logger = logging.getLogger("wallcraft")
 # ---------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------
+
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
-def allowed_file(filename):
+def allowed_file(filename: str) -> bool:
+    """Check if the filename has an allowed extension."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def money_to_int(val: str) -> int:
+    """
+    Converts a money string like '₹9,999' to integer 9999.
+    Handles empty or invalid strings gracefully returning 0.
+    """
     if not val:
         return 0
-    return int(val.replace("₹", "").replace(",", "").strip() or 0)
+    try:
+        cleaned = val.replace("₹", "").replace(",", "").strip()
+        return int(cleaned) if cleaned else 0
+    except ValueError:
+        logger.warning(f"money_to_int: Cannot convert value '{val}' to int.")
+        return 0
 
 # ---------------------------------------------------------------------
 # Firebase Initialization
@@ -71,9 +80,14 @@ except Exception as e:
 # ---------------------------------------------------------------------
 # ImgBB Upload
 # ---------------------------------------------------------------------
-IMGBB_API_KEY = "49c929b174cd1008c4379f46285ac846"
 
-def upload_to_imgbb(file):
+IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac846")
+
+def upload_to_imgbb(file) -> str | None:
+    """
+    Uploads a file object to ImgBB and returns the hosted image URL.
+    Returns None if upload fails.
+    """
     try:
         response = requests.post(
             "https://api.imgbb.com/1/upload",
@@ -93,7 +107,9 @@ def upload_to_imgbb(file):
 # ---------------------------------------------------------------------
 # Product Data
 # ---------------------------------------------------------------------
+
 def save_products(data: List[Dict[str, Any]]) -> None:
+    """Saves product list as JSON file."""
     try:
         with open(products_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
@@ -101,6 +117,7 @@ def save_products(data: List[Dict[str, Any]]) -> None:
         logger.error(f"Failed to write products file: {e}")
 
 def load_products() -> List[Dict[str, Any]]:
+    """Loads the product list from JSON file or returns a seed product list."""
     if os.path.exists(products_file):
         try:
             with open(products_file, "r", encoding="utf-8") as f:
@@ -108,11 +125,11 @@ def load_products() -> List[Dict[str, Any]]:
         except Exception as e:
             logger.error(f"Failed to read products file: {e}")
 
-    # Seed product
+    # Seed product with hosted image URL (replace with your hosted image URL)
     products_seed = [
         {
             "id": 1,
-            "imgs": ["/static/images/product1.jpg"],
+            "imgs": ["https://i.imgbb.com/YOUR_SEED_IMAGE.jpg"],
             "name": "Golden Glow Panel",
             "desc": "Handcrafted golden-accent Wall Craft panel.",
             "price_small": "₹9,999",
@@ -124,6 +141,7 @@ def load_products() -> List[Dict[str, Any]]:
     return products_seed
 
 def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
+    """Calculates cart items details and total cost."""
     items = []
     total = 0
     for key, data in cart.items():
@@ -133,15 +151,15 @@ def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]
                 logger.error(f"Invalid cart item key format: {key}")
                 continue
             pid, size = parts
-            qty = data["qty"]
+            qty = data.get("qty", 0)
             product = next((p for p in products if p["id"] == int(pid)), None)
-            if not product:
+            if not product or qty <= 0:
                 continue
             price = money_to_int(product.get(f"price_{size}", "0"))
             subtotal = price * qty
             total += subtotal
 
-            img_url = product.get("img") or (product.get("imgs")[0] if product.get("imgs") else "")
+            img_url = product.get("imgs")[0] if product.get("imgs") else ""
             items.append({
                 "id": product["id"],
                 "name": product["name"],
@@ -155,12 +173,12 @@ def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]
             logger.error(f"Error processing cart item {key}: {e}")
     return items, total
 
-
 products = load_products()
 
 @app.context_processor
 def inject_request():
     return dict(request=request)
+
 
 # ---------------------------------------------------------------------
 # Routes
