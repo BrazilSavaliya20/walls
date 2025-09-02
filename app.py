@@ -91,13 +91,18 @@ def upload_to_imgbb(file):
     except Exception as e:
         app.logger.error(f"ImgBB upload error: {e}")
         return None
+
 # ---------------------------------------------------------------------
-# Product data helpers
+# Product data helpers with size pricing support
 # ---------------------------------------------------------------------
 def money_to_int(val: str) -> int:
     if not val:
         return 0
     return int(val.replace("₹", "").replace(",", "").strip() or 0)
+
+def get_price_by_size(product: dict, size: str) -> int:
+    key = f"price_{size.lower()}"
+    return money_to_int(product.get(key))
 
 def save_products(data: List[Dict[str, Any]]) -> None:
     try:
@@ -109,41 +114,47 @@ def save_products(data: List[Dict[str, Any]]) -> None:
 def load_products() -> List[Dict[str, Any]]:
     if os.path.exists(products_file):
         try:
-            with open(products_file, "r", encoding="utf-8") as f:
-                return json.load(f)
+            return json.load(open(products_file, "r", encoding="utf-8"))
         except Exception as e:
             logger.error(f"Failed to read products file: {e}")
 
-    # Seed default product if file is missing
+    # Seed default product with size prices if file is missing
     products_seed = [
         {
             'id': 1,
-            'img': 'product1.jpg',
+            'imgs': ['product1.jpg'],
             'name': 'Golden Glow Panel',
             'desc': 'Handcrafted golden-accent Wall Craft panel.',
-            'old': '₹12,999',
-            'new': '₹9,999'
+            'price_small': '₹7,999',
+            'price_medium': '₹9,499',
+            'price_large': '₹12,999'
         }
     ]
     save_products(products_seed)
     return products_seed
 
-def get_cart_items_and_total(cart: Dict[str, int], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
+def get_cart_items_and_total(cart: Dict[str, Tuple[str, int]], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
     items = []
     total = 0
-    for pid, qty in cart.items():
-        product = next((p for p in products if p["id"] == int(pid)), None)
+    for key, value in cart.items():
+        # key format: productId_size (e.g. "1_small")
+        if not isinstance(value, tuple):
+            continue  # safety check if cart data is malformed
+        size, qty = value
+        product_id_part = key.rsplit('_', 1)[0]
+        product = next((p for p in products if p["id"] == int(product_id_part)), None)
         if not product:
             continue
-        price = money_to_int(product.get("new"))
+        price = get_price_by_size(product, size)
         subtotal = price * qty
         total += subtotal
         items.append({
             "id": product["id"],
             "name": product["name"],
-            "img": product["img"],
+            "img": product["imgs"][0] if product.get("imgs") else product.get("img", ""),
             "price": price,
             "qty": qty,
+            "size": size,
             "subtotal": subtotal
         })
     return items, total
@@ -168,19 +179,10 @@ def home():
         try:
             reviews_ref = db.collection('reviews').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
             for r in reviews_ref:
-                customer_name = r.get("customer_name")
-                if customer_name is None:
-                    customer_name = "Anonymous"
-
-                review_text = r.get("review_text")
-                if review_text is None:
-                    review_text = ""
-
-                rating = r.get("rating")
-                if rating is None:
-                    rating = 0
-                else:
-                    rating = int(rating)
+                customer_name = r.get("customer_name") or "Anonymous"
+                review_text = r.get("review_text") or ""
+                rating = r.get("rating") or 0
+                rating = int(rating)
 
                 reviews_list.append({
                     "customer_name": customer_name,
@@ -194,10 +196,6 @@ def home():
 
     logger.info(f"Total reviews loaded: {len(reviews_list)}")
     return render_template('home.html', products=products_list, reviews=reviews_list)
-
-
-
-
 
 @app.route('/about')
 def about():
@@ -261,32 +259,42 @@ def cart():
 @app.route('/add-to-cart', methods=['POST'])
 def add_to_cart():
     product_id = str(request.form.get('product_id'))
+    size = request.form.get('size', 'medium').lower()
     quantity = int(request.form.get('quantity', 1))
 
     cart_data = session.get("cart", {})
     if not isinstance(cart_data, dict):
         cart_data = {}
 
-    cart_data[product_id] = cart_data.get(product_id, 0) + quantity
+    key = f"{product_id}_{size}"
+    if key in cart_data:
+        existing_size, existing_qty = cart_data[key]
+        cart_data[key] = (existing_size, existing_qty + quantity)
+    else:
+        cart_data[key] = (size, quantity)
+
     session["cart"] = cart_data
     return ("", 204)
 
 @app.route('/update-cart', methods=['POST'])
 def update_cart():
     pid = str(request.form.get("product_id"))
+    size = request.form.get("size", "medium").lower()
     action = request.form.get("action")
 
     cart_data = session.get("cart", {})
     if not isinstance(cart_data, dict):
         cart_data = {}
 
-    if pid in cart_data:
+    key = f"{pid}_{size}"
+    if key in cart_data:
+        current_size, qty = cart_data[key]
         if action == "increase":
-            cart_data[pid] += 1
+            cart_data[key] = (current_size, qty + 1)
         elif action == "decrease":
-            cart_data[pid] = max(1, cart_data[pid] - 1)
+            cart_data[key] = (current_size, max(1, qty - 1))
         elif action == "remove":
-            cart_data.pop(pid, None)
+            cart_data.pop(key, None)
 
     session["cart"] = cart_data
     return redirect(url_for("cart"))
@@ -324,20 +332,23 @@ def process_order():
     }
 
     try:
-        for pid, qty in cart_data.items():
-            logger.info(f"Processing cart item: pid={pid}, qty={qty}")
-            product = next((p for p in products if p["id"] == int(pid)), None)
+        for key, value in cart_data.items():
+            size, qty = value
+            product_id_part = key.rsplit('_', 1)[0]
+            logger.info(f"Processing cart item: pid={product_id_part}, size={size}, qty={qty}")
+            product = next((p for p in products if p["id"] == int(product_id_part)), None)
             if not product:
-                logger.warning(f"No product found for id {pid}.")
+                logger.warning(f"No product found for id {product_id_part}.")
                 continue
-            price = money_to_int(product.get("new"))
+            price = get_price_by_size(product, size)
             subtotal = price * qty
             order_data["total"] += subtotal
             order_data["items"].append({
                 "product_id": product["id"],
                 "name": product["name"],
-                "img": product["img"],
+                "img": product["imgs"][0] if product.get("imgs") else product.get("img", ""),
                 "price": price,
+                "size": size,
                 "quantity": qty,
                 "subtotal": subtotal
             })
@@ -349,7 +360,6 @@ def process_order():
         session.modified = True
 
         return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
-
     except Exception as e:
         logger.error(f"Failed to save order data: {e}", exc_info=True)
         flash(f"Failed to process your order. Error: {e}", "danger")
@@ -417,8 +427,9 @@ def secret_admin():
                 'imgs': img_urls,
                 'name': request.form.get('name'),
                 'desc': request.form.get('desc'),
-                'old': request.form.get('old'),
-                'new': request.form.get('new')
+                'price_small': request.form.get('price_small'),
+                'price_medium': request.form.get('price_medium'),
+                'price_large': request.form.get('price_large')
             })
             save_products(products)
             flash('Product added successfully.', "success")
@@ -432,8 +443,9 @@ def secret_admin():
 
             product['name'] = request.form.get('name')
             product['desc'] = request.form.get('desc')
-            product['old'] = request.form.get('old')
-            product['new'] = request.form.get('new')
+            product['price_small'] = request.form.get('price_small')
+            product['price_medium'] = request.form.get('price_medium')
+            product['price_large'] = request.form.get('price_large')
 
             files = request.files.getlist('img_file')
             new_img_urls = []
@@ -458,7 +470,6 @@ def secret_admin():
         return redirect(url_for('secret_admin'))
 
     return render_template('admin_panel.html', products=products)
-
 
 # ---------------------------------------------------------------------
 # Run app

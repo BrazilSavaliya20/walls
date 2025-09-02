@@ -214,6 +214,7 @@
     .product-info {
       margin-top: 6px;
       text-align: center;
+      width: 100%;
     }
 
     .product-name {
@@ -241,6 +242,7 @@
       color: #666;
       margin-right: 4px;
       font-size: 0.75rem;
+      display: none; /* Hidden by default, show if you want old price */
     }
 
     .new-price {
@@ -250,18 +252,13 @@
     }
 
     /* Buttons */
-    .product-card {
-  width: 100%;
-  box-sizing: border-box;
-}
-.product-info {
-  width: 100%;
-}
-.cart-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
+    .cart-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
     .btn-secondary {
       background: #2a2a2a;
       color: #f4e7c1;
@@ -306,6 +303,19 @@
       color: #f4e7c1;
     }
 
+    /* Size selector */
+    .size-selector {
+      padding: 6px;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: #222;
+      color: #f4e7c1;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
     /* Toast Popup */
     .cart-toast {
       position: fixed;
@@ -339,299 +349,6 @@
     }
     .go-cart-btn:hover {
       background: #b8860b;
-    }
-
-    /* ===== About Section ===== */
-    .about-ultra-luxury {
-      padding: 80px 12%;
-      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
-      color: #f5f5f5;
-    }
-    .about-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 50px;
-      align-items: center;
-      justify-content: center;
-    }
-    .about-text {
-      flex: 1 1 500px;
-    }
-    .about-text h2 {
-      font-family: 'Cinzel', serif;
-      font-size: 2.5rem;
-      font-weight: 900;
-      margin-bottom: 20px;
-      color: #f4e7c1;
-      text-transform: uppercase;
-      text-shadow: 0 0 12px #d4af37;
-    }
-    .about-text h2 span {
-      color: #d4af37;
-    }
-    .about-text p {
-      font-size: 1rem;
-      line-height: 1.6;
-      color: #ccc;
-      margin-bottom: 15px;
-    }
-    .about-image {
-      flex: 1 1 400px;
-      text-align: center;
-    }
-    .about-image img {
-      max-width: 100%;
-      border-radius: 20px;
-      box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
-      transition: transform 0.4s ease;
-    }
-    .about-image img:hover {
-      transform: scale(1.05);
-    }
-
-/* Customer Reviews Section */
-.customer-reviews {
-  padding: 40px 5%;
-  background: #121212;
-  color: #f4e7c1;
-  max-width: 1700px;
-  margin: 40px auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  font-family: 'Roboto', sans-serif;
-  box-sizing: border-box;
-}
-
-.customer-reviews h2 {
-  text-align: center;
-  font-family: 'Cinzel', serif;
-  font-weight: 700;
-  font-size: 2rem;
-  margin-bottom: 30px;
-  color: #f4e7c1;
-}
-
-.customer-reviews-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.review-card {
-  background: #1a1a1a;
-  padding: 20px;
-  border-radius: 12px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  word-break: break-word;
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-.review-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-}
-
-.review-text {
-  margin: 0;
-  font-style: italic;
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #f4e7c1;
-}
-
-.customer-name {
-  text-align: right;
-  font-weight: bold;
-  margin-top: 12px;
-  font-size: 0.95rem;
-  color: #d4af37; /* Gold highlight */
-}
-
-.star-rating {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 10px;
-  font-size: 1.4rem;       /* Moderate size */
-  color: #d4af37;          /* Classic gold color */
-}
-
-.star-rating .fa-star {
-  /* solid stars use this gold color */
-}
-
-.star-rating .fa-regular.fa-star {
-  color: #ccc;             /* Light gray for empty stars */
-  opacity: 0.6;
-}
-
-.no-reviews {
-  text-align: center;
-  font-style: italic;
-  font-size: 1.1rem;
-  margin-top: 20px;
-}
-
-/* Responsive Breakpoints for reviews */
-@media (max-width: 1200px) {
-  .customer-reviews-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 900px) {
-  .customer-reviews-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .customer-reviews-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .review-card {
-    padding: 12px;
-    min-width: 0;
-    max-width: 100%;
-  }
-  .customer-reviews {
-    padding: 12px 2vw;
-  }
-}
-
-@media (max-width: 400px) {
-  .customer-reviews-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-
-    /* ===== Footer ===== */
-    footer {
-      background: #111;
-      color: #bbb;
-      padding: 60px 6% 25px;
-      font-size: 14px;
-      margin-top: 80px;
-    }
-    .footer-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 40px;
-      margin-bottom: 30px;
-      text-align: left;
-    }
-    .footer-about h3 {
-      font-size: 26px;
-      font-weight: 900;
-      color: #f5f5f5;
-      text-transform: uppercase;
-      text-shadow: 0 0 12px rgba(212,175,55,0.4);
-    }
-    .footer-about h3 span {
-      color: #d4af37;
-      text-shadow: 0 0 12px #d4af37;
-    }
-    .footer-about p {
-      margin-top: 10px;
-      color: #aaa;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .footer-links h4 {
-      color: #f4e7c1;
-      margin-bottom: 12px;
-      font-size: 16px;
-    }
-    .footer-links ul {
-      list-style: none;
-      padding: 0;
-    }
-    .footer-links ul li {
-      margin-bottom: 8px;
-    }
-    .footer-links ul li a {
-      text-decoration: none;
-      color: #ccc;
-      transition: all 0.3s ease;
-    }
-    .footer-links ul li a:hover {
-      color: #d4af37;
-      text-shadow: 0 0 8px #d4af37;
-    }
-    .footer-contact h4 {
-      color: #f4e7c1;
-      margin-bottom: 12px;
-    }
-    .footer-contact p {
-      margin: 6px 0;
-      color: #ccc;
-    }
-    .footer-social h4 {
-      color: #f4e7c1;
-      margin-bottom: 12px;
-    }
-    .footer-social .social-icons {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .footer-social .social-icons a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #222;
-      color: #d4af37;
-      font-size: 18px;
-      transition: all 0.3s ease;
-      text-decoration: none;
-    }
-    .footer-social .social-icons a:hover {
-      background: #d4af37;
-      color: #111;
-      box-shadow: 0 0 12px #d4af37;
-    }
-    .footer-bottom {
-      text-align: center;
-      border-top: 1px solid #333;
-      padding-top: 15px;
-      color: #888;
-      font-size: 13px;
-    }
-    .footer-bottom span {
-      color: #d4af37;
-      font-weight: bold;
-    }
-
-    /* Responsive Footer */
-    @media (max-width: 992px) {
-      footer {
-        padding: 50px 5% 20px;
-      }
-      .footer-container {
-        gap: 30px;
-      }
-    }
-    @media (max-width: 768px) {
-      .footer-container {
-        grid-template-columns: 1fr 1fr;
-        gap: 25px;
-      }
-    }
-    @media (max-width: 576px) {
-      .footer-container {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-      .footer-social .social-icons {
-        justify-content: center;
-      }
     }
   </style>
 </head>
@@ -681,24 +398,30 @@
       <div class="product-info">
         <h3 class="product-name">{{ product.name }}</h3>
         <p class="description">{{ product.desc }}</p>
-        <div class="price">
-          {% if product.old and (product.old|float) != 0 %}
-          <span class="old-price">₹{{ product.old }}</span>
-          {% endif %}
-          <span class="new-price">₹{{ product.new }}</span>
-        </div>
-        <div class="product-buttons">
-          <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
-            <input type="hidden" name="product_id" value="{{ product.id }}">
-            <input type="hidden" name="quantity" value="1" class="quantity-field">
-            <div class="quantity-control">
-              <button type="button" class="decrease">-</button>
-              <span class="quantity-display">1</span>
-              <button type="button" class="increase">+</button>
-            </div>
-            <button type="submit" class="btn-secondary add-to-cart-btn">Add to Cart</button>
-          </form>
-        </div>
+
+        <!-- Size Selector -->
+        <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+          <input type="hidden" name="quantity" value="1" class="quantity-field">
+
+          <select name="size" class="size-selector" data-product-id="{{ product.id }}">
+            <option value="small" data-price="{{ product.price_small|replace('₹','')|replace(',','') }}">Small (₹{{ product.price_small }})</option>
+            <option value="medium" data-price="{{ product.price_medium|replace('₹','')|replace(',','') }}" selected>Medium (₹{{ product.price_medium }})</option>
+            <option value="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">Large (₹{{ product.price_large }})</option>
+          </select>
+
+          <div class="price">
+            <span class="old-price"></span>
+            <span class="new-price" id="price-display-{{ product.id }}">₹{{ product.price_medium }}</span>
+          </div>
+
+          <div class="quantity-control">
+            <button type="button" class="decrease">-</button>
+            <span class="quantity-display">1</span>
+            <button type="button" class="increase">+</button>
+          </div>
+          <button type="submit" class="btn-secondary add-to-cart-btn">Add to Cart</button>
+        </form>
       </div>
     </div>
     {% endfor %}
@@ -743,6 +466,20 @@
       });
     });
 
+    // Price update on size change
+    document.querySelectorAll(".size-selector").forEach(select => {
+      select.addEventListener("change", (e) => {
+        let size = e.target.value;
+        let option = e.target.options[e.target.selectedIndex];
+        let price = option.getAttribute("data-price");
+        let productId = e.target.dataset.productId;
+        let priceDisplay = document.getElementById("price-display-" + productId);
+        if (priceDisplay) {
+          priceDisplay.innerText = "₹" + Number(price).toLocaleString();
+        }
+      });
+    });
+
     function showToast(message) {
       let toast = document.getElementById("cart-toast");
       let msg = document.getElementById("toast-message");
@@ -778,11 +515,8 @@
 </section>
 
 <!-- Customer Reviews Section -->
-
 <section class="customer-reviews">
   <h2>Customer Reviews</h2>
-  
-
   {% if reviews and reviews|length > 0 %}
   <div class="customer-reviews-grid">
     {% for review in reviews %}
