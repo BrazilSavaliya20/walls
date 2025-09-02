@@ -128,7 +128,11 @@ def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]
     total = 0
     for key, data in cart.items():
         try:
-            pid, size = key.split(":")
+            parts = key.split(":")
+            if len(parts) != 2:
+                logger.error(f"Invalid cart item key format: {key}")
+                continue
+            pid, size = parts
             qty = data["qty"]
             product = next((p for p in products if p["id"] == int(pid)), None)
             if not product:
@@ -150,6 +154,7 @@ def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]
         except Exception as e:
             logger.error(f"Error processing cart item {key}: {e}")
     return items, total
+
 
 products = load_products()
 
@@ -283,7 +288,7 @@ def process_order():
             flash("Your cart is empty. Please add items before checkout.", "warning")
             return redirect(url_for("shop"))
 
-        logger.info(f"Processing order for cart: {cart_data}")
+        logger.info(f"Processing order with cart: {cart_data}")
         order_data = {
             "name": request.form.get("name"),
             "mobile": request.form.get("mobile"),
@@ -296,12 +301,18 @@ def process_order():
         logger.info(f"Order form data: {order_data}")
 
         for key, data in cart_data.items():
-            pid, size = key.split(":")
-            qty = data["qty"]
+            parts = key.split(":")
+            if len(parts) != 2:
+                logger.error(f"Invalid cart item key format: {key}")
+                continue  # Skip malformed cart keys gracefully
+
+            pid, size = parts
+            qty = data.get("qty", 0)
             product = next((p for p in products if p["id"] == int(pid)), None)
             if not product:
                 logger.warning(f"Product with ID {pid} not found in products list.")
                 continue
+
             price = money_to_int(product.get(f"price_{size}", "0"))
             subtotal = price * qty
             order_data["total"] += subtotal
@@ -331,6 +342,7 @@ def process_order():
         logger.error(f"Exception in process_order: {e}", exc_info=True)
         flash("Failed to process your order. Please try again.", "danger")
         return redirect(url_for("checkout"))
+
 
 
 @app.route("/submit-review", methods=["POST"])
