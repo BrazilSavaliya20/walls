@@ -543,7 +543,8 @@ footer {
     {% for product in products %}
     <div class="product-card ultra-luxury-product-card">
       <div class="product-image-wrapper">
-        <img src="{{ product.img }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
+        <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
+
 
 
         {% if product.old and (product.old|float) != 0 %}
