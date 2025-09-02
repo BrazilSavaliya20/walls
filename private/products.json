@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "img": "product1.jpg",
+    "img": "https://i.ibb.co/w04Prt6/product1.jpg",
     "name": "Golden Glow Panel",
     "desc": "A handcrafted golden-accent backlit panel that adds pure luxury to your walls.",
     "old": "₹12,999",
@@ -9,7 +9,7 @@
   },
   {
     "id": 2,
-    "img": "product2.jpg",
+    "img": "https://i.ibb.co/2ndCYJK/product2.jpg",
     "name": "Marble Luxe Sign",
     "desc": "Premium marble-textured LED sign.",
     "old": "₹15,499",
@@ -17,7 +17,7 @@
   },
   {
     "id": 3,
-    "img": "product3.jpg",
+    "img": "https://i.ibb.co/xyz789/product3.jpg",
     "name": "Crystal Shine Decor",
     "desc": "Elegant crystal-finished lighting decor.",
     "old": "₹10,999",
