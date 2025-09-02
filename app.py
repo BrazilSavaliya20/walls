@@ -114,7 +114,8 @@ def save_products(data: List[Dict[str, Any]]) -> None:
 def load_products() -> List[Dict[str, Any]]:
     if os.path.exists(products_file):
         try:
-            return json.load(open(products_file, "r", encoding="utf-8"))
+            with open(products_file, "r", encoding="utf-8") as f:
+                return json.load(f)
         except Exception as e:
             logger.error(f"Failed to read products file: {e}")
 
