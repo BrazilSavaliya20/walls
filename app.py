@@ -277,27 +277,30 @@ def checkout():
 
 @app.route("/process_order", methods=["POST"])
 def process_order():
-    cart_data = session.get("cart")
-    if not cart_data:
-        flash("Your cart is empty. Please add items before checkout.", "warning")
-        return redirect(url_for("shop"))
-
-    order_data = {
-        "name": request.form.get("name"),
-        "mobile": request.form.get("mobile"),
-        "email": request.form.get("email"),
-        "address": request.form.get("address"),
-        "items": [],
-        "total": 0,
-        "timestamp": datetime.utcnow(),
-    }
-
     try:
+        cart_data = session.get("cart")
+        if not cart_data:
+            flash("Your cart is empty. Please add items before checkout.", "warning")
+            return redirect(url_for("shop"))
+
+        logger.info(f"Processing order for cart: {cart_data}")
+        order_data = {
+            "name": request.form.get("name"),
+            "mobile": request.form.get("mobile"),
+            "email": request.form.get("email"),
+            "address": request.form.get("address"),
+            "items": [],
+            "total": 0,
+            "timestamp": datetime.utcnow(),
+        }
+        logger.info(f"Order form data: {order_data}")
+
         for key, data in cart_data.items():
             pid, size = key.split(":")
             qty = data["qty"]
             product = next((p for p in products if p["id"] == int(pid)), None)
             if not product:
+                logger.warning(f"Product with ID {pid} not found in products list.")
                 continue
             price = money_to_int(product.get(f"price_{size}", "0"))
             subtotal = price * qty
@@ -313,42 +316,22 @@ def process_order():
             })
 
         if db:
-            # Use Firestore with explicit logging and confirmation
-            collection_ref = db.collection("orders")
-            doc_ref = collection_ref.add(order_data)
+            doc_ref = db.collection("orders").add(order_data)
             logger.info(f"Order saved with Firestore Doc ID: {doc_ref[1].id}")
         else:
-            # Fallback to local file
-            orders_file = os.path.join(PRIVATE_DIR, "orders.json")
-
-            def load_orders():
-                if os.path.exists(orders_file):
-                    try:
-                        with open(orders_file, "r", encoding="utf-8") as f:
-                            return json.load(f)
-                    except Exception as e:
-                        logger.error(f"Failed to read orders file: {e}")
-                return []
-
-            def save_orders(orders_list):
-                try:
-                    with open(orders_file, "w", encoding="utf-8") as f:
-                        json.dump(orders_list, f, ensure_ascii=False, indent=2)
-                except Exception as e:
-                    logger.error(f"Failed to save orders file: {e}")
-
-            orders = load_orders()
-            orders.append(order_data)
-            save_orders(orders)
-            logger.info(f"Order saved locally to {orders_file}")
+            logger.error("Firestore not initialized. Cannot save order to Firestore.")
+            flash("Order service temporarily unavailable, please try again later.", "danger")
+            return redirect(url_for("checkout"))
 
         session.pop("cart", None)
+        flash("Order placed successfully!")
         return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
 
     except Exception as e:
-        logger.error(f"Failed to save order data: {e}", exc_info=True)
-        flash("Failed to process your order.", "danger")
+        logger.error(f"Exception in process_order: {e}", exc_info=True)
+        flash("Failed to process your order. Please try again.", "danger")
         return redirect(url_for("checkout"))
+
 
 @app.route("/submit-review", methods=["POST"])
 def submit_review():
