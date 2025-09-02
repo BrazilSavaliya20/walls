@@ -146,9 +146,22 @@ nav ul li a.active {
   gap: 10px;
   width: 100%;
 }
-@media (max-width: 992px) { .ultra-luxury-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 768px) { .ultra-luxury-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
-@media (max-width: 480px) { .ultra-luxury-grid { grid-template-columns: 1fr; gap: 6px; } }
+
+/* Tablet and small desktops: 2 products per row */
+@media (max-width: 992px) {
+  .ultra-luxury-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+/* Mobile phones: 1 product per row */
+@media (max-width: 480px) {
+  .ultra-luxury-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
 
 /* Product Card */
 .ultra-luxury-product-card {
@@ -271,34 +284,34 @@ nav ul li a.active {
 }
 
 /* Size Selector */
-  .size-buttons {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
+.size-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
 
-  .size-btn {
-    flex: 1;
-    background: #222;
-    border: 2px solid #d4af37;
-    border-radius: 6px;
-    color: #f4e7c1;
-    font-weight: 600;
-    padding: 8px 6px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    line-height: 1.2;
-    text-align: center;
-    user-select: none;
-    transition: background 0.3s, color 0.3s;
-  }
+.size-btn {
+  flex: 1;
+  background: #222;
+  border: 2px solid #d4af37;
+  border-radius: 6px;
+  color: #f4e7c1;
+  font-weight: 600;
+  padding: 8px 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  text-align: center;
+  user-select: none;
+  transition: background 0.3s, color 0.3s;
+}
 
-  .size-btn.active,
-  .size-btn:hover {
-    background: #d4af37;
-    color: #222;
-    border-color: #b8860b;
-  }
+.size-btn.active,
+.size-btn:hover {
+  background: #d4af37;
+  color: #222;
+  border-color: #b8860b;
+}
 
 /* Toast Popup */
 .cart-toast {
@@ -329,6 +342,7 @@ nav ul li a.active {
   font-weight: bold;
 }
 .go-cart-btn:hover { background: #b8860b; }
+
 
 /* ========== About Section ========== */
 .about-ultra-luxury {
