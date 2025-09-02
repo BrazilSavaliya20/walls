@@ -45,14 +45,17 @@ def money_to_int(val: str) -> int:
     return int(val.replace("₹", "").replace(",", "").strip() or 0)
 
 # ---------------------------------------------------------------------
-# Firebase
+# Firebase Initialization
 # ---------------------------------------------------------------------
 def init_firestore():
     firebase_key_json = os.environ.get("FIREBASE_KEY")
     if not firebase_key_json:
         raise Exception("FIREBASE_KEY environment variable not set!")
+    try:
+        firebase_key_dict = json.loads(firebase_key_json)
+    except Exception as e:
+        raise Exception(f"FIREBASE_KEY is not a valid JSON string: {e}")
 
-    firebase_key_dict = json.loads(firebase_key_json)
     if not firebase_admin._apps:
         cred = credentials.Certificate(firebase_key_dict)
         firebase_admin.initialize_app(cred)
@@ -61,6 +64,7 @@ def init_firestore():
 db = None
 try:
     db = init_firestore()
+    logger.info("Firestore initialized successfully.")
 except Exception as e:
     logger.error(f"Firestore initialization failed: {e}")
 
@@ -285,7 +289,7 @@ def process_order():
         "address": request.form.get("address"),
         "items": [],
         "total": 0,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.utcnow(),
     }
 
     try:
@@ -309,11 +313,34 @@ def process_order():
             })
 
         if db:
-            db.collection("orders").add(order_data)
+            # Use Firestore with explicit logging and confirmation
+            collection_ref = db.collection("orders")
+            doc_ref = collection_ref.add(order_data)
+            logger.info(f"Order saved with Firestore Doc ID: {doc_ref[1].id}")
         else:
+            # Fallback to local file
+            orders_file = os.path.join(PRIVATE_DIR, "orders.json")
+
+            def load_orders():
+                if os.path.exists(orders_file):
+                    try:
+                        with open(orders_file, "r", encoding="utf-8") as f:
+                            return json.load(f)
+                    except Exception as e:
+                        logger.error(f"Failed to read orders file: {e}")
+                return []
+
+            def save_orders(orders_list):
+                try:
+                    with open(orders_file, "w", encoding="utf-8") as f:
+                        json.dump(orders_list, f, ensure_ascii=False, indent=2)
+                except Exception as e:
+                    logger.error(f"Failed to save orders file: {e}")
+
             orders = load_orders()
             orders.append(order_data)
             save_orders(orders)
+            logger.info(f"Order saved locally to {orders_file}")
 
         session.pop("cart", None)
         return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
