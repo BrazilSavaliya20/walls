@@ -397,6 +397,7 @@ def secret_admin():
                 "price_large": request.form.get("price_large"),
             })
             save_products(products)
+            products = load_products()  # Reload after save
             flash("Product added successfully.", "success")
 
         elif action == "update":
@@ -419,17 +420,20 @@ def secret_admin():
                 product["imgs"] = img_urls
 
             save_products(products)
+            products = load_products()  # Reload after save
             flash("Product updated successfully.", "success")
 
         elif action == "delete":
             pid = int(request.form.get("id"))
             products = [p for p in products if p["id"] != pid]
             save_products(products)
+            products = load_products()  # Reload after save
             flash("Product deleted successfully.", "success")
 
         return redirect(url_for("secret_admin"))
 
     return render_template("admin_panel.html", products=products)
+
 
 # ---------------------------------------------------------------------
 # Run App
