@@ -131,181 +131,213 @@
       }
     }
 
-    /* ===== Featured Section ===== */
-    .ultra-luxury-featured { 
-      padding: 20px 5%;
-      background: linear-gradient(135deg, #0a0a0a, #121212); 
-      color: white; 
-    }
+  /* ===== Featured Section ===== */
+  .ultra-luxury-featured {
+    padding: 20px 5%;
+    background: linear-gradient(135deg, #0a0a0a, #121212);
+    color: white;
+  }
 
-    .ultra-luxury-featured h2 {
-      font-family: 'Cinzel', serif; 
-      font-weight: 700;
-      font-size: 1.8rem;
-      color: #f4e7c1; 
-      text-align: center; 
-      margin-bottom: 20px;
-    }
+  .ultra-luxury-featured h2 {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: #f4e7c1;
+    text-align: center;
+    margin-bottom: 20px;
+  }
 
-    /* Grid System */
+  /* Grid System */
+  .ultra-luxury-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+
+  @media (max-width: 992px) {
     .ultra-luxury-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      width: 100%;
+      grid-template-columns: repeat(3, 1fr);
     }
+  }
 
-    @media (max-width: 992px) {
-      .ultra-luxury-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-
-    @media (max-width: 768px) {
-      .ultra-luxury-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    }
-
-    @media (max-width: 480px) {
-      .ultra-luxury-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-    }
-
-    /* Product Card */
-    .ultra-luxury-product-card {
-      background: #1a1a1a;
-      border-radius: 8px;
-      padding: 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 260px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-
-    /* Image */
-    .product-image-wrapper {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      background: #222;
-      border-radius: 6px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Discount badge */
-    .discount-badge {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: #d4af37;
-      color: #000;
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 4px 6px;
-      border-radius: 6px;
-      user-select: none;
-    }
-
-    .product-image-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    /* Info */
-    .product-info {
-      margin-top: 6px;
-      text-align: center;
-    }
-
-    .product-name {
-      font-family: 'Cinzel', serif;
-      font-weight: 600;
-      font-size: 0.9rem;
-      margin-bottom: 4px;
-      color: #f4e7c1;
-    }
-
-    .description {
-      font-size: 0.7rem;
-      color: #aaa;
-      margin-bottom: 4px;
-      line-height: 1.1;
-    }
-
-    .price {
-      margin-bottom: 4px;
-      font-size: 0.85rem;
-    }
-
-    .old-price {
-      text-decoration: line-through;
-      color: #666;
-      margin-right: 4px;
-      font-size: 0.75rem;
-    }
-
-    .new-price {
-      color: #d4af37;
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-
-    /* Buttons */
-    .product-card {
-  width: 100%;
-  box-sizing: border-box;
-}
-.product-info {
-  width: 100%;
-}
-.cart-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-    .btn-secondary {
-      background: #2a2a2a;
-      color: #f4e7c1;
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.3s;
-    }
-    .btn-secondary:hover {
-      background: #d4af37;
-      color: #000;
-    }
-
-    .quantity-control {
-      display: none;
-      justify-content: center;
-      align-items: center;
+  @media (max-width: 768px) {
+    .ultra-luxury-grid {
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
-      margin-bottom: 10px;
     }
-    .quantity-control button {
-      background: #555;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      padding: 4px 12px;
-      cursor: pointer;
-    }
-    .quantity-control button:hover {
-      background: #b8860b;
-      color: #222;
-    }
-    .quantity-display {
-      min-width: 30px;
-      text-align: center;
-      font-weight: bold;
-      color: #f4e7c1;
-    }
+  }
 
+  @media (max-width: 480px) {
+    .ultra-luxury-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+  }
+
+  /* Product Card */
+  .ultra-luxury-product-card {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 260px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Image Wrapper and Multiple Images */
+  .product-image-wrapper {
+    width: 100%;
+    background: #222;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    padding: 6px;
+  }
+
+  .product-images {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .product-images img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+  }
+
+  .product-images img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.9);
+    z-index: 2;
+  }
+
+  /* Discount badge */
+  .discount-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #d4af37;
+    color: #000;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 4px 6px;
+    border-radius: 6px;
+    user-select: none;
+    z-index: 3;
+  }
+
+  /* Product Info */
+  .product-info {
+    margin-top: 10px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .product-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: #f4e7c1;
+    overflow-wrap: break-word;
+  }
+
+  .description {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-bottom: 6px;
+    line-height: 1.3;
+    min-height: 48px;
+    overflow: hidden;
+  }
+
+  .price {
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+
+  .old-price {
+    text-decoration: line-through;
+    color: #666;
+    margin-right: 6px;
+    font-size: 0.8rem;
+  }
+
+  .new-price {
+    color: #d4af37;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  /* Buttons */
+  .cart-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .btn-secondary {
+    background: #2a2a2a;
+    color: #f4e7c1;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s;
+  }
+
+  .btn-secondary:hover {
+    background: #d4af37;
+    color: #000;
+  }
+
+  /* Quantity control hidden by default */
+  .quantity-control {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .quantity-control button {
+    background: #555;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    padding: 4px 12px;
+    cursor: pointer;
+  }
+
+  .quantity-control button:hover {
+    background: #b8860b;
+    color: #222;
+  }
+
+  .quantity-display {
+    min-width: 30px;
+    text-align: center;
+    font-weight: bold;
+    color: #f4e7c1;
+  }
     /* Toast Popup */
     .cart-toast {
       position: fixed;
@@ -673,7 +705,12 @@
     {% for product in products %}
     <div class="product-card ultra-luxury-product-card">
       <div class="product-image-wrapper">
-        <img src="{{ product.img }}" alt="{{ product.name }}" loading="lazy" />
+        {% if product.imgs and product.imgs|length > 0 %}
+          <!-- Show first image or consider slideshow/carousel -->
+          <img src="{{ product.imgs[0] }}" alt="{{ product.name }}" loading="lazy" />
+        {% else %}
+          <img src="/static/images/placeholder.png" alt="No Image" />
+        {% endif %}
         {% if product.old and (product.old|float) != 0 %}
         <div class="discount-badge">-{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%</div>
         {% endif %}
@@ -691,7 +728,7 @@
           <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
             <input type="hidden" name="product_id" value="{{ product.id }}">
             <input type="hidden" name="quantity" value="1" class="quantity-field">
-            <div class="quantity-control">
+            <div class="quantity-control" style="display:none;">
               <button type="button" class="decrease">-</button>
               <span class="quantity-display">1</span>
               <button type="button" class="increase">+</button>

@@ -80,18 +80,17 @@ def upload_to_imgbb(file):
         response = requests.post(
             "https://api.imgbb.com/1/upload",
             params={"key": IMGBB_API_KEY},
-            files={"image": file}
+            files={"image": (file.filename, file.stream, file.content_type)}
         )
         result = response.json()
         if result.get("success"):
             return result["data"]["url"]
         else:
-            logger.error(f"ImgBB upload failed: {result}")
+            app.logger.error(f"ImgBB upload failed: {result}")
             return None
     except Exception as e:
-        logger.error(f"ImgBB upload error: {e}")
+        app.logger.error(f"ImgBB upload error: {e}")
         return None
-
 # ---------------------------------------------------------------------
 # Product data helpers
 # ---------------------------------------------------------------------
@@ -396,20 +395,26 @@ def secret_admin():
         action = request.form.get('action')
 
         if action == 'add':
-            file = request.files.get('img_file')
-            if not file:
-                flash('No image uploaded!', "danger")
+            files = request.files.getlist('img_file')
+            if not files or files == [None]:
+                flash('No images uploaded!', "danger")
                 return redirect(url_for('secret_admin'))
 
-            img_url = upload_to_imgbb(file)
-            if not img_url:
+            img_urls = []
+            for file in files:
+                if file and file.filename:
+                    img_url = upload_to_imgbb(file)
+                    if img_url:
+                        img_urls.append(img_url)
+
+            if not img_urls:
                 flash('Image upload failed!', "danger")
                 return redirect(url_for('secret_admin'))
 
             new_id = max([p['id'] for p in products], default=0) + 1
             products.append({
                 'id': new_id,
-                'img': img_url,
+                'imgs': img_urls,
                 'name': request.form.get('name'),
                 'desc': request.form.get('desc'),
                 'old': request.form.get('old'),
@@ -430,11 +435,16 @@ def secret_admin():
             product['old'] = request.form.get('old')
             product['new'] = request.form.get('new')
 
-            file = request.files.get('img_file')
-            if file:
-                img_url = upload_to_imgbb(file)
-                if img_url:
-                    product['img'] = img_url
+            files = request.files.getlist('img_file')
+            new_img_urls = []
+            for file in files:
+                if file and file.filename:
+                    img_url = upload_to_imgbb(file)
+                    if img_url:
+                        new_img_urls.append(img_url)
+
+            if new_img_urls:
+                product['imgs'] = new_img_urls  # Replace existing images with new ones
 
             save_products(products)
             flash('Product updated successfully.', "success")
@@ -448,6 +458,7 @@ def secret_admin():
         return redirect(url_for('secret_admin'))
 
     return render_template('admin_panel.html', products=products)
+
 
 # ---------------------------------------------------------------------
 # Run app
