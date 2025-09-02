@@ -138,7 +138,6 @@ nav ul li a.active {
   text-align: center; 
   margin-bottom: 20px;
 }
-
 /* Grid */
 .ultra-luxury-grid {
   display: grid;
@@ -146,7 +145,6 @@ nav ul li a.active {
   gap: 10px;
   width: 100%;
 }
-
 /* Tablet and small desktops: 2 products per row */
 @media (max-width: 992px) {
   .ultra-luxury-grid {
@@ -154,15 +152,13 @@ nav ul li a.active {
     gap: 8px;
   }
 }
-
-/* Mobile phones: 1 product per row */
+/* Mobile phones: 2 products per row (instead of 1) */
 @media (max-width: 480px) {
   .ultra-luxury-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 6px;
   }
 }
-
 /* Product Card */
 .ultra-luxury-product-card {
   background: #1a1a1a;
@@ -175,7 +171,6 @@ nav ul li a.active {
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   overflow: hidden;
 }
-
 /* Product Image */
 .product-image-wrapper {
   width: 100%;
@@ -190,7 +185,6 @@ nav ul li a.active {
   height: 100%;
   object-fit: cover;
 }
-
 /* Discount */
 .discount-badge {
   position: absolute;
@@ -204,7 +198,6 @@ nav ul li a.active {
   border-radius: 6px;
   user-select: none;
 }
-
 /* Info */
 .product-info {
   margin-top: 6px;
@@ -236,7 +229,6 @@ nav ul li a.active {
   font-weight: 700;
   font-size: 0.9rem;
 }
-
 /* Buttons */
 .cart-form { width: 100%; display: flex; flex-direction: column; gap: 6px; }
 .btn-secondary {
@@ -254,7 +246,6 @@ nav ul li a.active {
   background: #d4af37;
   color: #000;
 }
-
 /* Quantity Control */
 .quantity-control {
   display: none;
@@ -282,14 +273,12 @@ nav ul li a.active {
   font-weight: bold;
   color: #f4e7c1;
 }
-
 /* Size Selector */
 .size-buttons {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
 }
-
 .size-btn {
   flex: 1;
   background: #222;
@@ -305,14 +294,12 @@ nav ul li a.active {
   user-select: none;
   transition: background 0.3s, color 0.3s;
 }
-
 .size-btn.active,
 .size-btn:hover {
   background: #d4af37;
   color: #222;
   border-color: #b8860b;
 }
-
 /* Toast Popup */
 .cart-toast {
   position: fixed;
