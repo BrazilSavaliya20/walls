@@ -56,6 +56,7 @@ def money_to_int(val: str) -> int:
 # ---------------------------------------------------------------------
 # Firebase Initialization
 # ---------------------------------------------------------------------
+
 def init_firestore():
     firebase_key_json = os.environ.get("FIREBASE_KEY")
     if not firebase_key_json:
@@ -110,7 +111,6 @@ def upload_to_imgbb(file) -> str | None:
         app.logger.error(f"ImgBB upload unexpected error: {e}")
         return None
 
-
 # ---------------------------------------------------------------------
 # Product Data
 # ---------------------------------------------------------------------
@@ -136,7 +136,7 @@ def load_products() -> List[Dict[str, Any]]:
     products_seed = [
         {
             "id": 1,
-            "imgs": ["https://i.imgbb.com/YOUR_SEED_IMAGE.jpg"],
+            "imgs": ["https://i.ibb.co/YOUR_SEED_IMAGE.jpg"],  # replace this URL with actual hosted image URL
             "name": "Golden Glow Panel",
             "desc": "Handcrafted golden-accent Wall Craft panel.",
             "price_small": "₹9,999",
@@ -186,10 +186,10 @@ products = load_products()
 def inject_request():
     return dict(request=request)
 
-
 # ---------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------
+
 @app.route("/")
 def home():
     products_list = products
@@ -207,9 +207,11 @@ def home():
             logger.error(f"Failed to fetch reviews: {e}")
     return render_template("home.html", products=products_list, reviews=reviews_list)
 
+
 @app.route("/about")
 def about():
     return render_template("about.html")
+
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
@@ -217,6 +219,7 @@ def contact():
         flash("Thank you for connecting with us! We will get back to you soon.")
         return redirect(url_for("contact"))
     return render_template("contact.html")
+
 
 @app.route("/process_contact", methods=["POST"])
 def process_contact():
@@ -250,15 +253,18 @@ def process_contact():
         flash("⚠️ Failed to send message.", "danger")
         return redirect(url_for("contact"))
 
+
 @app.route("/shop")
 def shop():
     return render_template("shop.html", products=products)
+
 
 @app.route("/cart")
 def cart():
     cart_data = session.get("cart", {})
     cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("cart.html", cart_items=cart_items, total=total)
+
 
 @app.route("/add-to-cart", methods=["POST"])
 def add_to_cart():
@@ -274,6 +280,7 @@ def add_to_cart():
 
     session["cart"] = cart_data
     return ("", 204)
+
 
 @app.route("/update-cart", methods=["POST"])
 def update_cart():
@@ -295,6 +302,7 @@ def update_cart():
     session["cart"] = cart_data
     return redirect(url_for("cart"))
 
+
 @app.route("/checkout")
 def checkout():
     cart_data = session.get("cart", {})
@@ -304,6 +312,7 @@ def checkout():
 
     cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("checkout.html", cart_items=cart_items, total=total)
+
 
 @app.route("/process_order", methods=["POST"])
 def process_order():
@@ -369,7 +378,6 @@ def process_order():
         return redirect(url_for("checkout"))
 
 
-
 @app.route("/submit-review", methods=["POST"])
 def submit_review():
     if db is None:
@@ -400,6 +408,7 @@ def submit_review():
 # ---------------------------------------------------------------------
 # Admin Panel
 # ---------------------------------------------------------------------
+
 @app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
     global products
@@ -459,9 +468,9 @@ def secret_admin():
 
     return render_template("admin_panel.html", products=products)
 
-
 # ---------------------------------------------------------------------
 # Run App
 # ---------------------------------------------------------------------
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
