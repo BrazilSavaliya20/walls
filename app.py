@@ -119,34 +119,33 @@ def load_products() -> List[Dict[str, Any]]:
     save_products(products_seed)
     return products_seed
 
-def get_cart_items_and_total(cart: Dict[str, int], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
+def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
     items = []
     total = 0
-    for pid, qty in cart.items():
+    for key, data in cart.items():
         try:
+            pid, size = key.split(":")
+            qty = data["qty"]
             product = next((p for p in products if p["id"] == int(pid)), None)
             if not product:
                 continue
-
-            price = money_to_int(product.get("new"))
+            price = money_to_int(product.get(f"price_{size}", "0"))
             subtotal = price * qty
             total += subtotal
 
-            # ✅ Handle products that may have either "img" or "imgs"
-            img_url = product.get("img") or (product.get("imgs")[0] if isinstance(product.get("imgs"), list) and product.get("imgs") else "")
-
+            img_url = product.get("img") or (product.get("imgs")[0] if product.get("imgs") else "")
             items.append({
                 "id": product["id"],
                 "name": product["name"],
                 "img": img_url,
+                "size": size,
                 "price": price,
                 "qty": qty,
-                "subtotal": subtotal
+                "subtotal": subtotal,
             })
         except Exception as e:
-            logger.error(f"Error processing cart item {pid}: {e}")
+            logger.error(f"Error processing cart item {key}: {e}")
     return items, total
-
 
 products = load_products()
 
@@ -274,10 +273,6 @@ def checkout():
 
 @app.route("/process_order", methods=["POST"])
 def process_order():
-    if db is None:
-        flash("⚠️ Firestore is not initialized.", "danger")
-        return redirect(url_for("checkout"))
-
     cart_data = session.get("cart")
     if not cart_data:
         flash("Your cart is empty. Please add items before checkout.", "warning")
@@ -290,7 +285,7 @@ def process_order():
         "address": request.form.get("address"),
         "items": [],
         "total": 0,
-        "timestamp": datetime.utcnow(),
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
     try:
@@ -313,9 +308,16 @@ def process_order():
                 "subtotal": subtotal,
             })
 
-        db.collection("orders").add(order_data)
+        if db:
+            db.collection("orders").add(order_data)
+        else:
+            orders = load_orders()
+            orders.append(order_data)
+            save_orders(orders)
+
         session.pop("cart", None)
         return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
+
     except Exception as e:
         logger.error(f"Failed to save order data: {e}", exc_info=True)
         flash("Failed to process your order.", "danger")
