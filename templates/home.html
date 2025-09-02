@@ -270,17 +270,34 @@ nav ul li a.active {
 }
 
 /* Size Selector */
-.size-selector {
-  padding: 6px;
-  border-radius: 6px;
-  border: none;
-  font-size: 0.85rem;
-  font-weight: 600;
-  background: #222;
-  color: #f4e7c1;
-  width: 100%;
-  box-sizing: border-box;
-}
+  .size-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .size-btn {
+    flex: 1;
+    background: #222;
+    border: 2px solid #d4af37;
+    border-radius: 6px;
+    color: #f4e7c1;
+    font-weight: 600;
+    padding: 8px 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1.2;
+    text-align: center;
+    user-select: none;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .size-btn.active,
+  .size-btn:hover {
+    background: #d4af37;
+    color: #222;
+    border-color: #b8860b;
+  }
 
 /* Toast Popup */
 .cart-toast {
@@ -643,36 +660,7 @@ footer {
   });
 </script>
 
-<style>
-  .size-buttons {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
 
-  .size-btn {
-    flex: 1;
-    background: #222;
-    border: 2px solid #d4af37;
-    border-radius: 6px;
-    color: #f4e7c1;
-    font-weight: 600;
-    padding: 8px 6px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    line-height: 1.2;
-    text-align: center;
-    user-select: none;
-    transition: background 0.3s, color 0.3s;
-  }
-
-  .size-btn.active,
-  .size-btn:hover {
-    background: #d4af37;
-    color: #222;
-    border-color: #b8860b;
-  }
-</style>
 
 
 <!-- About Section -->
