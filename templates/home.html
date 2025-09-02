@@ -534,27 +534,35 @@ footer {
         <h3 class="product-name">{{ product.name }}</h3>
         <p class="description">{{ product.desc }}</p>
 
-        <!-- Size Selector -->
+        <!-- Size Selector Buttons -->
         <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
           <input type="hidden" name="product_id" value="{{ product.id }}">
           <input type="hidden" name="quantity" value="1" class="quantity-field">
+          <input type="hidden" name="size" value="medium" class="selected-size-input">
 
-          <select name="size" class="size-selector" data-product-id="{{ product.id }}">
-            <option value="small" data-price="{{ product.price_small|replace('₹','')|replace(',','') }}">Small (₹{{ product.price_small }})</option>
-            <option value="medium" data-price="{{ product.price_medium|replace('₹','')|replace(',','') }}" selected>Medium (₹{{ product.price_medium }})</option>
-            <option value="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">Large (₹{{ product.price_large }})</option>
-          </select>
+          <div class="size-buttons" data-product-id="{{ product.id }}">
+            <button type="button" class="size-btn" data-size="small" data-price="{{ product.price_small|replace('₹','')|replace(',','') }}">
+              Small<br>₹{{ product.price_small }}
+            </button>
+            <button type="button" class="size-btn active" data-size="medium" data-price="{{ product.price_medium|replace('₹','')|replace(',','') }}">
+              Medium<br>₹{{ product.price_medium }}
+            </button>
+            <button type="button" class="size-btn" data-size="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">
+              Large<br>₹{{ product.price_large }}
+            </button>
+          </div>
 
           <div class="price">
             <span class="old-price"></span>
             <span class="new-price" id="price-display-{{ product.id }}">₹{{ product.price_medium }}</span>
           </div>
 
-          <div class="quantity-control">
+          <div class="quantity-control" style="display:none;">
             <button type="button" class="decrease">-</button>
             <span class="quantity-display">1</span>
             <button type="button" class="increase">+</button>
           </div>
+
           <button type="submit" class="btn-secondary add-to-cart-btn">Add to Cart</button>
         </form>
       </div>
@@ -571,6 +579,7 @@ footer {
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+    // Cart form quantity controls & add button
     document.querySelectorAll(".cart-form").forEach(form => {
       let addBtn = form.querySelector(".add-to-cart-btn");
       let qtyControl = form.querySelector(".quantity-control");
@@ -601,17 +610,26 @@ footer {
       });
     });
 
-    // Price update on size change
-    document.querySelectorAll(".size-selector").forEach(select => {
-      select.addEventListener("change", (e) => {
-        let size = e.target.value;
-        let option = e.target.options[e.target.selectedIndex];
-        let price = option.getAttribute("data-price");
-        let productId = e.target.dataset.productId;
-        let priceDisplay = document.getElementById("price-display-" + productId);
-        if (priceDisplay) {
-          priceDisplay.innerText = "₹" + Number(price).toLocaleString();
-        }
+    // Size button selection logic
+    document.querySelectorAll(".size-buttons").forEach(container => {
+      const sizeInput = container.querySelector(".selected-size-input");
+      const productId = container.dataset.productId;
+      const priceDisplay = document.getElementById("price-display-" + productId);
+
+      container.querySelectorAll(".size-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          // Remove active from all buttons
+          container.querySelectorAll(".size-btn").forEach(b => b.classList.remove("active"));
+          // Add active to clicked button
+          btn.classList.add("active");
+          // Update hidden input
+          sizeInput.value = btn.dataset.size;
+          // Update price display
+          const price = btn.dataset.price;
+          if(priceDisplay) {
+            priceDisplay.innerText = "₹" + Number(price).toLocaleString("en-IN");
+          }
+        });
       });
     });
 
@@ -624,6 +642,38 @@ footer {
     }
   });
 </script>
+
+<style>
+  .size-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .size-btn {
+    flex: 1;
+    background: #222;
+    border: 2px solid #d4af37;
+    border-radius: 6px;
+    color: #f4e7c1;
+    font-weight: 600;
+    padding: 8px 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1.2;
+    text-align: center;
+    user-select: none;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .size-btn.active,
+  .size-btn:hover {
+    background: #d4af37;
+    color: #222;
+    border-color: #b8860b;
+  }
+</style>
+
 
 <!-- About Section -->
 <section class="about-ultra-luxury">
