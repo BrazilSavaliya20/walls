@@ -186,6 +186,13 @@ products = load_products()
 def inject_request():
     return dict(request=request)
 
+from datetime import datetime
+
+@app.context_processor
+def inject_now():
+    return {'now': datetime.utcnow}
+
+
 # ---------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------
