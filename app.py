@@ -85,7 +85,7 @@ IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac84
 
 def upload_to_imgbb(file) -> str | None:
     """
-    Uploads a file object to ImgBB and returns the hosted image URL.
+    Uploads a file object to ImgBB and returns the hosted image direct URL.
     Returns None if upload fails.
     """
     try:
@@ -93,16 +93,23 @@ def upload_to_imgbb(file) -> str | None:
             "https://api.imgbb.com/1/upload",
             params={"key": IMGBB_API_KEY},
             files={"image": (file.filename, file.stream, file.content_type)},
+            timeout=30  # Timeout for network robustness
         )
         result = response.json()
-        if result.get("success"):
-            return result["data"]["url"]
+
+        if response.status_code == 200 and result.get("success"):
+            # Return direct URL of the uploaded image
+            return result["data"]["image"]["url"]
         else:
             app.logger.error(f"ImgBB upload failed: {result}")
             return None
-    except Exception as e:
-        app.logger.error(f"ImgBB upload error: {e}")
+    except requests.exceptions.RequestException as req_ex:
+        app.logger.error(f"ImgBB upload request error: {req_ex}")
         return None
+    except Exception as e:
+        app.logger.error(f"ImgBB upload unexpected error: {e}")
+        return None
+
 
 # ---------------------------------------------------------------------
 # Product Data
