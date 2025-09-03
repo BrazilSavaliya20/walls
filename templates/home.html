@@ -594,18 +594,27 @@ footer {
         </div>
 
         <!-- Add to Cart Container -->
-        <div class="add-to-cart-container" id="cart-container-{{ product.id }}">
-          <button type="button" class="btn btn-add" onclick="toggleCartOptions('{{ product.id }}')">Add to Cart</button>
+        <div class="add-to-cart-container" id="cart-container-{{ product.id }}" style="margin-top: 12px;">
 
-          <form method="POST" action="{{ url_for('add_to_cart') }}" class="add-to-cart-form" id="cart-form-{{ product.id }}" style="display:none; margin-top:8px; align-items:center; gap:6px;">
+          <!-- Initial Add to Cart Button -->
+          <button type="button" class="btn btn-add" onclick="toggleCartOptions('{{ product.id }}')">
+            Add to Cart
+          </button>
+
+          <!-- Quantity and Confirm Add Form - hidden initially -->
+          <form method="POST" action="{{ url_for('add_to_cart') }}" class="add-to-cart-form" 
+                id="cart-form-{{ product.id }}" style="display:none; margin-top:10px; justify-content:center; align-items: center; gap: 10px;">
             <input type="hidden" name="product_id" value="{{ product.id }}">
-            <!-- Size Selector (default to 'small') -->
             <input type="hidden" name="size" value="small">
 
-            <label for="quantity-{{ product.id }}" style="font-size: 0.9rem; color: #ddd; margin-right:6px;">Qty:</label>
-            <input type="number" id="quantity-{{ product.id }}" name="quantity" value="1" min="1" max="10" style="width:50px; padding: 4px; border-radius:4px; border: 1px solid #ccc;">
+            <button type="button" class="qty-btn" onclick="changeQuantity('{{ product.id }}', -1)">–</button>
 
-            <button type="submit" class="btn btn-edit" style="margin-left: 10px; padding: 6px 14px;">Add</button>
+            <input type="number" id="quantity-{{ product.id }}" name="quantity" value="1" min="1" max="10" 
+                   style="width: 48px; text-align:center; font-size: 1rem; border-radius: 5px; border: 2px solid #b88e2f; color: #fff; background: transparent;">
+
+            <button type="button" class="qty-btn" onclick="changeQuantity('{{ product.id }}', 1)">+</button>
+
+            <button type="submit" class="btn btn-confirm">Add</button>
           </form>
         </div>
 
@@ -616,15 +625,27 @@ footer {
 </section>
 
 <script>
+  // Toggle quantity form visibility
   function toggleCartOptions(productId) {
     const form = document.getElementById('cart-form-' + productId);
     if (form.style.display === 'none' || form.style.display === '') {
       form.style.display = 'flex';
       form.style.alignItems = 'center';
-      form.style.gap = '6px';
+      form.style.gap = '10px';
     } else {
       form.style.display = 'none';
     }
+  }
+
+  // Change quantity +/- bounded between 1 and 10
+  function changeQuantity(productId, delta) {
+    const qtyInput = document.getElementById('quantity-' + productId);
+    let current = parseInt(qtyInput.value);
+    if (isNaN(current)) current = 1;
+    current += delta;
+    if (current < 1) current = 1;
+    else if (current > 10) current = 10;
+    qtyInput.value = current;
   }
 </script>
 
