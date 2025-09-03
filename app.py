@@ -171,6 +171,7 @@ def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]
             logger.error(f"Error processing cart item {key}: {e}")
     return items, total
 
+# Load products once at startup
 products = load_products()
 
 @app.context_processor
