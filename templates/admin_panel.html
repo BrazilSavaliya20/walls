@@ -5,29 +5,161 @@
   <title>Admin Product Management</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background-color: #f9fafb; color: #333; margin: 0; padding: 20px; }
-    .admin-section { max-width: 1200px; margin: auto; }
-    h2, h3 { margin-bottom: 15px; color: #222; }
-    .top-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; }
-    .btn { padding: 6px 12px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; transition: 0.3s; }
-    .btn-edit { background: #10b981; color: #fff; }
-    .btn-delete { background: #ef4444; color: #fff; margin-top: 5px; }
-    .btn-replace { background: #fb923c; color: #fff; }
-    .btn-add-img { background: #2563eb; color: #fff; margin-bottom: 2px; }
-    .btn-home { background: #2563eb; color: #fff; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 14px; transition: 0.3s; }
-    .btn-home:hover { background: #1d4ed8; }
-    .flash { background: #fef9c3; border: 1px solid #facc15; padding: 10px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; }
-    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-    table th { background: #f1f5f9; text-align: left; font-weight: 600; font-size: 14px; color: #111827; }
-    table th, table td { padding: 12px 15px; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
-    .product-img-cell { min-width: 80px; text-align: center; }
-    .product-img-cell img { max-width: 60px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background: #f5f5f5; display: block; margin:auto;}
-    .input-wrapper input, .input-wrapper textarea { width: 100%; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
-    textarea { resize: vertical; min-height: 60px; }
-    form.inline-form, form.img-form { display: inline; }
-    form.add-form { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-    form.add-form input, form.add-form textarea { margin-bottom: 10px; }
-    .add-img-form { display: flex; align-items: center; gap: 5px; margin-bottom: 5px;}
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9fafb;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    .admin-section {
+      max-width: 1200px;
+      margin: auto;
+    }
+    h2, h3 {
+      margin-bottom: 15px;
+      color: #222;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+    .btn-home {
+      background: #2563eb;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    .btn-home:hover {
+      background: #1d4ed8;
+    }
+    .flash {
+      background: #fef9c3;
+      border: 1px solid #facc15;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    table th {
+      background: #f1f5f9;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      color: #111827;
+    }
+    table th, table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: middle;
+    }
+    .product-images {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .product-images div {
+      position: relative;
+    }
+    .product-images img {
+      max-width: 60px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background: #f5f5f5;
+      display: block;
+      margin: auto;
+    }
+    .product-images form button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 14px;
+      padding: 0;
+    }
+    .input-wrapper input,
+    .input-wrapper textarea {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    .btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-edit {
+      background: #10b981;
+      color: white;
+    }
+    .btn-edit:hover {
+      background: #059669;
+    }
+    .btn-delete {
+      background: #ef4444;
+      color: white;
+      margin-top: 5px;
+    }
+    .btn-delete:hover {
+      background: #dc2626;
+    }
+    .btn-add {
+      background: #2563eb;
+      color: white;
+      margin-top: 10px;
+    }
+    .btn-add:hover {
+      background: #1d4ed8;
+    }
+    form.inline-form {
+      display: inline;
+    }
+    form.add-form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      max-width: 500px;
+      margin-top: 30px;
+    }
+    form.add-form input,
+    form.add-form textarea {
+      margin-bottom: 10px;
+    }
+    td.actions {
+      min-width: 230px;
+    }
   </style>
 </head>
 <body>
@@ -44,11 +176,7 @@
     <h3>All Live Products</h3>
     <table>
       <tr>
-        {# Dynamically render as many image columns as the max number of images any product has #}
-        {% set max_imgs = products|map(attribute='imgs')|map('length')|max %}
-        {% for i in range(max_imgs) %}
-          <th>Image {{i+1}}</th>
-        {% endfor %}
+        <th>Images</th>
         <th>Name</th>
         <th>Description</th>
         <th>Price Small</th>
@@ -59,35 +187,21 @@
       </tr>
       {% for product in products %}
       <tr>
-        {# Render each image slot as a column #}
-        {% for i in range(max_imgs) %}
-          <td class="product-img-cell">
-            {% if product.imgs|length > i %}
-              <img src="{{ product.imgs[i] }}" alt="Image" loading="lazy" onerror="this.src='/static/images/placeholder.png'">
-              <form method="POST" enctype="multipart/form-data" class="img-form" style="margin-bottom:2px;">
-                <input type="file" name="replace_img" accept="image/*" style="display:inline;padding:0;margin:0;" required>
-                <input type="hidden" name="id" value="{{ product.id }}">
-                <input type="hidden" name="img_index" value="{{ i }}">
-                <input type="hidden" name="action" value="replace_image">
-                <button type="submit" class="btn btn-replace" style="padding:2px 5px;font-size:12px;">Replace</button>
-              </form>
-              <form method="POST" class="img-form" style="margin-bottom:2px;">
-                <input type="hidden" name="id" value="{{ product.id }}">
-                <input type="hidden" name="img_index" value="{{ i }}">
-                <input type="hidden" name="action" value="remove_image">
-                <button type="submit" class="btn btn-delete" style="padding:2px 5px;font-size:12px;">Remove</button>
-              </form>
-            {% else %}
-              {# Option to add new image if columns left #}
-              <form method="POST" enctype="multipart/form-data" class="add-img-form">
-                <input type="file" name="add_img" accept="image/*" required>
-                <input type="hidden" name="id" value="{{ product.id }}">
-                <input type="hidden" name="action" value="add_image">
-                <button type="submit" class="btn btn-add-img" style="padding:2px 5px;font-size:12px;">Add</button>
-              </form>
-            {% endif %}
-          </td>
-        {% endfor %}
+        <td>
+          <div class="product-images">
+            {% for url in product.imgs %}
+              <div>
+                <img src="{{ url }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='/static/images/placeholder.png'">
+                <form method="POST" class="inline-form" onsubmit="return confirm('Remove this image?');">
+                  <input type="hidden" name="id" value="{{ product.id }}">
+                  <input type="hidden" name="img_url" value="{{ url }}">
+                  <input type="hidden" name="action" value="remove_image">
+                  <button type="submit" title="Remove Image">&times;</button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        </td>
         <form method="POST" enctype="multipart/form-data" class="inline-form">
           <td class="input-wrapper">
             <input type="text" name="name" value="{{ product.name }}" required>
@@ -107,7 +221,8 @@
           <td class="input-wrapper">
             <textarea name="features" placeholder="Comma-separated features">{{ product.features | join(', ') }}</textarea>
           </td>
-          <td style="min-width: 170px;">
+          <td class="actions">
+            <input type="file" name="img_file" accept="image/*" multiple>
             <input type="hidden" name="id" value="{{ product.id }}">
             <input type="hidden" name="action" value="update">
             <button type="submit" class="btn btn-edit">Update</button>
@@ -121,8 +236,9 @@
       </tr>
       {% endfor %}
     </table>
+
     <h3>Add New Product</h3>
-    <form method="POST" enctype="multipart/form-data" class="add-form" style="max-width: 500px;">
+    <form method="POST" enctype="multipart/form-data" class="add-form">
       <input type="file" name="img_file" accept="image/*" multiple required>
       <input type="text" name="name" placeholder="Product Name" required>
       <textarea name="desc" placeholder="Description" required></textarea>
