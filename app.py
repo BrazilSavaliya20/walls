@@ -391,10 +391,16 @@ def secret_admin():
     global products
     if request.method == "POST":
         action = request.form.get("action")
+
         if action == "add":
             files = request.files.getlist("img_file")
             img_urls = [upload_to_imgbb(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
+
+            # Process features - split by commas, strip whitespace
+            features = request.form.get("features", "")
+            features_list = [f.strip() for f in features.split(",") if f.strip()]
+
             new_id = max([p["id"] for p in products], default=0) + 1
             products.append({
                 "id": new_id,
@@ -404,37 +410,52 @@ def secret_admin():
                 "price_small": request.form.get("price_small"),
                 "price_medium": request.form.get("price_medium"),
                 "price_large": request.form.get("price_large"),
+                "features": features_list,
             })
+
             save_products(products)
             products = load_products()  # Reload after save
             flash("Product added successfully.", "success")
+
         elif action == "update":
             pid = int(request.form.get("id"))
             product = next((p for p in products if p["id"] == pid), None)
             if not product:
                 flash("Product not found.", "danger")
                 return redirect(url_for("secret_admin"))
+
             product["name"] = request.form.get("name")
             product["desc"] = request.form.get("desc")
             product["price_small"] = request.form.get("price_small")
             product["price_medium"] = request.form.get("price_medium")
             product["price_large"] = request.form.get("price_large")
+
+            # Features
+            features = request.form.get("features", "")
+            product["features"] = [f.strip() for f in features.split(",") if f.strip()]
+
             files = request.files.getlist("img_file")
             img_urls = [upload_to_imgbb(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
             if img_urls:
-                product["imgs"] = img_urls
+                # Append new images instead of replacing all
+                product["imgs"].extend(img_urls)
+
             save_products(products)
             products = load_products()  # Reload after save
             flash("Product updated successfully.", "success")
+
         elif action == "delete":
             pid = int(request.form.get("id"))
             products = [p for p in products if p["id"] != pid]
             save_products(products)
             products = load_products()  # Reload after save
             flash("Product deleted successfully.", "success")
+
         return redirect(url_for("secret_admin"))
+
     return render_template("admin_panel.html", products=products)
+
 
 # ---------------------------------------------------------------------
 # Run App
