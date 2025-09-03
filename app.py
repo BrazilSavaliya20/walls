@@ -275,8 +275,9 @@ def add_to_cart():
     cart_data[key]["qty"] += quantity
     session['cart'] = cart_data
 
-    # After adding to cart, redirect back to product detail page
-    return redirect(url_for('product_detail', product_id=product_id))
+    # Redirect user to the cart page after adding
+    return redirect(url_for('cart'))
+
 
 
 @app.route("/update-cart", methods=["POST"])
