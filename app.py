@@ -260,18 +260,24 @@ def cart():
     cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("cart.html", cart_items=cart_items, total=total)
 
-@app.route("/add-to-cart", methods=["POST"])
+from flask import request, redirect, url_for, session
+
+@app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
-    pid = str(request.form.get("product_id"))
-    size = request.form.get("size", "small")
-    quantity = int(request.form.get("quantity", 1))
-    cart_data = session.get("cart", {})
-    key = f"{pid}:{size}"
+    product_id = str(request.form.get('product_id'))
+    quantity = int(request.form.get('quantity', 1))
+    size = request.form.get('size', 'small')
+
+    cart_data = session.get('cart', {})
+    key = f"{product_id}:{size}"
     if key not in cart_data:
         cart_data[key] = {"qty": 0}
     cart_data[key]["qty"] += quantity
-    session["cart"] = cart_data
-    return ("", 204)
+    session['cart'] = cart_data
+
+    # After adding to cart, redirect back to product detail page
+    return redirect(url_for('product_detail', product_id=product_id))
+
 
 @app.route("/update-cart", methods=["POST"])
 def update_cart():

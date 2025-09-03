@@ -108,13 +108,14 @@
 <body>
   <div class="container">
     <div class="gallery-col">
-      <img src="{{ product.imgs[0] }}" id="mainImage" alt="{{ product.name }}" class="main-image">
+      <img src="{{ product.imgs[0] }}" id="mainImage" alt="{{ product.name }}" class="main-image" />
       <div class="thumb-list" id="thumbs">
         {% for img in product.imgs %}
           <img src="{{ img }}" class="{% if loop.index0 == 0 %}selected{% endif %}" data-idx="{{ loop.index0 }}" alt="Product image" />
         {% endfor %}
       </div>
     </div>
+
     <div class="info-col">
       <div class="product-title">{{ product.name }}</div>
       <div class="price-range" id="priceDisplay">
@@ -128,7 +129,7 @@
         <button type="button" class="size-btn" data-size="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">Large</button>
       </div>
 
-      <form method="POST" action="{{ url_for('add_to_cart') }}">
+      <form id="addToCartForm" method="POST" action="{{ url_for('add_to_cart') }}">
         <div class="purchase-row">
           <div class="quantity-box">
             <button type="button" class="quantity-btn" id="decreaseQty">-</button>
@@ -205,6 +206,24 @@
         qtyInput.value = qty;
       }
     };
+
+    // AJAX Add to Cart to avoid page reload
+    document.getElementById('addToCartForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const formData = new FormData(this);
+      fetch(this.action, {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin"
+      }).then(response => {
+        if(response.ok){
+          alert("Added to cart!");
+          // Optionally update cart UI here
+        } else {
+          alert("Failed to add to cart.");
+        }
+      }).catch(() => alert("Error adding to cart."));
+    });
   </script>
 </body>
 </html>
