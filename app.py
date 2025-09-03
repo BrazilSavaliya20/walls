@@ -430,15 +430,21 @@ def secret_admin():
             product["price_medium"] = request.form.get("price_medium")
             product["price_large"] = request.form.get("price_large")
 
-            # Features
+            # Features - split and save as list
             features = request.form.get("features", "")
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
 
             files = request.files.getlist("img_file")
             img_urls = [upload_to_imgbb(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
+
             if img_urls:
-                # Append new images instead of replacing all
+                # Ensure imgs is a list, even if currently stored as a string
+                if isinstance(product.get("imgs"), str):
+                    product["imgs"] = [product["imgs"]]
+                elif product.get("imgs") is None:
+                    product["imgs"] = []
+                # Append new uploaded images
                 product["imgs"].extend(img_urls)
 
             save_products(products)
