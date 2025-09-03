@@ -188,31 +188,32 @@
       {% for product in products %}
       <tr>
         <td>
-          <div class="product-images">
-            {% for url in product.imgs %}
-              <div>
-                <img src="{{ url }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='/static/images/placeholder.png'">
-                
-                <!-- Remove Image Form -->
-                <form method="POST" class="inline-form" onsubmit="return confirm('Remove this image?');">
-                  <input type="hidden" name="id" value="{{ product.id }}">
-                  <input type="hidden" name="img_url" value="{{ url }}">
-                  <input type="hidden" name="action" value="remove_image">
-                  <button type="submit" title="Remove Image">&times;</button>
-                </form>
-                
-                <!-- Replace Image Form -->
-                <form method="POST" enctype="multipart/form-data" class="inline-form" style="margin-top:3px;">
-                  <input type="file" name="replace_img" accept="image/*" required>
-                  <input type="hidden" name="id" value="{{ product.id }}">
-                  <input type="hidden" name="img_url" value="{{ url }}">
-                  <input type="hidden" name="action" value="replace_image">
-                  <button type="submit" class="btn btn-edit" style="padding: 2px 8px; font-size: 12px;">Replace</button>
-                </form>
-              </div>
-            {% endfor %}
-          </div>
-        </td>
+  <div class="product-images">
+    {% for url in product.imgs %}
+      <div>
+        <img src="{{ url }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='/static/images/placeholder.png'">
+        
+        <!-- Separate Remove Image Form -->
+        <form method="POST" class="inline-form" onsubmit="return confirm('Remove this image?');" style="display:inline;">
+          <input type="hidden" name="id" value="{{ product.id }}">
+          <input type="hidden" name="img_url" value="{{ url }}">
+          <input type="hidden" name="action" value="remove_image">
+          <button type="submit" class="btn btn-delete" title="Remove Image">&times;</button>
+        </form>
+        
+        <!-- Separate Replace Image Form -->
+        <form method="POST" enctype="multipart/form-data" class="inline-form" style="display:inline;">
+          <input type="file" name="replace_img" accept="image/*" required>
+          <input type="hidden" name="id" value="{{ product.id }}">
+          <input type="hidden" name="img_url" value="{{ url }}">
+          <input type="hidden" name="action" value="replace_image">
+          <button type="submit" class="btn btn-edit" style="padding: 2px 8px; font-size: 12px;">Replace</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+</td>
+
         <form method="POST" enctype="multipart/form-data" class="inline-form">
           <td class="input-wrapper">
             <input type="text" name="name" value="{{ product.name }}" required>
