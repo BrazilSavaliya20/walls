@@ -458,9 +458,46 @@ def secret_admin():
             products = load_products()  # Reload after save
             flash("Product deleted successfully.", "success")
 
+        elif action == "remove_image":
+            pid = int(request.form.get("id"))
+            img_url = request.form.get("img_url")
+            product = next((p for p in products if p["id"] == pid), None)
+            if product and img_url in product.get("imgs", []):
+                product["imgs"].remove(img_url)
+                save_products(products)
+                products = load_products()
+                flash("Image removed successfully.", "success")
+            else:
+                flash("Image or product not found.", "danger")
+
+        elif action == "replace_image":
+            pid = int(request.form.get("id"))
+            img_url = request.form.get("img_url")
+            product = next((p for p in products if p["id"] == pid), None)
+            if not product:
+                flash("Product not found for image replacement.", "danger")
+                return redirect(url_for("secret_admin"))
+            files = request.files.getlist("replace_img")
+            if files and files[0] and files[0].filename:
+                new_img_url = upload_to_imgbb(files[0])
+                if new_img_url:
+                    if img_url in product.get("imgs", []):
+                        idx = product["imgs"].index(img_url)
+                        product["imgs"][idx] = new_img_url
+                        save_products(products)
+                        products = load_products()
+                        flash("Image replaced successfully.", "success")
+                    else:
+                        flash("Original image not found.", "danger")
+                else:
+                    flash("Failed to upload replacement image.", "danger")
+            else:
+                flash("No replacement image selected.", "warning")
+
         return redirect(url_for("secret_admin"))
 
     return render_template("admin_panel.html", products=products)
+
 
 
 # ---------------------------------------------------------------------
