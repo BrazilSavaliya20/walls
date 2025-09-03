@@ -152,10 +152,10 @@ nav ul li a.active {
     gap: 8px;
   }
 }
-/* Mobile phones: 2 products per row (instead of 1) */
+/* Mobile phones: 3 products per row */
 @media (max-width: 480px) {
   .ultra-luxury-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 6px;
   }
 }
@@ -272,33 +272,6 @@ nav ul li a.active {
   text-align: center;
   font-weight: bold;
   color: #f4e7c1;
-}
-/* Size Selector */
-.size-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.size-btn {
-  flex: 1;
-  background: #222;
-  border: 2px solid #d4af37;
-  border-radius: 6px;
-  color: #f4e7c1;
-  font-weight: 600;
-  padding: 8px 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  line-height: 1.2;
-  text-align: center;
-  user-select: none;
-  transition: background 0.3s, color 0.3s;
-}
-.size-btn.active,
-.size-btn:hover {
-  background: #d4af37;
-  color: #222;
-  border-color: #b8860b;
 }
 /* Toast Popup */
 .cart-toast {
@@ -537,7 +510,7 @@ footer {
   }
 </script>
 
-<!-- Featured Section -->
+<!-- Featured Products Section -->
 <section class="featured ultra-luxury-featured">
   <h2>Featured Creations</h2>
   <div class="product-grid ultra-luxury-grid">
@@ -545,46 +518,30 @@ footer {
     <div class="product-card ultra-luxury-product-card">
       <div class="product-image-wrapper">
         <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
-
-
-
         {% if product.old and (product.old|float) != 0 %}
-        <div class="discount-badge">-{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%</div>
+        <div class="discount-badge">
+          -{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%
+        </div>
         {% endif %}
       </div>
       <div class="product-info">
         <h3 class="product-name">{{ product.name }}</h3>
         <p class="description">{{ product.desc }}</p>
-
-        <!-- Size Selector Buttons -->
+        <!-- Price Range -->
+        <div class="price">
+          <span class="new-price">
+            ₹{{ product.price_small }} – ₹{{ product.price_large }}
+          </span>
+        </div>
         <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
           <input type="hidden" name="product_id" value="{{ product.id }}">
           <input type="hidden" name="quantity" value="1" class="quantity-field">
-          <input type="hidden" name="size" value="medium" class="selected-size-input">
-
-          <div class="size-buttons" data-product-id="{{ product.id }}">
-            <button type="button" class="size-btn" data-size="small" data-price="{{ product.price_small|replace('₹','')|replace(',','') }}">
-              Small<br>₹{{ product.price_small }}
-            </button>
-            <button type="button" class="size-btn active" data-size="medium" data-price="{{ product.price_medium|replace('₹','')|replace(',','') }}">
-              Medium<br>₹{{ product.price_medium }}
-            </button>
-            <button type="button" class="size-btn" data-size="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">
-              Large<br>₹{{ product.price_large }}
-            </button>
-          </div>
-
-          <div class="price">
-            <span class="old-price"></span>
-            <span class="new-price" id="price-display-{{ product.id }}">₹{{ product.price_medium }}</span>
-          </div>
-
+          <!-- No size input selection -->
           <div class="quantity-control" style="display:none;">
             <button type="button" class="decrease">-</button>
             <span class="quantity-display">1</span>
             <button type="button" class="increase">+</button>
           </div>
-
           <button type="submit" class="btn-secondary add-to-cart-btn">Add to Cart</button>
         </form>
       </div>
@@ -592,13 +549,11 @@ footer {
     {% endfor %}
   </div>
 </section>
-
 <!-- Toast Popup -->
 <div id="cart-toast" class="cart-toast">
   <span id="toast-message"></span>
   <a href="{{ url_for('cart') }}" class="go-cart-btn">Go to Cart</a>
 </div>
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   // Cart form quantity controls & add button
@@ -609,7 +564,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let qtyField = form.querySelector(".quantity-field");
     let productName = form.closest(".product-card").querySelector(".product-name").innerText;
     let opened = false;
-
     addBtn.addEventListener("click", (e) => {
       if (!opened) {
         e.preventDefault();
@@ -621,7 +575,6 @@ document.addEventListener("DOMContentLoaded", () => {
       fetch(form.action, { method: "POST", body: new FormData(form) })
         .then(() => showToast(productName + " has been added to your cart"));
     });
-
     form.querySelector(".increase").addEventListener("click", () => {
       let qty = parseInt(qtyDisplay.innerText);
       qty++;
@@ -637,37 +590,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-
-  // Size button selection logic - updated for robustness
-  document.querySelectorAll(".size-buttons").forEach(container => {
-    const sizeInput = container.querySelector(".selected-size-input");
-    const productId = container.dataset.productId;
-    const priceDisplay = document.getElementById("price-display-" + productId);
-
-    container.querySelectorAll(".size-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        // Remove active from all buttons
-        container.querySelectorAll(".size-btn").forEach(b => b.classList.remove("active"));
-        // Add active to clicked button
-        btn.classList.add("active");
-
-        // Update hidden input with selected size
-        if (sizeInput) {
-          sizeInput.value = btn.dataset.size;
-        }
-
-        // Update price display with formatted price
-        if (priceDisplay) {
-          const priceStr = btn.dataset.price;
-          const priceNum = parseFloat(priceStr);
-          if (!isNaN(priceNum)) {
-            priceDisplay.textContent = "₹" + priceNum.toLocaleString("en-IN");
-          }
-        }
-      });
-    });
-  });
-
   // Toast display function
   function showToast(message) {
     let toast = document.getElementById("cart-toast");
@@ -677,7 +599,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => toast.classList.remove("show"), 2500);
   }
 });
-
 </script>
 
 
