@@ -166,6 +166,84 @@ nav ul li a.active {
   }
 }
 
+ /* Add to Cart container */
+  .add-to-cart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Buttons design */
+  .btn-add {
+    background: #d4af37;
+    color: #000;
+    border-radius: 6px;
+    padding: 10px 24px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.6);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+    border: none;
+    letter-spacing: 1px;
+  }
+  .btn-add:hover {
+    background-color: #b8860b;
+  }
+
+  .add-to-cart-form {
+    display: flex;
+  }
+
+  .btn-confirm {
+    background: #10b981;
+    color: white;
+    border-radius: 6px;
+    border: none;
+    padding: 10px 18px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.6);
+    transition: background-color 0.3s ease;
+  }
+  .btn-confirm:hover {
+    background-color: #059669;
+  }
+
+  .qty-btn {
+    background: transparent;
+    border: 2px solid #b88e2f;
+    color: #b88e2f;
+    font-size: 1.5rem;
+    font-weight: 700;
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    line-height: 30px;
+    text-align: center;
+    padding: 0;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  .qty-btn:hover {
+    background-color: #b88e2f;
+    color: #fff;
+  }
+
+  /* Number input overrides for better dark style */
+  .add-to-cart-form input[type=number]::-webkit-inner-spin-button,
+  .add-to-cart-form input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .add-to-cart-form input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+
 /* Product Card */
 .product-link {
   display: flex;
@@ -519,11 +597,9 @@ footer {
         <div class="add-to-cart-container" id="cart-container-{{ product.id }}">
           <button type="button" class="btn btn-add" onclick="toggleCartOptions('{{ product.id }}')">Add to Cart</button>
 
-
-          <form method="POST" action="{{ url_for('add_to_cart') }}" class="add-to-cart-form" id="cart-form-{{ product.id }}" style="display:none; margin-top:8px;">
+          <form method="POST" action="{{ url_for('add_to_cart') }}" class="add-to-cart-form" id="cart-form-{{ product.id }}" style="display:none; margin-top:8px; align-items:center; gap:6px;">
             <input type="hidden" name="product_id" value="{{ product.id }}">
-            
-            <!-- Size Selector: optional, default to 'small' here -->
+            <!-- Size Selector (default to 'small') -->
             <input type="hidden" name="size" value="small">
 
             <label for="quantity-{{ product.id }}" style="font-size: 0.9rem; color: #ddd; margin-right:6px;">Qty:</label>
@@ -551,6 +627,7 @@ footer {
     }
   }
 </script>
+
 
 
 
