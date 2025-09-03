@@ -3,161 +3,207 @@
 <head>
   <meta charset="UTF-8" />
   <title>{{ product.name }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background: #121212;
-      color: #f4e7c1;
-      margin: 0; padding: 20px;
-      display: flex; justify-content: center; align-items: center; min-height: 100vh;
+      background: #f7f7fa;
+      margin: 0; padding: 0;
+      font-family: 'Inter', Arial, sans-serif;
+      color: #222;
+      min-height: 100vh;
     }
-    .product-detail {
-      background: #1a1a1a;
-      border-radius: 12px;
-      max-width: 600px;
-      width: 100%;
-      padding: 24px;
-      box-shadow: 0 5px 15px rgba(212,175,55,0.3);
-      text-align: center;
+    .container {
+      max-width: 1150px; margin: 40px auto 20px auto; background: #fff; border-radius: 18px;
+      box-shadow: 0 2px 16px rgba(146, 118, 44, 0.07); display: flex; gap: 40px; padding: 32px 40px;
+      flex-wrap: wrap;
     }
-    .detail-img {
-      width: 100%;
-      height: auto;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      object-fit: cover;
+    .gallery-col {
+      flex: 1.2; min-width: 320px;
     }
-    h1 {
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      margin-bottom: 12px;
+    .main-image {
+      width: 100%; border-radius: 14px; object-fit: cover; box-shadow: 0 0 10px #ebecd1;
+      aspect-ratio: 1.3/1; background: #efefef; margin-bottom: 18px;
     }
-    p {
-      color: #aaa;
-      font-size: 1rem;
-      line-height: 1.4;
-      margin-bottom: 24px;
+    .thumb-list {
+      display: flex; gap: 10px; overflow-x: auto; margin-bottom: 8px;
     }
-    .price {
-      margin-bottom: 20px;
-      font-size: 1.2rem;
+    .thumb-list img {
+      width: 65px; height: 65px; object-fit: cover; border-radius: 7px; cursor: pointer; border: 2px solid #e5e5e5;
+      transition: border 0.2s;
     }
-    .old-price {
-      color: #666;
-      text-decoration: line-through;
-      margin-right: 12px;
-      font-weight: 400;
+    .thumb-list img.selected, .thumb-list img:hover {
+      border: 2px solid #b88e2f;
     }
-    .new-price {
-      color: #d4af37;
-      font-weight: 700;
-      font-size: 1.4rem;
+
+    .info-col {
+      flex: 1.4; min-width: 310px; display: flex; flex-direction: column; justify-content: center;
     }
-    /* Size buttons */
-    .size-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 24px;
+    .product-title {
+      font-family: 'Cinzel', serif; font-size: 2.1rem; font-weight: 700; margin-bottom: 13px; color: #2d2d2d;
     }
+    .price-range {
+      font-size: 1.27rem; margin-bottom: 9px;
+      font-weight: 700; color: #b88e2f;
+    }
+    .old-price { color: #aaa; text-decoration: line-through; font-weight: 400; margin-right: 8px; }
+    .features-list {
+      color: #5a5a5a; font-size: 1rem; line-height: 1.7; margin: 22px 0 12px 0;
+      padding-left: 18px;
+    }
+    .features-list li { margin-bottom: 7px; }
+    .size-label {
+      font-size: 1.05rem; color: #525252; margin-bottom: 7px; font-weight: 600;
+    }
+    .size-buttons { display: flex; gap: 11px; margin-bottom: 17px; }
     .size-btn {
-      background: #222;
-      border: 2px solid #d4af37;
-      border-radius: 8px;
-      color: #f4e7c1;
-      font-weight: 600;
-      padding: 10px 16px;
-      cursor: pointer;
-      font-size: 1rem;
-      user-select: none;
-      transition: background 0.25s, color 0.25s;
-      flex: 1;
-      max-width: 120px;
+      background: #fff; border: 2px solid #b88e2f; border-radius: 7px;
+      color: #b88e2f; font-weight: 600; padding: 7px 21px; cursor: pointer;
+      font-size: 1rem; outline: none; transition: background 0.18s, color 0.18s;
     }
-    .size-btn.active,
-    .size-btn:hover {
-      background: #d4af37;
-      color: #121212;
-      border-color: #b8860b;
+    .size-btn.active, .size-btn:focus {
+      background: #b88e2f; color: #fff; border: 2px solid #7a631b;
     }
-    /* Add to Cart button */
-    .btn-secondary {
-      background: #d4af37;
-      color: #121212;
-      border: none;
-      padding: 14px 32px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: background 0.3s;
+    /* Quantity & Cart */
+    .purchase-row { display: flex; align-items: center; gap: 14px; margin-bottom: 24px;}
+    .quantity-box { display: flex; border: 1.6px solid #ece0c8; border-radius: 6px; align-items: center; }
+    .quantity-btn {
+      border: none; background: transparent; font-size: 1.3rem; padding: 5px 10px;
+      color: #b88e2f; font-weight: bold; cursor: pointer;
     }
-    .btn-secondary:hover {
-      background: #b8860b;
+    .quantity-display { min-width: 25px; text-align: center; font-size: 1.02rem; font-weight: 600; color: #222; }
+
+    .btn-atc {
+      background: #ffceb2; color: #fff; font-weight: 700;
+      border: none; border-radius: 7px; padding: 11px 32px; font-size: 1.08rem; cursor: pointer;
+      transition: background .19s;
+      letter-spacing: 1px;
+    }
+    .btn-atc:hover, .btn-atc:focus { background: #b88e2f; color: #fff; }
+    /* Description section */
+    .desc-section {
+      margin: 30px auto 10px auto;
+      max-width: 880px;
+      background: #fffbea; border-radius: 15px; padding: 18px 26px 24px 26px;
+      box-shadow: 0 2px 10px rgba(184,142,47,0.06); 
+    }
+    .desc-title {
+      font-size: 1.18rem; font-weight: bold; border-bottom: 2.5px solid #e19f39;
+      color: #333; margin-bottom: 6px; padding-bottom: 4px;
+      letter-spacing: 1px;
+    }
+    .desc-content { color: #4d4d4d; font-size: 1rem; line-height: 1.7; margin-top: 10px;}
+
+    @media (max-width: 900px) {
+      .container { flex-direction: column; gap: 22px; padding: 20px 4vw; }
+      .gallery-col, .info-col { min-width: 180px; }
+      .desc-section { margin: 27px 2vw 8px 2vw; }
+    }
+    @media (max-width: 540px) {
+      .container { padding: 9px 1.2vw 1.2vw 1.2vw; }
+      .desc-section { padding: 11px 7px 14px 11px; }
+      .main-image { min-height: 180px; }
     }
   </style>
 </head>
 <body>
-  <div class="product-detail">
-    <img src="{{ product.imgs[0] }}" alt="{{ product.name }}" class="detail-img" />
-    <h1>{{ product.name }}</h1>
-    <p>{{ product.desc }}</p>
-
-    <div class="price">
-      <span class="old-price" id="old-price">{{ product.old if product.old else '' }}</span>
-      <span class="new-price" id="price-display">₹{{ product.price_medium }}</span>
+  <div class="container">
+    <div class="gallery-col">
+      <img src="{{ product.imgs[0] }}" id="mainImage" alt="{{ product.name }}" class="main-image">
+      <div class="thumb-list" id="thumbs">
+        {% for img in product.imgs %}
+          <img src="{{ img }}" class="{% if loop.index0 == 0 %}selected{% endif %}" data-idx="{{ loop.index0 }}" alt="">
+        {% endfor %}
+      </div>
     </div>
+    <div class="info-col">
+      <div class="product-title">{{ product.name }}</div>
+      <div class="price-range">
+        <span id="priceRange">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
+      </div>
+      {# Uncomment if you want to show old price for a size only #}
+      {# <span class="old-price" id="oldPrice"></span> #}
 
-    <div class="size-buttons" id="size-buttons">
-      <button class="size-btn" data-size="small" data-price="{{ product.price_small|replace('₹','')|replace(',','') }}">Small<br>₹{{ product.price_small }}</button>
-      <button class="size-btn active" data-size="medium" data-price="{{ product.price_medium|replace('₹','')|replace(',','') }}">Medium<br>₹{{ product.price_medium }}</button>
-      <button class="size-btn" data-size="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">Large<br>₹{{ product.price_large }}</button>
+      <div class="size-label">Size</div>
+      <div class="size-buttons" id="sizeButtons">
+        <button class="size-btn" data-size="small" data-price="{{ product.price_small|replace('₹','')|replace(',','') }}">Small</button>
+        <button class="size-btn active" data-size="medium" data-price="{{ product.price_medium|replace('₹','')|replace(',','') }}">Medium</button>
+        <button class="size-btn" data-size="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">Large</button>
+      </div>
+
+      <form method="POST" action="{{ url_for('add_to_cart') }}" style="margin-bottom:0;">
+        <div class="purchase-row">
+          <div class="quantity-box">
+            <button type="button" class="quantity-btn" id="decreaseQty">-</button>
+            <span class="quantity-display" id="qtyDisplay">1</span>
+            <button type="button" class="quantity-btn" id="increaseQty">+</button>
+          </div>
+          <input type="hidden" name="quantity" id="qtyInput" value="1">
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+          <input type="hidden" name="size" id="selectedSize" value="medium">
+          <button type="submit" class="btn-atc">ADD TO CART</button>
+        </div>
+      </form>
+      <ul class="features-list">
+        {% for bullet in product.features if product.features %}
+          <li>{{ bullet }}</li>
+        {% endfor %}
+        {# Example static features below (remove if dynamically provided) #}
+        {% if not product.features %}
+          <li>Please Refer to 2nd Image For Size Guideline</li>
+          <li>Contains Mounting Hardware and Power Adapter.</li>
+          <li>Made with Laser-Cut MDF wood with led light at back to spread the light all over.</li>
+          <li>Wrapped with bubble wrap and packed in card board box for reaching you safely.</li>
+          <li>Easy to Clean, Just Wipe Off with Wet Cloth.</li>
+          <li>A Perfect Wall hanging for living room, bedroom, kitchen, Office, Hotel, dining room, office, bar etc. Due to different Viewing Screens, actual wall art colors may be slightly different from the product image.</li>
+        {% endif %}
+      </ul>
     </div>
-
-    <form method="POST" action="{{ url_for('add_to_cart') }}">
-      <input type="hidden" name="product_id" value="{{ product.id }}" />
-      <input type="hidden" name="size" value="medium" id="selected-size" />
-      <input type="hidden" name="quantity" value="1" />
-      <button type="submit" class="btn-secondary">Add to Cart</button>
-    </form>
   </div>
-
+  <div class="desc-section">
+    <div class="desc-title">Description</div>
+    <div class="desc-content">
+      {{ product.desc_long if product.desc_long else "No additional description." }}
+    </div>
+  </div>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const sizeButtons = document.getElementById('size-buttons');
-      const sizeBtns = sizeButtons.querySelectorAll('.size-btn');
-      const selectedSizeInput = document.getElementById('selected-size');
-      const priceDisplay = document.getElementById('price-display');
-      const oldPriceDisplay = document.getElementById('old-price');
+    // Image gallery switching
+    document.querySelectorAll('#thumbs img').forEach(img => {
+      img.addEventListener('click', function() {
+        document.getElementById('mainImage').src = this.src;
+        document.querySelectorAll('#thumbs img').forEach(i => i.classList.remove('selected'));
+        this.classList.add('selected');
+      });
+    });
 
-      sizeButtons.addEventListener('click', (e) => {
-        if (e.target.classList.contains('size-btn')) {
-          // Remove active class from all buttons
-          sizeBtns.forEach(btn => btn.classList.remove('active'));
-
-          // Add active class to clicked button
-          e.target.classList.add('active');
-
-          // Update hidden input value
-          selectedSizeInput.value = e.target.dataset.size;
-
-          // Update price display with formatted price
-          const priceStr = e.target.dataset.price;
-          const priceNum = parseFloat(priceStr);
-          if (!isNaN(priceNum)) {
-            priceDisplay.textContent = '₹' + priceNum.toLocaleString('en-IN');
-          }
-          
-          // Optionally update or hide old price if needed
-          if (oldPriceDisplay && oldPriceDisplay.textContent.trim() === '') {
-            oldPriceDisplay.style.display = 'none';
-          } else {
-            oldPriceDisplay.style.display = 'inline';
-          }
+    // Size selection and price update
+    const sizeButtons = document.querySelectorAll('.size-btn');
+    const priceRange = document.getElementById('priceRange');
+    const selectedSizeInput = document.getElementById('selectedSize');
+    sizeButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        sizeButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        selectedSizeInput.value = this.dataset.size;
+        // Update displayed price to selected size (not price range)
+        const priceValue = parseFloat(this.dataset.price);
+        if (!isNaN(priceValue)) {
+          priceRange.textContent = "₹" + priceValue.toLocaleString('en-IN');
         }
       });
     });
+
+    // Quantity control
+    let qty = 1;
+    const qtyDisplay = document.getElementById('qtyDisplay');
+    const qtyInput = document.getElementById('qtyInput');
+    document.getElementById('increaseQty').onclick = () => {
+      qty++; if (qty > 10) qty = 10;
+      qtyDisplay.textContent = qty; qtyInput.value = qty;
+    };
+    document.getElementById('decreaseQty').onclick = () => {
+      qty--; if (qty < 1) qty = 1;
+      qtyDisplay.textContent = qty; qtyInput.value = qty;
+    };
   </script>
 </body>
 </html>
