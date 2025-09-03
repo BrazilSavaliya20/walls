@@ -213,7 +213,7 @@
       <thead>
         <tr>
           <th>Product</th>
-          <th>Image</th>
+
           <th>Qty</th>
           <th>Price</th>
           <th>Subtotal</th>
@@ -223,9 +223,6 @@
         {% for item in order_items %}
         <tr>
           <td>{{ item.name }}</td>
-          <td>
-  <img src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy" />
-</td>
 
           <td>{{ item.quantity }}</td>
           <td>₹{{ item.price }}</td>
