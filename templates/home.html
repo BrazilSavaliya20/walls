@@ -499,7 +499,7 @@ footer {
   <h2>Featured Creations</h2>
   <div class="product-grid ultra-luxury-grid">
     {% for product in products %}
-    <a href="{{ url_for('product_page', product_id=product.id) }}" class="product-link" title="{{ product.name }}">
+    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="product-link" title="{{ product.name }}">
       <div class="product-image-wrapper">
         <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
         {% if product.old and (product.old|float) != 0 %}
