@@ -223,7 +223,7 @@
         {% for item in order_items %}
         <tr>
           <td>{{ item.name }}</td>
-          <td><img src="{{ url_for('static', filename='images/' ~ item.img) }}" alt="{{ item.name }}" loading="lazy" /></td>
+          <td><img src="{{ item.imgs[0] }}" alt="{{ item.name }}" loading="lazy" /></td>
           <td>{{ item.quantity }}</td>
           <td>₹{{ item.price }}</td>
           <td>₹{{ item.subtotal }}</td>
