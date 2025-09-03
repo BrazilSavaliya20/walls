@@ -111,64 +111,58 @@
       <img src="{{ product.imgs[0] }}" id="mainImage" alt="{{ product.name }}" class="main-image">
       <div class="thumb-list" id="thumbs">
         {% for img in product.imgs %}
-          <img src="{{ img }}" class="{% if loop.index0 == 0 %}selected{% endif %}" data-idx="{{ loop.index0 }}" alt="">
+          <img src="{{ img }}" class="{% if loop.index0 == 0 %}selected{% endif %}" data-idx="{{ loop.index0 }}" alt="Product image" />
         {% endfor %}
       </div>
     </div>
     <div class="info-col">
       <div class="product-title">{{ product.name }}</div>
-      <div class="price-range">
-        <span id="priceRange">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
+      <div class="price-range" id="priceDisplay">
+        ₹{{ product.price_small }} – ₹{{ product.price_large }}
       </div>
-      {# Uncomment if you want to show old price for a size only #}
-      {# <span class="old-price" id="oldPrice"></span> #}
 
       <div class="size-label">Size</div>
       <div class="size-buttons" id="sizeButtons">
-        <button class="size-btn" data-size="small" data-price="{{ product.price_small|replace('₹','')|replace(',','') }}">Small</button>
-        <button class="size-btn active" data-size="medium" data-price="{{ product.price_medium|replace('₹','')|replace(',','') }}">Medium</button>
-        <button class="size-btn" data-size="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">Large</button>
+        <button type="button" class="size-btn" data-size="small" data-price="{{ product.price_small|replace('₹','')|replace(',','') }}">Small</button>
+        <button type="button" class="size-btn active" data-size="medium" data-price="{{ product.price_medium|replace('₹','')|replace(',','') }}">Medium</button>
+        <button type="button" class="size-btn" data-size="large" data-price="{{ product.price_large|replace('₹','')|replace(',','') }}">Large</button>
       </div>
 
-      <form method="POST" action="{{ url_for('add_to_cart') }}" style="margin-bottom:0;">
+      <form method="POST" action="{{ url_for('add_to_cart') }}">
         <div class="purchase-row">
           <div class="quantity-box">
             <button type="button" class="quantity-btn" id="decreaseQty">-</button>
             <span class="quantity-display" id="qtyDisplay">1</span>
             <button type="button" class="quantity-btn" id="increaseQty">+</button>
           </div>
-          <input type="hidden" name="quantity" id="qtyInput" value="1">
-          <input type="hidden" name="product_id" value="{{ product.id }}">
-          <input type="hidden" name="size" id="selectedSize" value="medium">
+          <input type="hidden" name="quantity" id="qtyInput" value="1" />
+          <input type="hidden" name="product_id" value="{{ product.id }}" />
+          <input type="hidden" name="size" id="selectedSize" value="medium" />
           <button type="submit" class="btn-atc">ADD TO CART</button>
         </div>
       </form>
+
       <ul class="features-list">
-        {% for bullet in product.features if product.features %}
-          <li>{{ bullet }}</li>
-        {% endfor %}
-        {# Example static features below (remove if dynamically provided) #}
-        {% if not product.features %}
-          <li>Please Refer to 2nd Image For Size Guideline</li>
-          <li>Contains Mounting Hardware and Power Adapter.</li>
-          <li>Made with Laser-Cut MDF wood with led light at back to spread the light all over.</li>
-          <li>Wrapped with bubble wrap and packed in card board box for reaching you safely.</li>
-          <li>Easy to Clean, Just Wipe Off with Wet Cloth.</li>
-          <li>A Perfect Wall hanging for living room, bedroom, kitchen, Office, Hotel, dining room, office, bar etc. Due to different Viewing Screens, actual wall art colors may be slightly different from the product image.</li>
+        {% if product.features %}
+          {% for feature in product.features %}
+            <li>{{ feature }}</li>
+          {% endfor %}
+        {% else %}
+          <li>No product features listed.</li>
         {% endif %}
       </ul>
     </div>
   </div>
+
   <div class="desc-section">
     <div class="desc-title">Description</div>
-    <div class="desc-content">
-      {{ product.desc_long if product.desc_long else "No additional description." }}
-    </div>
+    <div class="desc-content">{{ product.desc_long if product.desc_long else product.desc }}</div>
   </div>
+
   <script>
-    // Image gallery switching
+    // Image thumbnail click switch main image
     document.querySelectorAll('#thumbs img').forEach(img => {
-      img.addEventListener('click', function() {
+      img.addEventListener('click', function () {
         document.getElementById('mainImage').src = this.src;
         document.querySelectorAll('#thumbs img').forEach(i => i.classList.remove('selected'));
         this.classList.add('selected');
@@ -177,32 +171,39 @@
 
     // Size selection and price update
     const sizeButtons = document.querySelectorAll('.size-btn');
-    const priceRange = document.getElementById('priceRange');
+    const priceDisplay = document.getElementById('priceDisplay');
     const selectedSizeInput = document.getElementById('selectedSize');
     sizeButtons.forEach(btn => {
-      btn.addEventListener('click', function() {
+      btn.addEventListener('click', function () {
         sizeButtons.forEach(b => b.classList.remove('active'));
         this.classList.add('active');
         selectedSizeInput.value = this.dataset.size;
-        // Update displayed price to selected size (not price range)
+
+        // Update price display
         const priceValue = parseFloat(this.dataset.price);
         if (!isNaN(priceValue)) {
-          priceRange.textContent = "₹" + priceValue.toLocaleString('en-IN');
+          priceDisplay.textContent = "₹" + priceValue.toLocaleString('en-IN');
         }
       });
     });
 
-    // Quantity control
+    // Quantity controls
     let qty = 1;
     const qtyDisplay = document.getElementById('qtyDisplay');
     const qtyInput = document.getElementById('qtyInput');
     document.getElementById('increaseQty').onclick = () => {
-      qty++; if (qty > 10) qty = 10;
-      qtyDisplay.textContent = qty; qtyInput.value = qty;
+      if (qty < 10) {
+        qty++;
+        qtyDisplay.textContent = qty;
+        qtyInput.value = qty;
+      }
     };
     document.getElementById('decreaseQty').onclick = () => {
-      qty--; if (qty < 1) qty = 1;
-      qtyDisplay.textContent = qty; qtyInput.value = qty;
+      if (qty > 1) {
+        qty--;
+        qtyDisplay.textContent = qty;
+        qtyInput.value = qty;
+      }
     };
   </script>
 </body>
