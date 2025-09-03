@@ -167,16 +167,24 @@ nav ul li a.active {
 }
 
 /* Product Card */
-.ultra-luxury-product-card {
-  background: #1a1a1a;
-  border-radius: 8px;
-  padding: 6px;
+.product-link {
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 6px;
   min-height: 270px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: filter 0.3s ease;
+}
+.product-link:hover .product-image-wrapper,
+.product-link:hover .product-name {
+  filter: brightness(1.1);
 }
 
 /* Product Image */
@@ -248,50 +256,6 @@ nav ul li a.active {
   font-size: 0.9rem;
 }
 
-/* Buttons */
-.cart-form { width: 100%; display: flex; flex-direction: column; gap: 6px; }
-.btn-secondary {
-  background: #2a2a2a;
-  color: #f4e7c1;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-.btn-secondary:hover {
-  background: #d4af37;
-  color: #000;
-}
-/* Quantity Control */
-.quantity-control {
-  display: none;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-.quantity-control button {
-  background: #555;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  padding: 4px 12px;
-  cursor: pointer;
-}
-.quantity-control button:hover {
-  background: #b8860b;
-  color: #222;
-}
-.quantity-display {
-  min-width: 30px;
-  text-align: center;
-  font-weight: bold;
-  color: #f4e7c1;
-}
 /* Toast Popup */
 .cart-toast {
   position: fixed;
@@ -321,6 +285,7 @@ nav ul li a.active {
   font-weight: bold;
 }
 .go-cart-btn:hover { background: #b8860b; }
+
 
 
 /* ========== About Section ========== */
@@ -534,7 +499,7 @@ footer {
   <h2>Featured Creations</h2>
   <div class="product-grid ultra-luxury-grid">
     {% for product in products %}
-    <div class="product-card ultra-luxury-product-card">
+    <a href="{{ url_for('product_page', product_id=product.id) }}" class="product-link" title="{{ product.name }}">
       <div class="product-image-wrapper">
         <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
         {% if product.old and (product.old|float) != 0 %}
@@ -546,69 +511,23 @@ footer {
       <div class="product-info">
         <h3 class="product-name">{{ product.name }}</h3>
         <p class="description">{{ product.desc }}</p>
-        <!-- Price Range -->
         <div class="price">
-          <span class="new-price">
-            ₹{{ product.price_small }} – ₹{{ product.price_large }}
-          </span>
+          <span class="new-price">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
         </div>
-        <form method="POST" action="{{ url_for('add_to_cart') }}" class="cart-form">
-          <input type="hidden" name="product_id" value="{{ product.id }}">
-          <input type="hidden" name="quantity" value="1" class="quantity-field">
-          <!-- No size input selection -->
-          <div class="quantity-control" style="display:none;">
-            <button type="button" class="decrease">-</button>
-            <span class="quantity-display">1</span>
-            <button type="button" class="increase">+</button>
-          </div>
-          <button type="submit" class="btn-secondary add-to-cart-btn">Add to Cart</button>
-        </form>
       </div>
-    </div>
+    </a>
     {% endfor %}
   </div>
 </section>
+
 <!-- Toast Popup -->
 <div id="cart-toast" class="cart-toast">
   <span id="toast-message"></span>
   <a href="{{ url_for('cart') }}" class="go-cart-btn">Go to Cart</a>
 </div>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // Cart form quantity controls & add button
-  document.querySelectorAll(".cart-form").forEach(form => {
-    let addBtn = form.querySelector(".add-to-cart-btn");
-    let qtyControl = form.querySelector(".quantity-control");
-    let qtyDisplay = form.querySelector(".quantity-display");
-    let qtyField = form.querySelector(".quantity-field");
-    let productName = form.closest(".product-card").querySelector(".product-name").innerText;
-    let opened = false;
-    addBtn.addEventListener("click", (e) => {
-      if (!opened) {
-        e.preventDefault();
-        qtyControl.style.display = "flex";
-        opened = true;
-        return;
-      }
-      e.preventDefault();
-      fetch(form.action, { method: "POST", body: new FormData(form) })
-        .then(() => showToast(productName + " has been added to your cart"));
-    });
-    form.querySelector(".increase").addEventListener("click", () => {
-      let qty = parseInt(qtyDisplay.innerText);
-      qty++;
-      qtyDisplay.innerText = qty;
-      qtyField.value = qty;
-    });
-    form.querySelector(".decrease").addEventListener("click", () => {
-      let qty = parseInt(qtyDisplay.innerText);
-      if (qty > 1) {
-        qty--;
-        qtyDisplay.innerText = qty;
-        qtyField.value = qty;
-      }
-    });
-  });
   // Toast display function
   function showToast(message) {
     let toast = document.getElementById("cart-toast");
@@ -619,6 +538,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
+
 
 
 

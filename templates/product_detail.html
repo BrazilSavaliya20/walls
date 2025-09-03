@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ product.name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="product-detail">
+    <img src="{{ product.imgs[0] }}" alt="{{ product.name }}" class="detail-img">
+    <h1>{{ product.name }}</h1>
+    <p>{{ product.desc }}</p>
+    <div class="price">
+      <span class="old-price">₹{{ product.old }}</span>
+      <span class="new-price">₹{{ product.new }}</span>
+    </div>
+    <form method="POST" action="{{ url_for('add_to_cart') }}">
+      <input type="hidden" name="product_id" value="{{ product.id }}">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" class="btn-secondary">Add to Cart</button>
+    </form>
+  </div>
+</body>
+</html>

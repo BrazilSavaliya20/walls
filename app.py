@@ -2,7 +2,7 @@ import os
 import json
 import logging
 from typing import List, Dict, Any, Tuple
-from flask import Flask, render_template, request, session, flash, redirect, url_for
+from flask import Flask, render_template, request, session, flash, redirect, url_for, abort
 from datetime import datetime
 from dotenv import load_dotenv
 import firebase_admin
@@ -13,11 +13,9 @@ import requests
 # Load environment variables
 # ---------------------------------------------------------------------
 load_dotenv()
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PRIVATE_DIR = os.path.join(BASE_DIR, "private")
 os.makedirs(PRIVATE_DIR, exist_ok=True)
-
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "public", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -26,13 +24,13 @@ app.secret_key = os.environ.get("SECRET_KEY", "8141@#Kaswala")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 products_file = os.path.join(PRIVATE_DIR, "products.json")
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("wallcraft")
 
 # ---------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------
-
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 def allowed_file(filename: str) -> bool:
@@ -56,7 +54,6 @@ def money_to_int(val: str) -> int:
 # ---------------------------------------------------------------------
 # Firebase Initialization
 # ---------------------------------------------------------------------
-
 def init_firestore():
     firebase_key_json = os.environ.get("FIREBASE_KEY")
     if not firebase_key_json:
@@ -65,7 +62,6 @@ def init_firestore():
         firebase_key_dict = json.loads(firebase_key_json)
     except Exception as e:
         raise Exception(f"FIREBASE_KEY is not a valid JSON string: {e}")
-
     if not firebase_admin._apps:
         cred = credentials.Certificate(firebase_key_dict)
         firebase_admin.initialize_app(cred)
@@ -81,7 +77,6 @@ except Exception as e:
 # ---------------------------------------------------------------------
 # ImgBB Upload
 # ---------------------------------------------------------------------
-
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac846")
 
 def upload_to_imgbb(file) -> str | None:
@@ -112,7 +107,6 @@ def upload_to_imgbb(file) -> str | None:
 # ---------------------------------------------------------------------
 # Product Data
 # ---------------------------------------------------------------------
-
 def save_products(data: List[Dict[str, Any]]) -> None:
     """Saves product list as JSON file."""
     try:
@@ -134,7 +128,7 @@ def load_products() -> List[Dict[str, Any]]:
     products_seed = [
         {
             "id": 1,
-            "imgs": ["https://i.ibb.co/DfdkKCgk/about2-jpg.jpg"],  # replace this URL with actual hosted image URL
+            "imgs": ["https://i.ibb.co/DfdkKCgk/about2-jpg.jpg"],  # Replace this URL with actual hosted image URL
             "name": "Golden Glow Panel",
             "desc": "Handcrafted golden-accent Wall Craft panel.",
             "price_small": "₹9,999",
@@ -183,8 +177,6 @@ products = load_products()
 def inject_request():
     return dict(request=request)
 
-from datetime import datetime
-
 @app.context_processor
 def inject_now():
     return {'now': datetime.utcnow}
@@ -226,17 +218,14 @@ def process_contact():
     if db is None:
         flash("⚠️ Firestore is not initialized.", "danger")
         return redirect(url_for("contact"))
-
     name = request.form.get("name")
     email = request.form.get("email")
     mobile = request.form.get("mobile")
     address = request.form.get("address")
     message = request.form.get("message")
-
     if not name or not email or not mobile:
         flash("⚠️ Please fill in all required fields.")
         return redirect(url_for("contact"))
-
     try:
         db.collection("contacts").add({
             "name": name,
@@ -257,6 +246,13 @@ def process_contact():
 def shop():
     return render_template("shop.html", products=products)
 
+@app.route("/product/<int:product_id>")
+def product_detail(product_id):
+    product = next((p for p in products if p["id"] == product_id), None)
+    if not product:
+        abort(404)
+    return render_template("product_detail.html", product=product)
+
 @app.route("/cart")
 def cart():
     cart_data = session.get("cart", {})
@@ -268,13 +264,11 @@ def add_to_cart():
     pid = str(request.form.get("product_id"))
     size = request.form.get("size", "small")
     quantity = int(request.form.get("quantity", 1))
-
     cart_data = session.get("cart", {})
     key = f"{pid}:{size}"
     if key not in cart_data:
         cart_data[key] = {"qty": 0}
     cart_data[key]["qty"] += quantity
-
     session["cart"] = cart_data
     return ("", 204)
 
@@ -283,10 +277,8 @@ def update_cart():
     pid = str(request.form.get("product_id"))
     size = request.form.get("size", "small")
     action = request.form.get("action")
-
     key = f"{pid}:{size}"
     cart_data = session.get("cart", {})
-
     if key in cart_data:
         if action == "increase":
             cart_data[key]["qty"] += 1
@@ -294,7 +286,6 @@ def update_cart():
             cart_data[key]["qty"] = max(1, cart_data[key]["qty"] - 1)
         elif action == "remove":
             cart_data.pop(key, None)
-
     session["cart"] = cart_data
     return redirect(url_for("cart"))
 
@@ -304,7 +295,6 @@ def checkout():
     if not cart_data:
         flash("Your cart is empty. Please add items before checkout.", "warning")
         return redirect(url_for("shop"))
-
     cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("checkout.html", cart_items=cart_items, total=total)
 
@@ -317,6 +307,7 @@ def process_order():
             return redirect(url_for("shop"))
 
         logger.info(f"Processing order with cart: {cart_data}")
+
         order_data = {
             "name": request.form.get("name"),
             "mobile": request.form.get("mobile"),
@@ -326,21 +317,18 @@ def process_order():
             "total": 0,
             "timestamp": datetime.utcnow(),
         }
-        logger.info(f"Order form data: {order_data}")
 
         for key, data in cart_data.items():
             parts = key.split(":")
             if len(parts) != 2:
                 logger.error(f"Invalid cart item key format: {key}")
                 continue
-
             pid, size = parts
             qty = data.get("qty", 0)
             product = next((p for p in products if p["id"] == int(pid)), None)
             if not product:
                 logger.warning(f"Product with ID {pid} not found in products list.")
                 continue
-
             price = money_to_int(product.get(f"price_{size}", "0"))
             subtotal = price * qty
             order_data["total"] += subtotal
@@ -365,7 +353,6 @@ def process_order():
         session.pop("cart", None)
         flash("Order placed successfully!")
         return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
-
     except Exception as e:
         logger.error(f"Exception in process_order: {e}", exc_info=True)
         flash("Failed to process your order. Please try again.", "danger")
@@ -376,15 +363,12 @@ def submit_review():
     if db is None:
         flash("⚠️ Firestore is not initialized.", "danger")
         return redirect(url_for("home"))
-
     name = request.form.get("name")
     review = request.form.get("review")
     rating = request.form.get("rating")
-
     if not name or not review or not rating:
         flash("⚠️ Please provide name, review, and rating.", "warning")
         return redirect(request.referrer or url_for("home"))
-
     try:
         db.collection("reviews").add({
             "customer_name": name,
@@ -401,18 +385,15 @@ def submit_review():
 # ---------------------------------------------------------------------
 # Admin Panel
 # ---------------------------------------------------------------------
-
 @app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
     global products
     if request.method == "POST":
         action = request.form.get("action")
-
         if action == "add":
             files = request.files.getlist("img_file")
             img_urls = [upload_to_imgbb(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
-
             new_id = max([p["id"] for p in products], default=0) + 1
             products.append({
                 "id": new_id,
@@ -426,44 +407,36 @@ def secret_admin():
             save_products(products)
             products = load_products()  # Reload after save
             flash("Product added successfully.", "success")
-
         elif action == "update":
             pid = int(request.form.get("id"))
             product = next((p for p in products if p["id"] == pid), None)
             if not product:
                 flash("Product not found.", "danger")
                 return redirect(url_for("secret_admin"))
-
             product["name"] = request.form.get("name")
             product["desc"] = request.form.get("desc")
             product["price_small"] = request.form.get("price_small")
             product["price_medium"] = request.form.get("price_medium")
             product["price_large"] = request.form.get("price_large")
-
             files = request.files.getlist("img_file")
             img_urls = [upload_to_imgbb(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
             if img_urls:
                 product["imgs"] = img_urls
-
             save_products(products)
             products = load_products()  # Reload after save
             flash("Product updated successfully.", "success")
-
         elif action == "delete":
             pid = int(request.form.get("id"))
             products = [p for p in products if p["id"] != pid]
             save_products(products)
             products = load_products()  # Reload after save
             flash("Product deleted successfully.", "success")
-
         return redirect(url_for("secret_admin"))
-
     return render_template("admin_panel.html", products=products)
 
 # ---------------------------------------------------------------------
 # Run App
 # ---------------------------------------------------------------------
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
