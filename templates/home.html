@@ -384,51 +384,73 @@ nav ul li a.active {
   transition: filter 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Enhanced mobile product cards */
-@media (max-width: 480px) {
+/* Increase product image size on smaller devices */
+@media (max-width: 768px) {
   .product-link {
-    padding: 12px;
-    min-height: 350px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    min-height: auto; /* allow height to adjust */
+  }
+  .product-link .product-info {
+    padding: 12px 10px;
+  }
+  .product-link .product-name {
+    font-size: 1.3rem;
+  }
+  .product-link .product-info .price {
+    font-size: 1.1rem;
+  }
+  .product-link .product-info .btn-add {
+    font-size: 1.2rem;
+    padding: 14px 32px;
+  }
+  .product-link .product-info .add-to-cart-container {
+    width: 100%;
+  }
+
+  .product-link .product-info .qty-btn {
+    font-size: 2rem;
+    width: 48px;
+    height: 48px;
+  }
+  .product-link .product-info .qty-btn:hover {
+    background-color: #d4af37;
+  }
+  
+  .product-link .product-info .add-to-cart-form input[type="number"] {
+    width: 64px;
+    font-size: 1.3rem;
+  }
+
+  /* Enlarge product image */
+  .product-link .product-image-wrapper {
+    aspect-ratio: 1 / 1;  /* more square and bigger */
+    max-width: 320px;
+    margin: 0 auto; /* center */
   }
 }
 
-.product-link:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 8px 20px rgba(212,175,55,0.45);
-}
-
-.product-link:hover .product-image-wrapper,
-.product-link:hover .product-name {
-  filter: brightness(1.2);
-}
-
-/* ========== LARGER PRODUCT IMAGES ========== */
-.product-image-wrapper {
-  width: 100%;
-  aspect-ratio: 1 / 1.3;
-  background: #222;
-  border-radius: 8px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
-}
-
-/* MUCH LARGER images on mobile */
+/* For very small screens */
 @media (max-width: 480px) {
-  .product-image-wrapper {
-    aspect-ratio: 1 / 1.4; /* Even taller aspect ratio */
-    border-radius: 12px;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
-    margin-bottom: 8px;
+  .product-link .product-image-wrapper {
+    max-width: 100%;
   }
-}
 
-.product-image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  .product-link .product-name {
+    font-size: 1.5rem;
+  }
+
+  .product-link .product-info .price {
+    font-size: 1.2rem;
+  }
+
+  .product-link .product-info .btn-add {
+    font-size: 1.3rem;
+    padding: 16px 40px;
+    width: 100%;
+  }
+
+  .product-link {
+    padding: 16px 12px;
+  }
 }
 
 /* Enhanced discount badge */
