@@ -5,9 +5,9 @@ from typing import List, Dict, Any, Tuple
 from flask import Flask, render_template, request, session, flash, redirect, url_for, abort
 from datetime import datetime
 from dotenv import load_dotenv
+import requests
 import firebase_admin
 from firebase_admin import credentials, firestore
-import requests
 
 # ---------------------------------------------------------------------
 # Load environment variables
@@ -22,7 +22,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app = Flask(__name__, static_folder="public", static_url_path="/static")
 app.secret_key = os.environ.get("SECRET_KEY", "8141@#Kaswala")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 products_file = os.path.join(PRIVATE_DIR, "products.json")
 
 logging.basicConfig(level=logging.INFO)
@@ -34,14 +33,9 @@ logger = logging.getLogger("wallcraft")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 def allowed_file(filename: str) -> bool:
-    """Check if the filename has an allowed extension."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def money_to_int(val: str) -> int:
-    """
-    Converts a money string like '₹9,999' to integer 9999.
-    Handles empty or invalid strings gracefully returning 0.
-    """
     if not val:
         return 0
     try:
@@ -75,21 +69,18 @@ except Exception as e:
     logger.error(f"Firestore initialization failed: {e}")
 
 # ---------------------------------------------------------------------
-# ImgBB Upload
+# ImgBB Upload (Permanent Img URLs)
 # ---------------------------------------------------------------------
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac846")
 
 def upload_to_imgbb(file) -> str | None:
-    """
-    Uploads a file object to ImgBB and returns the hosted image direct URL.
-    Returns None if upload fails.
-    """
+    """Uploads a file object to ImgBB and returns the hosted image direct URL (permanent)."""
     try:
         response = requests.post(
             "https://api.imgbb.com/1/upload",
-            params={"key": IMGBB_API_KEY},
+            params={"key": IMGBB_API_KEY},  # DO NOT SET expiration PARAM!
             files={"image": (file.filename, file.stream, file.content_type)},
-            timeout=30  # Timeout for network robustness
+            timeout=30
         )
         result = response.json()
         if response.status_code == 200 and result.get("success"):
@@ -108,7 +99,6 @@ def upload_to_imgbb(file) -> str | None:
 # Product Data
 # ---------------------------------------------------------------------
 def save_products(data: List[Dict[str, Any]]) -> None:
-    """Saves product list as JSON file."""
     try:
         with open(products_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
@@ -116,7 +106,6 @@ def save_products(data: List[Dict[str, Any]]) -> None:
         logger.error(f"Failed to write products file: {e}")
 
 def load_products() -> List[Dict[str, Any]]:
-    """Loads the product list from JSON file or returns a seed product list."""
     if os.path.exists(products_file):
         try:
             with open(products_file, "r", encoding="utf-8") as f:
@@ -124,11 +113,11 @@ def load_products() -> List[Dict[str, Any]]:
         except Exception as e:
             logger.error(f"Failed to read products file: {e}")
 
-    # Seed product with hosted image URL (replace with your hosted image URL)
+    # Seed product
     products_seed = [
         {
             "id": 1,
-            "imgs": ["https://i.ibb.co/DfdkKCgk/about2-jpg.jpg"],  # Replace this URL with actual hosted image URL
+            "imgs": ["https://i.ibb.co/DfdkKCgk/about2-jpg.jpg"],
             "name": "Golden Glow Panel",
             "desc": "Handcrafted golden-accent Wall Craft panel.",
             "price_small": "₹9,999",
@@ -140,7 +129,6 @@ def load_products() -> List[Dict[str, Any]]:
     return products_seed
 
 def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
-    """Calculates cart items details and total cost."""
     items = []
     total = 0
     for key, data in cart.items():
@@ -260,7 +248,7 @@ def cart():
     cart_items, total = get_cart_items_and_total(cart_data, products)
     return render_template("cart.html", cart_items=cart_items, total=total)
 
-from flask import request, redirect, url_for, session
+from flask import session
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
@@ -275,10 +263,7 @@ def add_to_cart():
     cart_data[key]["qty"] += quantity
     session['cart'] = cart_data
 
-    # Redirect user to the cart page after adding
     return redirect(url_for('cart'))
-
-
 
 @app.route("/update-cart", methods=["POST"])
 def update_cart():
@@ -398,13 +383,11 @@ def secret_admin():
     global products
     if request.method == "POST":
         action = request.form.get("action")
-
         if action == "add":
             files = request.files.getlist("img_file")
             img_urls = [upload_to_imgbb(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
 
-            # Process features - split by commas, strip whitespace
             features = request.form.get("features", "")
             features_list = [f.strip() for f in features.split(",") if f.strip()]
 
@@ -421,7 +404,7 @@ def secret_admin():
             })
 
             save_products(products)
-            products = load_products()  # Reload after save
+            products = load_products()
             flash("Product added successfully.", "success")
 
         elif action == "update":
@@ -437,7 +420,6 @@ def secret_admin():
             product["price_medium"] = request.form.get("price_medium")
             product["price_large"] = request.form.get("price_large")
 
-            # Features - split and save as list
             features = request.form.get("features", "")
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
 
@@ -446,23 +428,21 @@ def secret_admin():
             img_urls = [u for u in img_urls if u]
 
             if img_urls:
-                # Ensure imgs is a list, even if currently stored as a string
                 if isinstance(product.get("imgs"), str):
                     product["imgs"] = [product["imgs"]]
                 elif product.get("imgs") is None:
                     product["imgs"] = []
-                # Append new uploaded images
                 product["imgs"].extend(img_urls)
 
             save_products(products)
-            products = load_products()  # Reload after save
+            products = load_products()
             flash("Product updated successfully.", "success")
 
         elif action == "delete":
             pid = int(request.form.get("id"))
             products = [p for p in products if p["id"] != pid]
             save_products(products)
-            products = load_products()  # Reload after save
+            products = load_products()
             flash("Product deleted successfully.", "success")
 
         elif action == "remove_image":
@@ -500,12 +480,8 @@ def secret_admin():
                     flash("Failed to upload replacement image.", "danger")
             else:
                 flash("No replacement image selected.", "warning")
-
         return redirect(url_for("secret_admin"))
-
     return render_template("admin_panel.html", products=products)
-
-
 
 # ---------------------------------------------------------------------
 # Run App
