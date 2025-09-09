@@ -573,34 +573,29 @@ footer {
 </script>
 
 <!-- Featured Products Section -->
-<!-- Featured Products Section -->
 <section class="featured ultra-luxury-featured">
   <h2>Featured Creations</h2>
   <div class="product-grid ultra-luxury-grid">
     {% for product in products %}
-    <div class="product-link" title="{{ product.name }}">
-      <a href="{{ url_for('product_detail', product_id=product.id) }}" class="product-image-wrapper">
-        <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
-        {% if product.old and (product.old|float) != 0 %}
-        <div class="discount-badge">
-          -{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%
+    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="product-link" title="{{ product.name }}" style="text-decoration:none;">
+      <div>
+        <div class="product-image-wrapper">
+          <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
+          {% if product.old and (product.old|float) != 0 %}
+          <div class="discount-badge">
+            -{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%
+          </div>
+          {% endif %}
         </div>
-        {% endif %}
-      </a>
-      <div class="product-info">
-        <h3 class="product-name">{{ product.name }}</h3>
-        <div class="price">
-          <span class="new-price">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
+        <div class="product-info">
+          <h3 class="product-name">{{ product.name }}</h3>
+          <div class="price">
+            <span class="new-price">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
+          </div>
+          <button type="button" class="btn btn-add" style="pointer-events:none;opacity:0.84;">Add to Cart</button>
         </div>
-        <!-- Add to Cart Button -->
-        <form method="POST" action="{{ url_for('add_to_cart') }}" style="margin-top:12px;">
-          <input type="hidden" name="product_id" value="{{ product.id }}">
-          <input type="hidden" name="quantity" value="1">
-          <input type="hidden" name="size" value="small">
-          <button type="submit" class="btn btn-add">Add to Cart</button>
-        </form>
       </div>
-    </div>
+    </a>
     {% endfor %}
   </div>
 </section>
