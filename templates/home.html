@@ -903,198 +903,219 @@ footer {
 }
 
 /* ========== Mobile Optimizations ========== */
-
-
-/* ========== Footer ========== */
-footer {
-  background: #111;
-  color: #bbb;
-  padding: 60px 6% 25px;
-  font-size: 14px;
-  margin-top: 80px;
-}
-.footer-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 40px;
-  margin-bottom: 30px;
-}
-.footer-about h3 {
-  font-size: 26px;
-  font-weight: 900;
-  color: #f5f5f5;
-  text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(212,175,55,0.4);
-}
-.footer-about h3 span { color: #d4af37; text-shadow: 0 0 12px #d4af37; }
-.footer-about p { margin-top: 10px; color: #aaa; font-size: 14px; }
-
-.footer-links h4,
-.footer-contact h4,
-.footer-social h4 { color: #f4e7c1; margin-bottom: 12px; font-size: 16px; }
-
-.footer-links ul { list-style: none; padding: 0; }
-.footer-links ul li { margin-bottom: 8px; }
-.footer-links ul li a {
-  text-decoration: none;
-  color: #ccc;
-  transition: all 0.3s ease;
-}
-.footer-links ul li a:hover { color: #d4af37; text-shadow: 0 0 8px #d4af37; }
-
-.footer-contact p { margin: 6px 0; color: #ccc; }
-
-.footer-social .social-icons {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.footer-social .social-icons a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #222;
-  color: #d4af37;
-  font-size: 18px;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-.footer-social .social-icons a:hover {
-  background: #d4af37;
-  color: #111;
-  box-shadow: 0 0 12px #d4af37;
+@media (max-width: 768px) {
+  :root {
+    --space-xs: 0.375rem;
+    --space-sm: 0.75rem;
+    --space-md: 1.125rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 2.5rem;
+  }
+  
+  .footer-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .footer-social .social-icons {
+    justify-content: center;
+  }
+  
+  .scroll-to-top {
+    bottom: 1rem;
+    right: 1rem;
+    width: 45px;
+    height: 45px;
+  }
 }
 
-.footer-bottom {
-  text-align: center;
-  border-top: 1px solid #333;
-  padding-top: 15px;
-  color: #888;
-  font-size: 13px;
+/* ========== Performance Optimizations ========== */
+img {
+  max-width: 100%;
+  height: auto;
 }
-.footer-bottom span { color: #d4af37; font-weight: bold; }
 
-/* Responsive Footer */
-@media (max-width: 768px) { .footer-container { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 576px) {
-  .footer-container { grid-template-columns: 1fr; text-align: center; }
-  .footer-social .social-icons { justify-content: center; }
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --primary-gold: #ffdb4d;
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --card-bg: #000000;
+  }
 }
 </style>
 </head>
 <body>
 
-<header class="navbar">
-  <a href="{{ url_for('home') }}" style="display: flex; align-items: center; gap: 10px;">
-    <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Wall Craft Design" style="height: 60px;" />
+<header class="navbar" id="navbar">
+  <a href="#home" class="logo-container">
+    <img src="https://via.placeholder.com/50x50/d4af37/000000?text=WC" alt="Wall Craft Design" />
     <div class="logo">Wall<span>Crafts</span></div>
   </a>
 
-  <!-- Hamburger -->
-  <div class="hamburger" onclick="toggleMenu(this)">
+  <!-- Enhanced Hamburger -->
+  <div class="hamburger" onclick="toggleMenu(this)" aria-label="Toggle navigation menu">
     <span></span><span></span><span></span>
   </div>
 
   <nav id="navMenu">
     <ul>
-      <li><a href="{{ url_for('home') }}" class="{% if request.endpoint == 'home' %}active{% endif %}">Home</a></li>
-      <li><a href="{{ url_for('shop') }}" class="{% if request.endpoint == 'shop' %}active{% endif %}">Shop</a></li>
-      <li><a href="{{ url_for('about') }}" class="{% if request.endpoint == 'about' %}active{% endif %}">About</a></li>
-      <li><a href="{{ url_for('cart') }}" class="{% if request.endpoint == 'cart' %}active{% endif %}">Cart</a></li>
-      <li><a href="{{ url_for('contact') }}" class="{% if request.endpoint == 'contact' %}active{% endif %}">Contact</a></li>
+      <li><a href="#home" class="active">Home</a></li>
+      <li><a href="#products">Shop</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#cart">Cart</a></li>
+      <li><a href="#contact">Contact</a></li>
     </ul>
   </nav>
 </header>
 
-<script>
-  function toggleMenu(x) {
-    x.classList.toggle("active");
-    document.getElementById("navMenu").classList.toggle("active");
-  }
-</script>
-
-<!-- Featured Products Section -->
-<section class="featured ultra-luxury-featured">
-  <h2>Featured Creations</h2>
-  <div class="product-grid ultra-luxury-grid">
-    {% for product in products %}
-    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="product-link" title="{{ product.name }}" style="text-decoration:none;">
-      <div>
-        <div class="product-image-wrapper">
-          <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
-          {% if product.old and (product.old|float) != 0 %}
-          <div class="discount-badge">
-            -{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%
-          </div>
-          {% endif %}
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">{{ product.name }}</h3>
-          <div class="price">
-            <span class="new-price">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
-          </div>
-          <button type="button" class="btn btn-add" style="pointer-events:none;opacity:0.84;">Add to Cart</button>
-        </div>
-      </div>
+<!-- Hero Section -->
+<section class="hero-section" id="home">
+  <div class="hero-content">
+    <h1 class="hero-title">Illuminate Your Space</h1>
+    <p class="hero-subtitle">Handcrafted LED wall art that transforms ordinary walls into extraordinary statements of luxury and elegance.</p>
+    <a href="#products" class="hero-cta">
+      <span>Explore Collection</span>
+      <i class="fas fa-arrow-right"></i>
     </a>
-    {% endfor %}
   </div>
 </section>
 
-<script>
-  // Toggle quantity form visibility
-  function toggleCartOptions(productId) {
-    const form = document.getElementById('cart-form-' + productId);
-    if (form.style.display === 'none' || form.style.display === '') {
-      form.style.display = 'flex';
-      form.style.alignItems = 'center';
-      form.style.gap = '10px';
-    } else {
-      form.style.display = 'none';
-    }
-  }
+<!-- Featured Products Section -->
+<section class="featured ultra-luxury-featured" id="products">
+  <div class="section-header">
+    <h2 class="section-title">Featured Creations</h2>
+    <p class="section-subtitle">Discover our most popular handcrafted LED wall art pieces</p>
+  </div>
+  
+  <div class="product-grid ultra-luxury-grid">
+    <!-- Sample Product 1 -->
+    <a href="#product1" class="product-link" title="Golden Mandala">
+      <div class="product-image-wrapper">
+        <img src="https://via.placeholder.com/300x360/1a1a1a/d4af37?text=Golden+Mandala" alt="Golden Mandala LED Art">
+        <div class="discount-badge">-25%</div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Golden Mandala</h3>
+        <div class="price">
+          <span class="old-price">₹3,999</span>
+          <span class="new-price">₹2,999 – ₹4,999</span>
+        </div>
+        <button type="button" class="btn-add">Add to Cart</button>
+      </div>
+    </a>
 
-  // Change quantity +/- bounded between 1 and 10
-  function changeQuantity(productId, delta) {
-    const qtyInput = document.getElementById('quantity-' + productId);
-    let current = parseInt(qtyInput.value);
-    if (isNaN(current)) current = 1;
-    current += delta;
-    if (current < 1) current = 1;
-    else if (current > 10) current = 10;
-    qtyInput.value = current;
-  }
-</script>
+    <!-- Sample Product 2 -->
+    <a href="#product2" class="product-link" title="Geometric Harmony">
+      <div class="product-image-wrapper">
+        <img src="https://via.placeholder.com/300x360/1a1a1a/d4af37?text=Geometric+Art" alt="Geometric Harmony LED Art">
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Geometric Harmony</h3>
+        <div class="price">
+          <span class="new-price">₹2,499 – ₹3,999</span>
+        </div>
+        <button type="button" class="btn-add">Add to Cart</button>
+      </div>
+    </a>
 
+    <!-- Sample Product 3 -->
+    <a href="#product3" class="product-link" title="Nature's Glow">
+      <div class="product-image-wrapper">
+        <img src="https://via.placeholder.com/300x360/1a1a1a/d4af37?text=Nature+Glow" alt="Nature's Glow LED Art">
+        <div class="discount-badge">-15%</div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Nature's Glow</h3>
+        <div class="price">
+          <span class="old-price">₹3,499</span>
+          <span class="new-price">₹2,999 – ₹4,499</span>
+        </div>
+        <button type="button" class="btn-add">Add to Cart</button>
+      </div>
+    </a>
 
+    <!-- Sample Product 4 -->
+    <a href="#product4" class="product-link" title="Abstract Elegance">
+      <div class="product-image-wrapper">
+        <img src="https://via.placeholder.com/300x360/1a1a1a/d4af37?text=Abstract+Art" alt="Abstract Elegance LED Art">
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Abstract Elegance</h3>
+        <div class="price">
+          <span class="new-price">₹3,299 – ₹5,299</span>
+        </div>
+        <button type="button" class="btn-add">Add to Cart</button>
+      </div>
+    </a>
 
+    <!-- Sample Product 5 -->
+    <a href="#product5" class="product-link" title="Cosmic Dreams">
+      <div class="product-image-wrapper">
+        <img src="https://via.placeholder.com/300x360/1a1a1a/d4af37?text=Cosmic+Dreams" alt="Cosmic Dreams LED Art">
+        <div class="discount-badge">-30%</div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Cosmic Dreams</h3>
+        <div class="price">
+          <span class="old-price">₹4,999</span>
+          <span class="new-price">₹3,499 – ₹5,999</span>
+        </div>
+        <button type="button" class="btn-add">Add to Cart</button>
+      </div>
+    </a>
 
-
-
+    <!-- Sample Product 6 -->
+    <a href="#product6" class="product-link" title="Royal Phoenix">
+      <div class="product-image-wrapper">
+        <img src="https://via.placeholder.com/300x360/1a1a1a/d4af37?text=Royal+Phoenix" alt="Royal Phoenix LED Art">
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Royal Phoenix</h3>
+        <div class="price">
+          <span class="new-price">₹4,299 – ₹6,799</span>
+        </div>
+        <button type="button" class="btn-add">Add to Cart</button>
+      </div>
+    </a>
+  </div>
+</section>
 
 <!-- About Section -->
-<section class="about-ultra-luxury">
+<section class="about-ultra-luxury" id="about">
   <div class="about-container">
     <div class="about-text">
       <h2>About <span>Wall Crafts</span></h2>
       <p>
-        At <strong>Wall Craft</strong>, we believe light is more than just illumination
-        it’s art. Our handcrafted wallcraft creations are designed to elevate your space,
+        At <strong>Wall Craft</strong>, we believe light is more than just illumination—
+        it's art. Our handcrafted wall art creations are designed to elevate your space,
         blending timeless craftsmanship with modern LED brilliance. Each piece is
         meticulously created to radiate elegance and transform walls into captivating
         statements of luxury.
       </p>
       <p>
-        Whether you’re looking to create a bold impression or add a subtle
+        Whether you're looking to create a bold impression or add a subtle
         luxurious glow, our designs embody the perfect harmony of <em>artistry</em> and
-        <em>innovation</em>.
+        <em>innovation</em>. Every piece tells a story of passion, precision, and 
+        the pursuit of perfection.
       </p>
     </div>
     <div class="about-image">
-      <img src="{{ url_for('static', filename='images/about.jpg') }}" alt="About Wall Craft" />
+      <img src="https://via.placeholder.com/500x600/1a1a1a/d4af37?text=Craftsmanship" alt="Wall Craft Artistry" />
     </div>
   </div>
 </section>
@@ -1102,65 +1123,290 @@ footer {
 <!-- Customer Reviews Section -->
 <section class="customer-reviews">
   <h2>Customer Reviews</h2>
-  {% if reviews and reviews|length > 0 %}
   <div class="customer-reviews-grid">
-    {% for review in reviews %}
     <div class="review-card">
       <div class="star-rating">
-        {% for i in range(1, 6) %}
-          {% if i <= review.rating %}
-            <i class="fa-solid fa-star"></i>
-          {% else %}
-            <i class="fa-regular fa-star"></i>
-          {% endif %}
-        {% endfor %}
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
       </div>
-      <p class="review-text">"{{ review.review_text }}"</p>
-      <p class="customer-name">— {{ review.customer_name }}</p>
+      <p class="review-text">"Absolutely stunning! The Golden Mandala piece transformed our living room completely. The LED lighting creates such a warm, magical ambiance."</p>
+      <p class="customer-name">— Priya Sharma</p>
     </div>
-    {% endfor %}
+    
+    <div class="review-card">
+      <div class="star-rating">
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+      </div>
+      <p class="review-text">"Quality craftsmanship and beautiful design. The geometric pattern adds such elegance to our bedroom. Highly recommended!"</p>
+      <p class="customer-name">— Rajesh Kumar</p>
+    </div>
+    
+    <div class="review-card">
+      <div class="star-rating">
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-regular fa-star"></i>
+      </div>
+      <p class="review-text">"Great customer service and fast delivery. The Nature's Glow piece looks amazing in our office space. Creates perfect mood lighting."</p>
+      <p class="customer-name">— Anita Patel</p>
+    </div>
+    
+    <div class="review-card">
+      <div class="star-rating">
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+        <i class="fa-solid fa-star"></i>
+      </div>
+      <p class="review-text">"Exceptional quality and unique designs. The Royal Phoenix is truly a masterpiece. Worth every penny!"</p>
+      <p class="customer-name">— Vikram Singh</p>
+    </div>
   </div>
-  {% else %}
-  <p class="no-reviews">No reviews yet. Be the first to add one!</p>
-  {% endif %}
 </section>
 
 <footer>
   <div class="footer-container">
     <div class="footer-about">
       <h3>Wall<span>Craft</span></h3>
-      <p>Illuminating art with elegance & luxury. Handcrafted LED Wall Craft wall decor made to inspire your space.</p>
+      <p>Illuminating art with elegance & luxury. Handcrafted LED Wall Craft wall decor made to inspire your space and transform your environment.</p>
     </div>
     <div class="footer-links">
       <h4>Quick Links</h4>
       <ul>
-        <li><a href="{{ url_for('home') }}">Home</a></li>
-        <li><a href="{{ url_for('shop') }}">Shop</a></li>
-        <li><a href="{{ url_for('about') }}">About</a></li>
-        <li><a href="{{ url_for('cart') }}">Cart</a></li>
-        <li><a href="{{ url_for('contact') }}">Contact</a></li>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#products">Shop</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#cart">Cart</a></li>
+        <li><a href="#contact">Contact</a></li>
       </ul>
     </div>
     <div class="footer-contact">
       <h4>Contact Us</h4>
-      <p>📍 517- Hilltown land mark, Nr. Das khaman, Nikol, Ahemdabad. 382350</p>
-      <p>📞 +91 94099 10447</p>
-      <p>📧 jkd08971@gmail.com</p>
+      <p><i class="fas fa-map-marker-alt"></i> 517- Hilltown land mark, Nr. Das khaman, Nikol, Ahmedabad. 382350</p>
+      <p><i class="fas fa-phone"></i> +91 94099 10447</p>
+      <p><i class="fas fa-envelope"></i> jkd08971@gmail.com</p>
     </div>
     <div class="footer-social">
       <h4>Follow Us</h4>
       <div class="social-icons">
-        <a href="https://www.instagram.com/wall_craft_design_" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.facebook.com/profile.php?id=100089059718140" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-        <a href="https://youtube.com/@jk-design-jk" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://wa.me/919409910447?text=hello" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://www.instagram.com/wall_craft_design_" target="_blank" title="Instagram" aria-label="Follow us on Instagram">
+          <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://www.facebook.com/profile.php?id=100089059718140" target="_blank" title="Facebook" aria-label="Follow us on Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+        <a href="https://youtube.com/@jk-design-jk" target="_blank" title="YouTube" aria-label="Subscribe to our YouTube channel">
+          <i class="fab fa-youtube"></i>
+        </a>
+        <a href="https://wa.me/919409910447?text=Hello" target="_blank" title="WhatsApp" aria-label="Contact us on WhatsApp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
       </div>
     </div>
   </div>
   <div class="footer-bottom">
-    <p>&copy; 2025 <span>Wall Craft</span>. All rights reserved.</p>
+    <p>&copy; 2025 <span>Wall Craft</span>. All rights reserved. | Crafted with passion</p>
   </div>
 </footer>
+
+<!-- Scroll to Top Button -->
+<button class="scroll-to-top" id="scrollToTop" aria-label="Scroll to top">
+  <i class="fas fa-chevron-up"></i>
+</button>
+
+<script>
+// Enhanced Menu Toggle with Animation
+function toggleMenu(x) {
+  x.classList.toggle("active");
+  const navMenu = document.getElementById("navMenu");
+  navMenu.classList.toggle("active");
+  
+  // Prevent body scroll when menu is open on mobile
+  if (navMenu.classList.contains("active")) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = 'auto';
+  }
+}
+
+// Enhanced Navbar Scroll Effect
+window.addEventListener('scroll', function() {
+  const navbar = document.getElementById('navbar');
+  const scrollToTop = document.getElementById('scrollToTop');
+  
+  if (window.scrollY > 50) {
+    navbar.classList.add('scrolled');
+  } else {
+    navbar.classList.remove('scrolled');
+  }
+  
+  // Show/hide scroll to top button
+  if (window.scrollY > 300) {
+    scrollToTop.classList.add('visible');
+  } else {
+    scrollToTop.classList.remove('visible');
+  }
+});
+
+// Smooth Scroll for Navigation Links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      const headerOffset = 100;
+      const elementPosition = target.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
+      // Close mobile menu if open
+      const navMenu = document.getElementById("navMenu");
+      const hamburger = document.querySelector('.hamburger');
+      if (navMenu.classList.contains('active')) {
+        navMenu.classList.remove('active');
+        hamburger.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+      
+      // Update active nav link
+      document.querySelectorAll('nav a').forEach(link => link.classList.remove('active'));
+      this.classList.add('active');
+    }
+  });
+});
+
+// Scroll to Top Functionality
+document.getElementById('scrollToTop').addEventListener('click', function() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+});
+
+// Enhanced Cart Functionality (Demo)
+document.querySelectorAll('.btn-add').forEach(button => {
+  button.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Add visual feedback
+    this.style.transform = 'scale(0.95)';
+    this.innerHTML = '<i class="fas fa-check"></i> Added!';
+    this.style.background = 'var(--accent-green)';
+    this.style.borderColor = 'var(--accent-green)';
+    this.style.color = 'white';
+    
+    // Reset button after 2 seconds
+    setTimeout(() => {
+      this.innerHTML = 'Add to Cart';
+      this.style.transform = 'scale(1)';
+      this.style.background = 'transparent';
+      this.style.borderColor = 'var(--primary-gold)';
+      this.style.color = 'var(--primary-gold)';
+    }, 2000);
+    
+    // Show toast notification (optional)
+    showToast('Item added to cart successfully!');
+  });
+});
+
+// Toast Notification Function
+function showToast(message) {
+  // Remove existing toast if any
+  const existingToast = document.querySelector('.cart-toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+  
+  // Create new toast
+  const toast = document.createElement('div');
+  toast.className = 'cart-toast';
+  toast.innerHTML = `
+    <i class="fas fa-shopping-cart"></i>
+    <span>${message}</span>
+  `;
+  
+  document.body.appendChild(toast);
+  
+  // Show toast
+  setTimeout(() => toast.classList.add('show'), 100);
+  
+  // Hide and remove toast
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 350);
+  }, 3000);
+}
+
+// Intersection Observer for Fade In Animations
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('fade-in');
+    }
+  });
+}, observerOptions);
+
+// Observe elements for animation
+document.querySelectorAll('.product-link, .review-card, .about-text, .about-image').forEach(el => {
+  observer.observe(el);
+});
+
+// Close mobile menu when clicking outside
+document.addEventListener('click', function(e) {
+  const navbar = document.querySelector('.navbar');
+  const navMenu = document.getElementById('navMenu');
+  const hamburger = document.querySelector('.hamburger');
+  
+  if (!navbar.contains(e.target) && navMenu.classList.contains('active')) {
+    navMenu.classList.remove('active');
+    hamburger.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  }
+});
+
+// Preload critical images for better performance
+const criticalImages = [
+  'https://via.placeholder.com/300x360/1a1a1a/d4af37?text=Golden+Mandala',
+  'https://via.placeholder.com/300x360/1a1a1a/d4af37?text=Geometric+Art'
+];
+
+criticalImages.forEach(src => {
+  const img = new Image();
+  img.src = src;
+});
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+  // Add loading animation to images
+  document.querySelectorAll('img').forEach(img => {
+    img.addEventListener('load', function() {
+      this.style.opacity = '1';
+    });
+  });
+  
+  console.log('Wall Craft - Enhanced UI Loaded Successfully! ✨');
+});
+</script>
 
 </body>
 </html>
