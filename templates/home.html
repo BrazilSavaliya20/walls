@@ -573,6 +573,7 @@ footer {
 </script>
 
 <!-- Featured Products Section -->
+<!-- Featured Products Section -->
 <section class="featured ultra-luxury-featured">
   <h2>Featured Creations</h2>
   <div class="product-grid ultra-luxury-grid">
@@ -588,36 +589,16 @@ footer {
       </a>
       <div class="product-info">
         <h3 class="product-name">{{ product.name }}</h3>
-        <p class="description">{{ product.desc }}</p>
         <div class="price">
           <span class="new-price">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
         </div>
-
-        <!-- Add to Cart Container -->
-        <div class="add-to-cart-container" id="cart-container-{{ product.id }}" style="margin-top: 12px;">
-
-          <!-- Initial Add to Cart Button -->
-          <button type="button" class="btn btn-add" onclick="toggleCartOptions('{{ product.id }}')">
-            Add to Cart
-          </button>
-
-          <!-- Quantity and Confirm Add Form - hidden initially -->
-          <form method="POST" action="{{ url_for('add_to_cart') }}" class="add-to-cart-form" 
-                id="cart-form-{{ product.id }}" style="display:none; margin-top:10px; justify-content:center; align-items: center; gap: 10px;">
-            <input type="hidden" name="product_id" value="{{ product.id }}">
-            <input type="hidden" name="size" value="small">
-
-            <button type="button" class="qty-btn" onclick="changeQuantity('{{ product.id }}', -1)">–</button>
-
-            <input type="number" id="quantity-{{ product.id }}" name="quantity" value="1" min="1" max="10" 
-                   style="width: 48px; text-align:center; font-size: 1rem; border-radius: 5px; border: 2px solid #b88e2f; color: #fff; background: transparent;">
-
-            <button type="button" class="qty-btn" onclick="changeQuantity('{{ product.id }}', 1)">+</button>
-
-            <button type="submit" class="btn btn-confirm">Add</button>
-          </form>
-        </div>
-
+        <!-- Add to Cart Button -->
+        <form method="POST" action="{{ url_for('add_to_cart') }}" style="margin-top:12px;">
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+          <input type="hidden" name="quantity" value="1">
+          <input type="hidden" name="size" value="small">
+          <button type="submit" class="btn btn-add">Add to Cart</button>
+        </form>
       </div>
     </div>
     {% endfor %}
