@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import requests
 import firebase_admin
 from firebase_admin import credentials, firestore
+import razorpay
 
 # ---------------------------------------------------------------------
 # Load environment variables
@@ -28,12 +29,21 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("wallcraft")
 
 # ---------------------------------------------------------------------
+# Razorpay configuration
+# ---------------------------------------------------------------------
+RAZORPAY_KEY_ID = "rzp_test_RGHzf24TfjfbAy"
+RAZORPAY_KEY_SECRET = "xPSpg6R2zzdWf85Pn5gGfOyQ"
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+
+# ---------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
+
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def money_to_int(val: str) -> int:
     if not val:
@@ -44,6 +54,7 @@ def money_to_int(val: str) -> int:
     except ValueError:
         logger.warning(f"money_to_int: Cannot convert value '{val}' to int.")
         return 0
+
 
 # ---------------------------------------------------------------------
 # Firebase Initialization
@@ -61,6 +72,7 @@ def init_firestore():
         firebase_admin.initialize_app(cred)
     return firestore.client()
 
+
 db = None
 try:
     db = init_firestore()
@@ -72,12 +84,14 @@ except Exception as e:
 # ImgBB Upload (Permanent Img URLs)
 # ---------------------------------------------------------------------
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac846")
+
+
 def upload_to_imgbb(file) -> str | None:
     """Uploads a file object to ImgBB and returns the hosted image direct URL (permanent)."""
     try:
         response = requests.post(
             "https://api.imgbb.com/1/upload",
-            params={"key": IMGBB_API_KEY},  # DO NOT SET expiration PARAM!
+            params={"key": IMGBB_API_KEY},
             files={"image": (file.filename, file.stream, file.content_type)},
             timeout=30
         )
@@ -94,8 +108,9 @@ def upload_to_imgbb(file) -> str | None:
         app.logger.error(f"ImgBB upload unexpected error: {e}")
         return None
 
+
 # ---------------------------------------------------------------------
-# Product Data – Robust Persistence
+# Product Data – Robust Persistence
 # ---------------------------------------------------------------------
 def save_products(data: List[Dict[str, Any]]) -> None:
     try:
@@ -103,6 +118,7 @@ def save_products(data: List[Dict[str, Any]]) -> None:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.error(f"Failed to write products file: {e}")
+
 
 def load_products() -> List[Dict[str, Any]]:
     if os.path.exists(products_file):
@@ -125,6 +141,7 @@ def load_products() -> List[Dict[str, Any]]:
     ]
     save_products(products_seed)
     return products_seed
+
 
 def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
     items = []
@@ -157,21 +174,23 @@ def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]
             logger.error(f"Error processing cart item {key}: {e}")
     return items, total
 
-# ----------------------------------------------------------------------------
-# Load products at every request (not global) for 100% robust persistence
+
 def get_products():
     return load_products()
+
 
 @app.context_processor
 def inject_request():
     return dict(request=request)
 
+
 @app.context_processor
 def inject_now():
     return {'now': datetime.utcnow}
 
+
 # ---------------------------------------------------------------------
-# Routes (Only home(), shop(), etc. use new get_products())
+# Routes
 # ---------------------------------------------------------------------
 @app.route("/")
 def home():
@@ -190,6 +209,7 @@ def home():
             logger.error(f"Failed to fetch reviews: {e}")
     return render_template("home.html", products=products_list, reviews=reviews_list)
 
+
 @app.route("/about")
 def about():
     return render_template("about.html")
@@ -204,9 +224,11 @@ def cancellation_refund():
 def privacy_policy():
     return render_template("privacy_policy.html")
 
+
 @app.route("/terms-conditions")
 def terms_conditions():
     return render_template("terms_conditions.html")
+
 
 @app.route("/shipping-policy")
 def shipping_policy():
@@ -219,6 +241,7 @@ def contact():
         flash("Thank you for connecting with us! We will get back to you soon.")
         return redirect(url_for("contact"))
     return render_template("contact.html")
+
 
 @app.route("/process_contact", methods=["POST"])
 def process_contact():
@@ -249,9 +272,11 @@ def process_contact():
         flash("⚠️ Failed to send message.", "danger")
         return redirect(url_for("contact"))
 
+
 @app.route("/shop")
 def shop():
     return render_template("shop.html", products=get_products())
+
 
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
@@ -260,11 +285,13 @@ def product_detail(product_id):
         abort(404)
     return render_template("product_detail.html", product=product)
 
+
 @app.route("/cart")
 def cart():
     cart_data = session.get("cart", {})
     cart_items, total = get_cart_items_and_total(cart_data, get_products())
     return render_template("cart.html", cart_items=cart_items, total=total)
+
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
@@ -280,6 +307,7 @@ def add_to_cart():
     session['cart'] = cart_data
 
     return redirect(url_for('cart'))
+
 
 @app.route("/update-cart", methods=["POST"])
 def update_cart():
@@ -299,8 +327,6 @@ def update_cart():
     return redirect(url_for("cart"))
 
 
-
-
 @app.route("/checkout")
 def checkout():
     cart_data = session.get("cart", {})
@@ -308,38 +334,76 @@ def checkout():
         flash("Your cart is empty. Please add items before checkout.", "warning")
         return redirect(url_for("shop"))
     cart_items, total = get_cart_items_and_total(cart_data, get_products())
-    return render_template("checkout.html", cart_items=cart_items, total=total)
+
+    amount_in_paise = total * 100  # Convert INR to paise
+
+    # Create order in Razorpay
+    razorpay_order = razorpay_client.order.create({
+        "amount": amount_in_paise,
+        "currency": "INR",
+        "payment_capture": "1"
+    })
+
+    return render_template("checkout.html",
+                           cart_items=cart_items,
+                           total=total,
+                           razorpay_order_id=razorpay_order['id'],
+                           razorpay_key_id=RAZORPAY_KEY_ID)
+
 
 @app.route("/process_order", methods=["POST"])
 def process_order():
     try:
         cart_data = session.get("cart")
         if not cart_data:
-            flash("Your cart is empty. Please add items before checkout.", "warning")
+            flash("Your cart is empty. Please add items before checkout.")
             return redirect(url_for("shop"))
 
-        logger.info(f"Processing order with cart: {cart_data}")
+        # Razorpay payment details (sent from client after payment)
+        payment_id = request.form.get('razorpay_payment_id')
+        order_id = request.form.get('razorpay_order_id')
+        signature = request.form.get('razorpay_signature')
 
+        if not all([payment_id, order_id, signature]):
+            flash("Payment information missing or invalid.")
+            return redirect(url_for("checkout"))
+
+        # Verify payment signature
+        params_dict = {
+            'razorpay_order_id': order_id,
+            'razorpay_payment_id': payment_id,
+            'razorpay_signature': signature
+        }
+
+        try:
+            razorpay_client.utility.verify_payment_signature(params_dict)
+        except razorpay.errors.SignatureVerificationError:
+            flash("Payment verification failed. Please contact support.")
+            return redirect(url_for("checkout"))
+
+        # Create order data object
         order_data = {
             "name": request.form.get("name"),
             "mobile": request.form.get("mobile"),
             "email": request.form.get("email"),
             "address": request.form.get("address"),
+            "payment_id": payment_id,
+            "order_id": order_id,
+            "signature": signature,
             "items": [],
             "total": 0,
             "timestamp": datetime.utcnow(),
         }
 
+        # Fill order items and total
         for key, data in cart_data.items():
             parts = key.split(":")
             if len(parts) != 2:
-                logger.error(f"Invalid cart item key format: {key}")
                 continue
             pid, size = parts
             qty = data.get("qty", 0)
             product = next((p for p in get_products() if p["id"] == int(pid)), None)
             if not product:
-                logger.warning(f"Product with ID {pid} not found in products list.")
                 continue
             price = money_to_int(product.get(f"price_{size}", "0"))
             subtotal = price * qty
@@ -354,21 +418,23 @@ def process_order():
                 "subtotal": subtotal,
             })
 
+        # Save order in Firestore
         if db:
-            doc_ref = db.collection("orders").add(order_data)
-            logger.info(f"Order saved with Firestore Doc ID: {doc_ref[1].id}")
+            db.collection("orders").add(order_data)
+            logger.info(f"Order saved with Razorpay payment ID {payment_id}")
         else:
-            logger.error("Firestore not initialized. Cannot save order to Firestore.")
-            flash("Order service temporarily unavailable, please try again later.", "danger")
-            return redirect(url_for("checkout"))
+            flash("Payment succeeded but order saving unavailable.")
+            logger.error("Firestore not initialized.")
 
         session.pop("cart", None)
-        flash("Order placed successfully!")
+
         return render_template("order_success.html", order_items=order_data["items"], total=order_data["total"])
+
     except Exception as e:
-        logger.error(f"Exception in process_order: {e}", exc_info=True)
-        flash("Failed to process your order. Please try again.", "danger")
+        logger.error("Exception during order processing", exc_info=True)
+        flash("An error occurred processing your order.")
         return redirect(url_for("checkout"))
+
 
 @app.route("/submit-review", methods=["POST"])
 def submit_review():
