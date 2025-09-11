@@ -194,6 +194,25 @@ def home():
 def about():
     return render_template("about.html")
 
+
+@app.route("/cancellation-refund")
+def cancellation_refund():
+    return render_template("cancellation_refund.html")
+
+
+@app.route("/privacy-policy")
+def privacy_policy():
+    return render_template("privacy_policy.html")
+
+@app.route("/terms-conditions")
+def terms_conditions():
+    return render_template("terms_conditions.html")
+
+@app.route("/shipping-policy")
+def shipping_policy():
+    return render_template("shipping_policy.html")
+
+
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
@@ -278,6 +297,9 @@ def update_cart():
             cart_data.pop(key, None)
     session["cart"] = cart_data
     return redirect(url_for("cart"))
+
+
+
 
 @app.route("/checkout")
 def checkout():
