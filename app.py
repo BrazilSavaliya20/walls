@@ -72,7 +72,6 @@ except Exception as e:
 # ImgBB Upload (Permanent Img URLs)
 # ---------------------------------------------------------------------
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac846")
-
 def upload_to_imgbb(file) -> str | None:
     """Uploads a file object to ImgBB and returns the hosted image direct URL (permanent)."""
     try:
@@ -96,7 +95,7 @@ def upload_to_imgbb(file) -> str | None:
         return None
 
 # ---------------------------------------------------------------------
-# Product Data
+# Product Data – Robust Persistence
 # ---------------------------------------------------------------------
 def save_products(data: List[Dict[str, Any]]) -> None:
     try:
@@ -112,7 +111,6 @@ def load_products() -> List[Dict[str, Any]]:
                 return json.load(f)
         except Exception as e:
             logger.error(f"Failed to read products file: {e}")
-
     # Seed product
     products_seed = [
         {
@@ -159,8 +157,10 @@ def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]
             logger.error(f"Error processing cart item {key}: {e}")
     return items, total
 
-# Load products once at startup
-products = load_products()
+# ----------------------------------------------------------------------------
+# Load products at every request (not global) for 100% robust persistence
+def get_products():
+    return load_products()
 
 @app.context_processor
 def inject_request():
@@ -171,12 +171,11 @@ def inject_now():
     return {'now': datetime.utcnow}
 
 # ---------------------------------------------------------------------
-# Routes
+# Routes (Only home(), shop(), etc. use new get_products())
 # ---------------------------------------------------------------------
-
 @app.route("/")
 def home():
-    products_list = products
+    products_list = get_products()
     reviews_list = []
     if db:
         try:
@@ -233,11 +232,11 @@ def process_contact():
 
 @app.route("/shop")
 def shop():
-    return render_template("shop.html", products=products)
+    return render_template("shop.html", products=get_products())
 
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
-    product = next((p for p in products if p["id"] == product_id), None)
+    product = next((p for p in get_products() if p["id"] == product_id), None)
     if not product:
         abort(404)
     return render_template("product_detail.html", product=product)
@@ -245,10 +244,8 @@ def product_detail(product_id):
 @app.route("/cart")
 def cart():
     cart_data = session.get("cart", {})
-    cart_items, total = get_cart_items_and_total(cart_data, products)
+    cart_items, total = get_cart_items_and_total(cart_data, get_products())
     return render_template("cart.html", cart_items=cart_items, total=total)
-
-from flask import session
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
@@ -288,7 +285,7 @@ def checkout():
     if not cart_data:
         flash("Your cart is empty. Please add items before checkout.", "warning")
         return redirect(url_for("shop"))
-    cart_items, total = get_cart_items_and_total(cart_data, products)
+    cart_items, total = get_cart_items_and_total(cart_data, get_products())
     return render_template("checkout.html", cart_items=cart_items, total=total)
 
 @app.route("/process_order", methods=["POST"])
@@ -318,7 +315,7 @@ def process_order():
                 continue
             pid, size = parts
             qty = data.get("qty", 0)
-            product = next((p for p in products if p["id"] == int(pid)), None)
+            product = next((p for p in get_products() if p["id"] == int(pid)), None)
             if not product:
                 logger.warning(f"Product with ID {pid} not found in products list.")
                 continue
@@ -376,11 +373,12 @@ def submit_review():
     return redirect(url_for("home"))
 
 # ---------------------------------------------------------------------
-# Admin Panel
+# Admin Panel – Always loads and saves immediately for true robustness
 # ---------------------------------------------------------------------
 @app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
-    global products
+    products = load_products()  # Always get latest
+
     if request.method == "POST":
         action = request.form.get("action")
         if action == "add":
@@ -402,10 +400,9 @@ def secret_admin():
                 "price_large": request.form.get("price_large"),
                 "features": features_list,
             })
-
             save_products(products)
-            products = load_products()
             flash("Product added successfully.", "success")
+            return redirect(url_for("secret_admin"))
 
         elif action == "update":
             pid = int(request.form.get("id"))
@@ -427,35 +424,38 @@ def secret_admin():
             img_urls = [upload_to_imgbb(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
 
+            # Defensive list handling for images
+            imgs = product.get("imgs")
+            if imgs is None or isinstance(imgs, str):
+                imgs = [imgs] if imgs else []
             if img_urls:
-                if isinstance(product.get("imgs"), str):
-                    product["imgs"] = [product["imgs"]]
-                elif product.get("imgs") is None:
-                    product["imgs"] = []
-                product["imgs"].extend(img_urls)
+                imgs.extend(img_urls)
+            # Remove accidental Nones and empty strings
+            imgs = [im for im in imgs if im]
+            product["imgs"] = imgs
 
             save_products(products)
-            products = load_products()
             flash("Product updated successfully.", "success")
+            return redirect(url_for("secret_admin"))
 
         elif action == "delete":
             pid = int(request.form.get("id"))
             products = [p for p in products if p["id"] != pid]
             save_products(products)
-            products = load_products()
             flash("Product deleted successfully.", "success")
+            return redirect(url_for("secret_admin"))
 
         elif action == "remove_image":
             pid = int(request.form.get("id"))
             img_url = request.form.get("img_url")
             product = next((p for p in products if p["id"] == pid), None)
             if product and img_url in product.get("imgs", []):
-                product["imgs"].remove(img_url)
+                product["imgs"] = [img for img in product.get("imgs", []) if img != img_url]
                 save_products(products)
-                products = load_products()
                 flash("Image removed successfully.", "success")
             else:
                 flash("Image or product not found.", "danger")
+            return redirect(url_for("secret_admin"))
 
         elif action == "replace_image":
             pid = int(request.form.get("id"))
@@ -468,11 +468,14 @@ def secret_admin():
             if files and files[0] and files[0].filename:
                 new_img_url = upload_to_imgbb(files[0])
                 if new_img_url:
-                    if img_url in product.get("imgs", []):
-                        idx = product["imgs"].index(img_url)
-                        product["imgs"][idx] = new_img_url
+                    imgs = product.get("imgs")
+                    if imgs is None or isinstance(imgs, str):
+                        imgs = [imgs] if imgs else []
+                    if img_url in imgs:
+                        idx = imgs.index(img_url)
+                        imgs[idx] = new_img_url
+                        product["imgs"] = imgs
                         save_products(products)
-                        products = load_products()
                         flash("Image replaced successfully.", "success")
                     else:
                         flash("Original image not found.", "danger")
@@ -480,7 +483,8 @@ def secret_admin():
                     flash("Failed to upload replacement image.", "danger")
             else:
                 flash("No replacement image selected.", "warning")
-        return redirect(url_for("secret_admin"))
+            return redirect(url_for("secret_admin"))
+
     return render_template("admin_panel.html", products=products)
 
 # ---------------------------------------------------------------------

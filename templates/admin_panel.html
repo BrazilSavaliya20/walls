@@ -2,265 +2,729 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Product Management</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f9fafb;
-      color: #333;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #1a202c;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      min-height: 100vh;
     }
-    .admin-section {
-      max-width: 1200px;
-      margin: auto;
+    
+    .admin-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      margin: 20px;
+      padding: 32px;
+      min-height: calc(100vh - 40px);
     }
-    h2, h3 {
-      margin-bottom: 15px;
-      color: #222;
-    }
-    .top-bar {
+    
+    .header {
       display: flex;
-      justify-content: flex-end;
-      margin-bottom: 20px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e2e8f0;
     }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+    
     .btn-home {
-      background: #2563eb;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
       color: white;
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 12px 24px;
+      border-radius: 12px;
       text-decoration: none;
+      font-weight: 600;
       font-size: 14px;
-      transition: 0.3s;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+    
     .btn-home:hover {
-      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
     }
+    
     .flash {
-      background: #fef9c3;
-      border: 1px solid #facc15;
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      font-size: 14px;
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease-out;
     }
+    
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .section-header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #374151;
+      margin: 0;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #4f46e5;
+      margin-bottom: 4px;
+    }
+    
+    .stat-label {
+      color: #6b7280;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .products-container {
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      margin-bottom: 32px;
+    }
+    
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
     table {
       width: 100%;
       border-collapse: collapse;
-      background: #fff;
-      border-radius: 10px;
+      background: white;
+      border-radius: 16px;
       overflow: hidden;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
+    
     table th {
-      background: #f1f5f9;
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
       text-align: left;
       font-weight: 600;
       font-size: 14px;
-      color: #111827;
+      color: #374151;
+      padding: 16px;
+      border-bottom: 2px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-    table th, table td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #e5e7eb;
+    
+    table td {
+      padding: 16px;
+      border-bottom: 1px solid #f3f4f6;
       vertical-align: middle;
     }
+    
+    table tr:hover {
+      background: #f8fafc;
+      transition: background-color 0.2s ease;
+    }
+    
     .product-images {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 8px;
+      max-width: 200px;
     }
-    .product-images div {
+    
+    .image-container {
       position: relative;
+      display: inline-block;
     }
+    
     .product-images img {
-      max-width: 60px;
-      border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      background: #f5f5f5;
-      display: block;
-      margin: auto;
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
     }
-    .product-images form button {
+    
+    .product-images img:hover {
+      transform: scale(1.1);
+      z-index: 5;
+    }
+    
+    .image-actions {
       position: absolute;
-      top: 0;
-      right: 0;
+      top: -8px;
+      right: -8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    
+    .image-container:hover .image-actions {
+      opacity: 1;
+    }
+    
+    .btn-remove {
       background: #ef4444;
       color: white;
       border: none;
       border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-weight: bold;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
       cursor: pointer;
-      font-size: 14px;
-      line-height: 14px;
-      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
+    
+    .input-wrapper {
+      position: relative;
+    }
+    
     .input-wrapper input,
     .input-wrapper textarea {
       width: 100%;
-      padding: 6px 8px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
       font-size: 14px;
-      box-sizing: border-box;
+      transition: all 0.2s ease;
+      background: #fafafa;
     }
+    
+    .input-wrapper input:focus,
+    .input-wrapper textarea:focus {
+      outline: none;
+      border-color: #4f46e5;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    
     textarea {
       resize: vertical;
-      min-height: 60px;
+      min-height: 80px;
+      font-family: inherit;
     }
+    
     .btn {
-      padding: 6px 12px;
+      padding: 10px 16px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 14px;
+      font-weight: 500;
       cursor: pointer;
-      transition: 0.3s;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
     }
+    
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    
     .btn-edit {
-      background: #10b981;
+      background: linear-gradient(135deg, #10b981, #059669);
       color: white;
+      box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3);
     }
+    
     .btn-edit:hover {
-      background: #059669;
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
     }
+    
     .btn-delete {
-      background: #ef4444;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
       color: white;
-      margin-top: 5px;
+      margin-top: 8px;
+      box-shadow: 0 3px 8px rgba(239, 68, 68, 0.3);
     }
+    
     .btn-delete:hover {
-      background: #dc2626;
+      box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
     }
+    
     .btn-add {
-      background: #2563eb;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: white;
-      margin-top: 10px;
+      padding: 14px 28px;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
+    
     .btn-add:hover {
-      background: #1d4ed8;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
     }
-    form.inline-form {
-      display: inline;
+    
+    .actions-cell {
+      min-width: 160px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    form.add-form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    
+    .add-product-form {
+      background: linear-gradient(135deg, #ffffff, #f8fafc);
+      padding: 32px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .form-group label {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .file-upload {
+      border: 2px dashed #cbd5e0;
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      background: #f7fafc;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+    }
+    
+    .file-upload:hover {
+      border-color: #4f46e5;
+      background: #eef2ff;
+    }
+    
+    .file-upload.dragover {
+      border-color: #4f46e5;
+      background: #eef2ff;
+      transform: scale(1.02);
+    }
+    
+    .file-upload-icon {
+      font-size: 3rem;
+      color: #9ca3af;
+      margin-bottom: 16px;
+    }
+    
+    .file-upload-text {
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    
+    .file-upload-subtext {
+      color: #9ca3af;
+      font-size: 14px;
+    }
+    
+    .price-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+    }
+    
+    .modal-content {
+      background: white;
+      margin: 5% auto;
+      padding: 32px;
+      border-radius: 20px;
+      width: 90%;
       max-width: 500px;
-      margin-top: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      animation: modalShow 0.3s ease-out;
     }
-    form.add-form input,
-    form.add-form textarea {
-      margin-bottom: 10px;
+    
+    @keyframes modalShow {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
-    td.actions {
-      min-width: 230px;
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #9ca3af;
+    }
+    
+    @media (max-width: 768px) {
+      .admin-container {
+        margin: 10px;
+        padding: 20px;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .table-wrapper {
+        font-size: 14px;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .price-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    
+    .spinner {
+      border: 3px solid #f3f4f6;
+      border-top: 3px solid #4f46e5;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <div class="admin-section">
-    <div class="top-bar">
-      <a href="{{ url_for('home') }}" class="btn-home">Go to Home Page</a>
+  <div class="admin-container">
+    <div class="header">
+      <h1><i class="fas fa-cogs"></i> Product Management</h1>
+      <a href="{{ url_for('home') }}" class="btn-home">
+        <i class="fas fa-home"></i> Back to Store
+      </a>
     </div>
-    <h2>Admin Panel – Product Management</h2>
+
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <div class="flash">{{ messages[0] }}</div>
+        <div class="flash">
+          <i class="fas fa-info-circle"></i>
+          {{ messages[0] }}
+        </div>
       {% endif %}
     {% endwith %}
-    <h3>All Live Products</h3>
-    <table>
-      <tr>
-        <th>Images</th>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Price Small</th>
-        <th>Price Medium</th>
-        <th>Price Large</th>
-        <th>Features</th>
-        <th>Actions</th>
-      </tr>
-      {% for product in products %}
-      <tr>
-        <td>
-  <div class="product-images">
-    {% for url in product.imgs %}
-      <div>
-        <img src="{{ url }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='/static/images/placeholder.png'">
-        
-        <!-- Separate Remove Image Form -->
-        <form method="POST" class="inline-form" onsubmit="return confirm('Remove this image?');" style="display:inline;">
-          <input type="hidden" name="id" value="{{ product.id }}">
-          <input type="hidden" name="img_url" value="{{ url }}">
-          <input type="hidden" name="action" value="remove_image">
-          <button type="submit" class="btn btn-delete" title="Remove Image">&times;</button>
-        </form>
-        
-        <!-- Separate Replace Image Form -->
-        <form method="POST" enctype="multipart/form-data" class="inline-form" style="display:inline;">
-          <input type="file" name="replace_img" accept="image/*" required>
-          <input type="hidden" name="id" value="{{ product.id }}">
-          <input type="hidden" name="img_url" value="{{ url }}">
-          <input type="hidden" name="action" value="replace_image">
-          <button type="submit" class="btn btn-edit" style="padding: 2px 8px; font-size: 12px;">Replace</button>
-        </form>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">{{ products|length }}</div>
+        <div class="stat-label">Total Products</div>
       </div>
-    {% endfor %}
-  </div>
-</td>
+      <div class="stat-card">
+        <div class="stat-value">{{ products|selectattr('imgs')|list|length }}</div>
+        <div class="stat-label">With Images</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">
+          {{ products|map(attribute='imgs')|map('length')|sum }}
+        </div>
+        <div class="stat-label">Total Images</div>
+      </div>
+    </div>
 
-        <form method="POST" enctype="multipart/form-data" class="inline-form">
-          <td class="input-wrapper">
-            <input type="text" name="name" value="{{ product.name }}" required>
-          </td>
-          <td class="input-wrapper">
-            <textarea name="desc" required>{{ product.desc }}</textarea>
-          </td>
-          <td class="input-wrapper">
-            <input type="text" name="price_small" value="{{ product.price_small | default('') }}" required>
-          </td>
-          <td class="input-wrapper">
-            <input type="text" name="price_medium" value="{{ product.price_medium | default('') }}" required>
-          </td>
-          <td class="input-wrapper">
-            <input type="text" name="price_large" value="{{ product.price_large | default('') }}" required>
-          </td>
-          <td class="input-wrapper">
-            <textarea name="features" placeholder="Comma-separated features">{{ product.features | join(', ') }}</textarea>
-          </td>
-          <td class="actions">
-            <input type="file" name="img_file" accept="image/*" multiple>
-            <input type="hidden" name="id" value="{{ product.id }}">
-            <input type="hidden" name="action" value="update">
-            <button type="submit" class="btn btn-edit">Update</button>
-        </form>
-        <form method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this product?');">
-          <input type="hidden" name="id" value="{{ product.id }}">
-          <input type="hidden" name="action" value="delete">
-          <button type="submit" class="btn btn-delete">Delete</button>
-        </form>
-          </td>
-      </tr>
-      {% endfor %}
-    </table>
+    <div class="products-container">
+      <div class="section-header">
+        <i class="fas fa-box"></i>
+        <h2>Product Inventory</h2>
+      </div>
 
-    <h3>Add New Product</h3>
-    <form method="POST" enctype="multipart/form-data" class="add-form">
-      <input type="file" name="img_file" accept="image/*" multiple required>
-      <input type="text" name="name" placeholder="Product Name" required>
-      <textarea name="desc" placeholder="Description" required></textarea>
-      <input type="text" name="price_small" placeholder="Price Small" required>
-      <input type="text" name="price_medium" placeholder="Price Medium" required>
-      <input type="text" name="price_large" placeholder="Price Large" required>
-      <textarea name="features" placeholder="Comma-separated features"></textarea>
-      <input type="hidden" name="action" value="add">
-      <button type="submit" class="btn btn-add">Add Product</button>
-    </form>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th><i class="fas fa-images"></i> Images</th>
+              <th><i class="fas fa-tag"></i> Product Name</th>
+              <th><i class="fas fa-align-left"></i> Description</th>
+              <th><i class="fas fa-dollar-sign"></i> Small</th>
+              <th><i class="fas fa-dollar-sign"></i> Medium</th>
+              <th><i class="fas fa-dollar-sign"></i> Large</th>
+              <th><i class="fas fa-star"></i> Features</th>
+              <th><i class="fas fa-tools"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in products %}
+            <tr>
+              <td>
+                <div class="product-images">
+                  {% for url in product.imgs %}
+                    <div class="image-container">
+                      <img src="{{ url }}" alt="{{ product.name }}" loading="lazy" 
+                           onerror="this.src='/static/images/placeholder.png'">
+                      <div class="image-actions">
+                        <form method="POST" class="inline-form" 
+                              onsubmit="return confirm('Remove this image?');">
+                          <input type="hidden" name="id" value="{{ product.id }}">
+                          <input type="hidden" name="img_url" value="{{ url }}">
+                          <input type="hidden" name="action" value="remove_image">
+                          <button type="submit" class="btn-remove" title="Remove Image">
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </td>
+
+              <form method="POST" enctype="multipart/form-data" class="inline-form">
+                <td class="input-wrapper">
+                  <input type="text" name="name" value="{{ product.name }}" required>
+                </td>
+                <td class="input-wrapper">
+                  <textarea name="desc" required>{{ product.desc }}</textarea>
+                </td>
+                <td class="input-wrapper">
+                  <input type="text" name="price_small" 
+                         value="{{ product.price_small | default('') }}" required>
+                </td>
+                <td class="input-wrapper">
+                  <input type="text" name="price_medium" 
+                         value="{{ product.price_medium | default('') }}" required>
+                </td>
+                <td class="input-wrapper">
+                  <input type="text" name="price_large" 
+                         value="{{ product.price_large | default('') }}" required>
+                </td>
+                <td class="input-wrapper">
+                  <textarea name="features" 
+                            placeholder="Comma-separated features">{{ product.features | join(', ') }}</textarea>
+                </td>
+                <td class="actions-cell">
+                  <input type="file" name="img_file" accept="image/*" multiple style="margin-bottom: 8px;">
+                  <input type="hidden" name="id" value="{{ product.id }}">
+                  <input type="hidden" name="action" value="update">
+                  <button type="submit" class="btn btn-edit">
+                    <i class="fas fa-save"></i> Update
+                  </button>
+              </form>
+              <form method="POST" class="inline-form" 
+                    onsubmit="return confirm('Are you sure you want to delete this product?');">
+                <input type="hidden" name="id" value="{{ product.id }}">
+                <input type="hidden" name="action" value="delete">
+                <button type="submit" class="btn btn-delete">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              </form>
+                </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="add-product-form">
+      <div class="section-header">
+        <i class="fas fa-plus-circle"></i>
+        <h2>Add New Product</h2>
+      </div>
+
+      <form method="POST" enctype="multipart/form-data">
+        <div class="file-upload" onclick="document.getElementById('fileInput').click()" 
+             ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+          <div class="file-upload-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+          <div class="file-upload-text">
+            Click to upload images or drag and drop
+          </div>
+          <div class="file-upload-subtext">
+            PNG, JPG, WEBP up to 10MB each
+          </div>
+          <input type="file" id="fileInput" name="img_file" accept="image/*" 
+                 multiple required style="display: none;" onchange="updateFileText(this)">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="productName">Product Name</label>
+            <input type="text" id="productName" name="name" placeholder="Enter product name" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="productDesc">Description</label>
+            <textarea id="productDesc" name="desc" placeholder="Product description" required></textarea>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Pricing</label>
+          <div class="price-grid">
+            <input type="text" name="price_small" placeholder="Small Size Price" required>
+            <input type="text" name="price_medium" placeholder="Medium Size Price" required>
+            <input type="text" name="price_large" placeholder="Large Size Price" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="productFeatures">Features</label>
+          <textarea id="productFeatures" name="features" 
+                    placeholder="Enter features separated by commas"></textarea>
+        </div>
+
+        <input type="hidden" name="action" value="add">
+        <button type="submit" class="btn btn-add">
+          <i class="fas fa-plus"></i> Add Product
+        </button>
+      </form>
+    </div>
   </div>
+
+  <script>
+    // Enhanced file upload functionality
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('dragover');
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      document.getElementById('fileInput').files = files;
+      updateFileText(document.getElementById('fileInput'));
+    }
+
+    function updateFileText(input) {
+      const fileUpload = document.querySelector('.file-upload');
+      const fileText = fileUpload.querySelector('.file-upload-text');
+      if (input.files.length > 0) {
+        fileText.textContent = `${input.files.length} file(s) selected`;
+      }
+    }
+
+    // Add loading states
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<div class="spinner"></div>' + submitBtn.innerHTML;
+          form.classList.add('loading');
+        }
+      });
+    });
+
+    // Remove dragover class when drag leaves
+    document.addEventListener('dragleave', function(e) {
+      if (e.target.classList.contains('file-upload')) {
+        e.target.classList.remove('dragover');
+      }
+    });
+
+    // Auto-save functionality (optional)
+    let autoSaveTimer;
+    document.querySelectorAll('input, textarea').forEach(input => {
+      if (!input.type.includes('file') && !input.type.includes('hidden')) {
+        input.addEventListener('input', function() {
+          clearTimeout(autoSaveTimer);
+          // Auto-save after 2 seconds of inactivity
+          autoSaveTimer = setTimeout(() => {
+            // You could implement auto-save here
+            console.log('Auto-save triggered for:', input.name);
+          }, 2000);
+        });
+      }
+    });
+  </script>
 </body>
 </html>
