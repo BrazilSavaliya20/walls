@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Your Store Name</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #2d3748;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .policy-card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 24px;
+            box-shadow: 0 12px 28px rgba(80,70,229,0.07), 0 1.5px 3px rgba(20,10,90,0.03);
+            padding: 48px 28px 36px 28px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 30px;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 10px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-bottom: 22px;
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.12);
+        }
+        .back-btn:hover {
+            background: linear-gradient(135deg, #4338ca, #6d28d9);
+            transform: translateY(-1.5px) scale(1.04);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .header h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 7px;
+        }
+        .header p {
+            font-size: 1.07rem;
+            color: #6b7280;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+        .last-updated {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            font-size: 1.01rem;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 11px 17px;
+            margin-bottom: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+        }
+        .section {
+            margin-bottom: 34px;
+        }
+        .section h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+        .section h3 {
+            font-size: 1.07rem;
+            font-weight: 600;
+            color: #444;
+            margin: 20px 0 10px 0;
+            padding-left: 13px;
+            border-left: 4px solid #667eea;
+        }
+        .section p { margin-bottom: 14px; font-size: 1rem; color: #4a5568; }
+        .section ul { margin: 12px 0 12px 26px; }
+        .section li { margin-bottom: 8px; color: #4a5568; }
+        .highlight-box, .warning-box {
+            border-radius: 10px;
+            padding: 15px 17px;
+            margin: 22px 0;
+            font-size: 1rem;
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+            border: 1px solid #38b2ac;
+        }
+        .warning-box {
+            background: linear-gradient(135deg, #fed7d7,#feb2b2);
+            border: 1px solid #e53e3e;
+        }
+        .highlight-box h4, .warning-box h4 { margin: 0 0 8px 0; font-weight: 700; display: flex; align-items: center; gap: 8px;}
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 18px 0 14px 0;
+            font-size: 1rem;
+            box-shadow: 0 1.5px 3.5px rgba(40,40,60,0.08);
+        }
+        .data-table th, .data-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .data-table th {
+            background: #f4f6fa;
+            font-weight: 600;
+            color: #363636;
+        }
+        .contact-section {
+            background: linear-gradient(135deg, #f7fafc,#e2e8f0);
+            border-radius: 12px;
+            padding: 22px 17px;
+            text-align: center;
+            margin-top: 34px;
+        }
+        .contact-section h3 {
+            color: #1a202c;
+            margin-bottom: 17px;
+            border: none;
+            padding: 0;
+        }
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+            justify-content: center;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        @media (max-width: 770px) {
+            .container{ padding:14px 7px;}
+            .policy-card{ padding:20px 10px;}
+            .header h1 { font-size: 1.6rem;}
+            .section h2 { font-size:1.12rem;}
+            .data-table{ font-size: 0.95rem;}
+            .data-table th, .data-table td{padding:8px;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="policy-card">
+            <a href="/" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back to Store
+            </a>
+            <div class="header">
+                <h1><i class="fas fa-shield-alt"></i> Privacy Policy</h1>
+                <p>Your privacy and data protection are our priority.</p>
+            </div>
+            <div class="last-updated">
+                <i class="fas fa-calendar-alt"></i>
+                Last Updated: January 15, 2025
+            </div>
+            <div class="section">
+                <h2><i class="fas fa-info-circle"></i> Introduction</h2>
+                <p>This Privacy Policy describes how <b>Your Store Name</b> (“we,” “our,” or “us”) collects, uses, and protects your personal information when you visit our website or make a purchase from us.</p>
+                <p>By using our service, you agree to the collection and use of information in accordance with this policy. We are committed to ensuring your privacy is protected and your personal information is handled responsibly.</p>
+            </div>
+            <div class="section">
+                <h2><i class="fas fa-database"></i> Information We Collect</h2>
+                <h3>Personal Information</h3>
+                <p>When you make a purchase or attempt to make a purchase through our store, we may collect:</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Details</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Contact</td>
+                            <td>Name, email, phone</td>
+                            <td>Order processing, communication</td>
+                        </tr>
+                        <tr>
+                            <td>Billing</td>
+                            <td>Billing address, payment details</td>
+                            <td>Payment handling, legal compliance</td>
+                        </tr>
+                        <tr>
+                            <td>Shipping</td>
+                            <td>Shipping address, delivery notes</td>
+                            <td>Product delivery</td>
+                        </tr>
+                        <tr>
+                            <td>Device</td>
+                            <td>IP address, browser, device info</td>
+                            <td>Security, website improvements</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3>Automatically Collected</h3>
+                <ul>
+                    <li>Cookies and Tracking: Usage patterns, preferences</li>
+                    <li>Log Data: IP address, browser type, access times</li>
+                    <li>Usage Data: Pages visited, navigation, click patterns</li>
+                </ul>
+            </div>
+            <div class="section">
+                <h2><i class="fas fa-cogs"></i> How We Use Your Information</h2>
+                <ul>
+                    <li><strong>Order Fulfillment:</strong> Processing transactions and shipping</li>
+                    <li><strong>Customer Service:</strong> Support and communication</li>
+                    <li><strong>Marketing Emails:</strong> Only if you opt in</li>
+                    <li><strong>Analysis:</strong> Improve our products and website</li>
+                    <li><strong>Security:</strong> Fraud prevention and safety</li>
+                    <li><strong>Legal Compliance:</strong> Fulfill legal obligations</li>
+                </ul>
+                <div class="highlight-box">
+                    <h4><i class="fas fa-user-check"></i> Consent</h4>
+                    <p>Marketing communications are only sent if you opt in, and you can unsubscribe anytime.</p>
+                </div>
+            </div>
+            <div class="section">
+                <h2><i class="fas fa-share-alt"></i> When We Share Information</h2>
+                <ul>
+                    <li>With service providers (payments, shipping, analytics) as needed to run our business.</li>
+                    <li>To comply with legal requirements and protect our rights or safety.</li>
+                    <li>In the event of business transfers such as merger, acquisition, or asset sale.</li>
+                </ul>
+                <div class="warning-box">
+                    <h4><i class="fas fa-shield-alt"></i> Protection</h4>
+                    <p>All service partners must contractually respect your privacy and handle data securely.</p>
+                </div>
+            </div>
+            <div class="section">
+                <h2><i class="fas fa-cookie-bite"></i> Cookies & Tracking</h2>
+                <p>
+                   We use cookies and similar technologies to personalize your experience and gather analytics.
+                   Essential cookies are required for core site functionality; performance and marketing cookies are optional.
+                </p>
+                <h3>Managing Cookies</h3>
+                <p>You can control cookies via your browser settings; disabling some cookies may impact your experience.</p>
+            </div>
+            <div class="section">
+                <h2><i class="fas fa-lock"></i> Data Security</h2>
+                <p>We use administrative, technical, and physical safeguards to protect your personal information
+                   from loss, misuse, or unauthorized access.</p>
+            </div>
+            <div class="section">
+                <h2><i class="fas fa-globe-asia"></i> International Data</h2>
+                <p>Your information may be processed outside your home country, but we take steps to ensure it remains protected.</p>
+            </div>
+            <div class="section">
+                <h2><i class="fas fa-sync"></i> Policy Updates</h2>
+                <p>
+                    We may update this Privacy Policy. Changes will be posted here with a new effective date.
+                </p>
+            </div>
+            <div class="section contact-section">
+                <h3><i class="fas fa-envelope"></i> Contact Us</h3>
+                <div class="contact-info">
+                    <span class="contact-item"><i class="fas fa-envelope"></i> privacy@[yourdomain].com</span>
+                    <span class="contact-item"><i class="fas fa-phone"></i> 0123-456789</span>
+                    <span class="contact-item"><i class="fas fa-map-marker-alt"></i> Your Business Address</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

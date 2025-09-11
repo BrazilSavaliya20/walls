@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shipping Policy - Your Store Name</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #2d3748;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .policy-card {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 24px;
+            box-shadow: 0 12px 28px rgba(80,70,229,0.07), 0 1.5px 3px rgba(20,10,90,0.03);
+            padding: 48px 28px 36px 28px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 30px;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 10px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-bottom: 22px;
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.12);
+        }
+        .back-btn:hover {
+            background: linear-gradient(135deg, #4338ca, #6d28d9);
+            transform: translateY(-1.5px) scale(1.04);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .header h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 7px;
+        }
+        .header p {
+            font-size: 1.07rem;
+            color: #6b7280;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+        .section {
+            margin-bottom: 34px;
+        }
+        .section h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+        .section p, .section ul {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 14px;
+        }
+        .section ul {
+            list-style-type: disc;
+            padding-left: 26px;
+        }
+        .section ul li {
+            margin-bottom: 9px;
+        }
+        .contact-section {
+            background: linear-gradient(135deg, #f7fafc, #e2e8f0);
+            border-radius: 12px;
+            padding: 22px 17px;
+            text-align: center;
+            margin-top: 34px;
+        }
+        .contact-section h3 {
+            color: #1a202c;
+            margin-bottom: 17px;
+        }
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+            justify-content: center;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        @media (max-width: 770px) {
+            .container { padding:14px 7px;}
+            .policy-card { padding:20px 10px;}
+            .header h1 { font-size: 1.8rem;}
+            .section h2 { font-size:1.12rem;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="policy-card">
+            <a href="/" class="back-btn" title="Back to Store">
+                <i class="fas fa-arrow-left"></i> Back to Store
+            </a>
+            <div class="header">
+                <h1><i class="fas fa-truck"></i> Shipping Policy</h1>
+                <p>Transparent shipping terms for a seamless delivery experience.</p>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-box"></i> Order Processing</h2>
+                <p>Orders are typically processed within 2-3 business days after payment confirmation.</p>
+                <p>Custom or personalized products may require longer processing times; you will be notified accordingly.</p>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-shipping-fast"></i> Delivery Timeframes</h2>
+                <ul>
+                    <li>Standard delivery within India usually takes 5-7 business days from shipment.</li>
+                    <li>International shipping times vary depending on the destination and customs processing.</li>
+                    <li>Delays may occur due to unforeseen circumstances, including weather or carrier issues.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-dollar-sign"></i> Shipping Charges</h2>
+                <p>Shipping fees are calculated based on weight, dimensions, and destination, and are displayed at checkout.</p>
+                <p>Free shipping offers may apply based on promotional terms, which will be clearly indicated.</p>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-box-open"></i> Tracking Your Order</h2>
+                <p>Once your order ships, you will receive a tracking number via email to monitor delivery status.</p>
+                <p>If you do not receive a tracking number within 3 days of order confirmation, please contact support.</p>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-exclamation-triangle"></i> Damages and Lost Shipments</h2>
+                <ul>
+                    <li>Please inspect your package upon receipt and report any damages or missing items within 48 hours.</li>
+                    <li>We are not responsible for delays or losses caused by the shipping carrier beyond our control.</li>
+                    <li>In case of damage or loss, contact us immediately for resolution assistance.</li>
+                </ul>
+            </div>
+
+            <div class="section contact-section">
+                <h3><i class="fas fa-headset"></i> Contact Us</h3>
+                <div class="contact-info">
+                    <span class="contact-item"><i class="fas fa-envelope"></i> support@[yourdomain].com</span>
+                    <span class="contact-item"><i class="fas fa-phone"></i> 0123-456789</span>
+                    <span class="contact-item"><i class="fas fa-map-marker-alt"></i> Your Business Address</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
