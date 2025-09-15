@@ -48,7 +48,7 @@ CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL")
 CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
 CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
 CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
-CLOUDINARY_URL="cloudinary://828442639417:fmqTzNjFw_IuZn69@dryos74"
+CLOUDINARY_URL="cloudinary://828442639417:fmqTzNjFwZ_IuZn69zwy51d6-mA@dryos74"
 
 
 # Configure cloudinary
