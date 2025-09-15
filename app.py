@@ -464,13 +464,16 @@ def submit_review():
 # ---------------------------------------------------------------------
 @app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
-    products = load_products()  # Always get latest
+    products = load_products()  # Always get latest from storage
 
     if request.method == "POST":
         action = request.form.get("action")
+
+        # -------------------------------
+        # ADD NEW PRODUCT
+        # -------------------------------
         if action == "add":
             files = request.files.getlist("img_file")
-            # UPLOAD IMAGES TO CLOUDINARY
             img_urls = []
             for f in files:
                 if f and f.filename and allowed_file(f.filename):
@@ -492,24 +495,32 @@ def secret_admin():
                 "price_large": request.form.get("price_large"),
                 "features": features_list,
             })
+
             save_products(products)
-            flash("Product added successfully.", "success")
+            flash("✅ Product added successfully.", "success")
             return redirect(url_for("secret_admin"))
 
+        # -------------------------------
+        # UPDATE PRODUCT
+        # -------------------------------
         elif action == "update":
             pid = int(request.form.get("id"))
             product = next((p for p in products if p["id"] == pid), None)
             if not product:
-                flash("Product not found.", "danger")
+                flash("❌ Product not found.", "danger")
                 return redirect(url_for("secret_admin"))
+
+            # Update fields
             product["name"] = request.form.get("name")
             product["desc"] = request.form.get("desc")
             product["price_small"] = request.form.get("price_small")
             product["price_medium"] = request.form.get("price_medium")
             product["price_large"] = request.form.get("price_large")
+
             features = request.form.get("features", "")
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
 
+            # Upload new images (if any)
             files = request.files.getlist("img_file")
             img_urls = []
             for f in files:
@@ -518,64 +529,76 @@ def secret_admin():
                     if u:
                         img_urls.append(u)
 
-            imgs = product.get("imgs")
-            if imgs is None or isinstance(imgs, str):
-                imgs = [imgs] if imgs else []
             if img_urls:
-                imgs.extend(img_urls)
-            imgs = [im for im in imgs if im]
-            product["imgs"] = imgs
+                existing_imgs = product.get("imgs", [])
+                if isinstance(existing_imgs, str):
+                    existing_imgs = [existing_imgs]
+                product["imgs"] = [im for im in existing_imgs if im] + img_urls
+
             save_products(products)
-            flash("Product updated successfully.", "success")
+            flash("✅ Product updated successfully.", "success")
             return redirect(url_for("secret_admin"))
 
+        # -------------------------------
+        # DELETE PRODUCT
+        # -------------------------------
         elif action == "delete":
             pid = int(request.form.get("id"))
             products = [p for p in products if p["id"] != pid]
             save_products(products)
-            flash("Product deleted successfully.", "success")
+            flash("🗑️ Product deleted successfully.", "success")
             return redirect(url_for("secret_admin"))
 
+        # -------------------------------
+        # REMOVE SINGLE IMAGE
+        # -------------------------------
         elif action == "remove_image":
             pid = int(request.form.get("id"))
             img_url = request.form.get("img_url")
             product = next((p for p in products if p["id"] == pid), None)
+
             if product and img_url in product.get("imgs", []):
                 product["imgs"] = [img for img in product.get("imgs", []) if img != img_url]
                 save_products(products)
-                flash("Image removed successfully.", "success")
+                flash("🖼️ Image removed successfully.", "success")
             else:
-                flash("Image or product not found.", "danger")
+                flash("❌ Image or product not found.", "danger")
             return redirect(url_for("secret_admin"))
 
+        # -------------------------------
+        # REPLACE SINGLE IMAGE
+        # -------------------------------
         elif action == "replace_image":
             pid = int(request.form.get("id"))
             img_url = request.form.get("img_url")
             product = next((p for p in products if p["id"] == pid), None)
+
             if not product:
-                flash("Product not found for image replacement.", "danger")
+                flash("❌ Product not found for image replacement.", "danger")
                 return redirect(url_for("secret_admin"))
+
             files = request.files.getlist("replace_img")
             if files and files[0] and files[0].filename and allowed_file(files[0].filename):
                 new_img_url = upload_to_cloudinary(files[0])
                 if new_img_url:
-                    imgs = product.get("imgs")
-                    if imgs is None or isinstance(imgs, str):
-                        imgs = [imgs] if imgs else []
+                    imgs = product.get("imgs", [])
+                    if isinstance(imgs, str):
+                        imgs = [imgs]
                     if img_url in imgs:
                         idx = imgs.index(img_url)
                         imgs[idx] = new_img_url
                         product["imgs"] = imgs
                         save_products(products)
-                        flash("Image replaced successfully.", "success")
+                        flash("🔄 Image replaced successfully.", "success")
                     else:
-                        flash("Original image not found.", "danger")
+                        flash("❌ Original image not found.", "danger")
                 else:
-                    flash("Failed to upload replacement image.", "danger")
+                    flash("⚠️ Failed to upload replacement image.", "danger")
             else:
-                flash("No replacement image selected or unsupported file type.", "warning")
+                flash("⚠️ No replacement image selected or unsupported file type.", "warning")
             return redirect(url_for("secret_admin"))
 
+    # Render admin panel
     return render_template("admin_panel.html", products=products)
 
 # ---------------------------------------------------------------------
