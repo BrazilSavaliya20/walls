@@ -10,31 +10,19 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import razorpay
 
-# Cloudinary imports
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-
 # ---------------------------------------------------------------------
 # Load environment variables
 # ---------------------------------------------------------------------
 load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Private directory (not exposed to users)
 PRIVATE_DIR = os.path.join(BASE_DIR, "private")
 os.makedirs(PRIVATE_DIR, exist_ok=True)
-
-# Upload folder (publicly accessible)
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "public", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Flask config
 app = Flask(__name__, static_folder="public", static_url_path="/static")
 app.secret_key = os.environ.get("SECRET_KEY", "8141@#Kaswala")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Products file stored privately
 products_file = os.path.join(PRIVATE_DIR, "products.json")
 
 logging.basicConfig(level=logging.INFO)
@@ -43,57 +31,37 @@ logger = logging.getLogger("wallcraft")
 # ---------------------------------------------------------------------
 # Razorpay configuration
 # ---------------------------------------------------------------------
-RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "rzp_test_RGHzf24TfjfbAy")
-RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "xPSpg6R2zzdWf85Pn5gGfOyQ")
+RAZORPAY_KEY_ID = "rzp_test_RGHzf24TfjfbAy"
+RAZORPAY_KEY_SECRET = "xPSpg6R2zzdWf85Pn5gGfOyQ"
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 # ---------------------------------------------------------------------
-# Cloudinary configuration
+# Freeimage.host API configuration
 # ---------------------------------------------------------------------
-# Expecting CLOUDINARY_URL or individual env vars
-CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL")
-CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
-CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
-CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
+FREEIMAGE_API_KEY = os.environ.get("FREEIMAGE_API_KEY", "6d207e02198a847aa98d0a2a901485a5")   # Store your API key in .env
 
-
-# Configure cloudinary
-if CLOUDINARY_URL:
-    cloudinary.config(cloudinary_url=CLOUDINARY_URL)
-else:
-    if not all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET]):
-        logger.warning("Cloudinary environment variables not fully set. Image uploads will fail.")
-    cloudinary.config(
-        cloud_name="dryos74",
-        api_key="828442639417",
-        api_secret="fmqTzNjFw_IuZn69",
-        secure=True
-    )
-
-def upload_to_cloudinary(file, folder: str = "wallcraft_products") -> str | None:
-    """
-    Upload a werkzeug FileStorage to Cloudinary and return the secure_url.
-    Returns None on failure.
-    """
-    if not file or not getattr(file, "filename", None):
-        return None
+def upload_to_freeimage_host(file) -> str | None:
+    """Uploads a file object to Freeimage.host and returns the hosted image direct URL."""
     try:
-        # Use the file stream directly. Cloudinary can accept file-like objects.
-        # Provide a public_id based on filename + timestamp to avoid collisions.
-        filename = os.path.splitext(file.filename)[0]
-        timestamp = int(datetime.utcnow().timestamp())
-        public_id = f"{folder}/{filename}-{timestamp}"
-        result = cloudinary.uploader.upload(
-            file,
-            folder=folder,
-            public_id=public_id,
-            overwrite=False,
-            resource_type="image",
-            use_filename=False,
-        )
-        return result.get("secure_url")
+        url = "https://freeimage.host/api/1/upload"
+        payload = {
+            "key": FREEIMAGE_API_KEY,
+            "action": "upload",
+            "format": "json"
+        }
+        # We use files["source"] as described in the API docs
+        files = {
+            "source": (file.filename, file.stream, file.content_type)
+        }
+        response = requests.post(url, data=payload, files=files, timeout=30)
+        result = response.json()
+        if response.status_code == 200 and result.get("status_code") == 200:
+            return result["image"]["url"]  # Direct link to the uploaded image
+        else:
+            app.logger.error(f"Freeimage.host upload failed: {result}")
+            return None
     except Exception as e:
-        logger.error(f"Cloudinary upload failed: {e}", exc_info=True)
+        app.logger.error(f"Freeimage.host upload error: {e}")
         return None
 
 # ---------------------------------------------------------------------
@@ -211,6 +179,7 @@ def inject_request():
 def inject_now():
     return {'now': datetime.utcnow}
 
+
 # ---------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------
@@ -231,25 +200,31 @@ def home():
             logger.error(f"Failed to fetch reviews: {e}")
     return render_template("home.html", products=products_list, reviews=reviews_list)
 
+
 @app.route("/about")
 def about():
     return render_template("about.html")
+
 
 @app.route("/cancellation-refund")
 def cancellation_refund():
     return render_template("cancellation_refund.html")
 
+
 @app.route("/privacy-policy")
 def privacy_policy():
     return render_template("privacy_policy.html")
+
 
 @app.route("/terms-conditions")
 def terms_conditions():
     return render_template("terms_conditions.html")
 
+
 @app.route("/shipping-policy")
 def shipping_policy():
     return render_template("shipping_policy.html")
+
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
@@ -257,6 +232,7 @@ def contact():
         flash("Thank you for connecting with us! We will get back to you soon.")
         return redirect(url_for("contact"))
     return render_template("contact.html")
+
 
 @app.route("/process_contact", methods=["POST"])
 def process_contact():
@@ -287,9 +263,11 @@ def process_contact():
         flash("⚠️ Failed to send message.", "danger")
         return redirect(url_for("contact"))
 
+
 @app.route("/shop")
 def shop():
     return render_template("shop.html", products=get_products())
+
 
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
@@ -298,11 +276,13 @@ def product_detail(product_id):
         abort(404)
     return render_template("product_detail.html", product=product)
 
+
 @app.route("/cart")
 def cart():
     cart_data = session.get("cart", {})
     cart_items, total = get_cart_items_and_total(cart_data, get_products())
     return render_template("cart.html", cart_items=cart_items, total=total)
+
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
@@ -318,6 +298,7 @@ def add_to_cart():
     session['cart'] = cart_data
 
     return redirect(url_for('cart'))
+
 
 @app.route("/update-cart", methods=["POST"])
 def update_cart():
@@ -335,6 +316,7 @@ def update_cart():
             cart_data.pop(key, None)
     session["cart"] = cart_data
     return redirect(url_for("cart"))
+
 
 @app.route("/checkout")
 def checkout():
@@ -358,6 +340,7 @@ def checkout():
                            total=total,
                            razorpay_order_id=razorpay_order['id'],
                            razorpay_key_id=RAZORPAY_KEY_ID)
+
 
 @app.route("/process_order", methods=["POST"])
 def process_order():
@@ -443,6 +426,7 @@ def process_order():
         flash("An error occurred processing your order.")
         return redirect(url_for("checkout"))
 
+
 @app.route("/submit-review", methods=["POST"])
 def submit_review():
     if db is None:
@@ -472,22 +456,15 @@ def submit_review():
 # ---------------------------------------------------------------------
 @app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
-    products = load_products()  # Always get latest from storage
+    products = load_products()  # Always get latest
 
     if request.method == "POST":
         action = request.form.get("action")
-
-        # -------------------------------
-        # ADD NEW PRODUCT
-        # -------------------------------
         if action == "add":
             files = request.files.getlist("img_file")
-            img_urls = []
-            for f in files:
-                if f and f.filename and allowed_file(f.filename):
-                    u = upload_to_cloudinary(f)
-                    if u:
-                        img_urls.append(u)
+            # UPLOAD IMAGES TO FREEIMAGE.HOST
+            img_urls = [upload_to_freeimage_host(f) for f in files if f and f.filename]
+            img_urls = [u for u in img_urls if u]
 
             features = request.form.get("features", "")
             features_list = [f.strip() for f in features.split(",") if f.strip()]
@@ -503,110 +480,84 @@ def secret_admin():
                 "price_large": request.form.get("price_large"),
                 "features": features_list,
             })
-
             save_products(products)
-            flash("✅ Product added successfully.", "success")
+            flash("Product added successfully.", "success")
             return redirect(url_for("secret_admin"))
 
-        # -------------------------------
-        # UPDATE PRODUCT
-        # -------------------------------
         elif action == "update":
             pid = int(request.form.get("id"))
             product = next((p for p in products if p["id"] == pid), None)
             if not product:
-                flash("❌ Product not found.", "danger")
+                flash("Product not found.", "danger")
                 return redirect(url_for("secret_admin"))
-
-            # Update fields
             product["name"] = request.form.get("name")
             product["desc"] = request.form.get("desc")
             product["price_small"] = request.form.get("price_small")
             product["price_medium"] = request.form.get("price_medium")
             product["price_large"] = request.form.get("price_large")
-
             features = request.form.get("features", "")
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
-
-            # Upload new images (if any)
             files = request.files.getlist("img_file")
-            img_urls = []
-            for f in files:
-                if f and f.filename and allowed_file(f.filename):
-                    u = upload_to_cloudinary(f)
-                    if u:
-                        img_urls.append(u)
-
+            img_urls = [upload_to_freeimage_host(f) for f in files if f and f.filename]
+            img_urls = [u for u in img_urls if u]
+            imgs = product.get("imgs")
+            if imgs is None or isinstance(imgs, str):
+                imgs = [imgs] if imgs else []
             if img_urls:
-                existing_imgs = product.get("imgs", [])
-                if isinstance(existing_imgs, str):
-                    existing_imgs = [existing_imgs]
-                product["imgs"] = [im for im in existing_imgs if im] + img_urls
-
+                imgs.extend(img_urls)
+            imgs = [im for im in imgs if im]
+            product["imgs"] = imgs
             save_products(products)
-            flash("✅ Product updated successfully.", "success")
+            flash("Product updated successfully.", "success")
             return redirect(url_for("secret_admin"))
 
-        # -------------------------------
-        # DELETE PRODUCT
-        # -------------------------------
         elif action == "delete":
             pid = int(request.form.get("id"))
             products = [p for p in products if p["id"] != pid]
             save_products(products)
-            flash("🗑️ Product deleted successfully.", "success")
+            flash("Product deleted successfully.", "success")
             return redirect(url_for("secret_admin"))
 
-        # -------------------------------
-        # REMOVE SINGLE IMAGE
-        # -------------------------------
         elif action == "remove_image":
             pid = int(request.form.get("id"))
             img_url = request.form.get("img_url")
             product = next((p for p in products if p["id"] == pid), None)
-
             if product and img_url in product.get("imgs", []):
                 product["imgs"] = [img for img in product.get("imgs", []) if img != img_url]
                 save_products(products)
-                flash("🖼️ Image removed successfully.", "success")
+                flash("Image removed successfully.", "success")
             else:
-                flash("❌ Image or product not found.", "danger")
+                flash("Image or product not found.", "danger")
             return redirect(url_for("secret_admin"))
 
-        # -------------------------------
-        # REPLACE SINGLE IMAGE
-        # -------------------------------
         elif action == "replace_image":
             pid = int(request.form.get("id"))
             img_url = request.form.get("img_url")
             product = next((p for p in products if p["id"] == pid), None)
-
             if not product:
-                flash("❌ Product not found for image replacement.", "danger")
+                flash("Product not found for image replacement.", "danger")
                 return redirect(url_for("secret_admin"))
-
             files = request.files.getlist("replace_img")
-            if files and files[0] and files[0].filename and allowed_file(files[0].filename):
-                new_img_url = upload_to_cloudinary(files[0])
+            if files and files[0] and files[0].filename:
+                new_img_url = upload_to_freeimage_host(files[0])
                 if new_img_url:
-                    imgs = product.get("imgs", [])
-                    if isinstance(imgs, str):
-                        imgs = [imgs]
+                    imgs = product.get("imgs")
+                    if imgs is None or isinstance(imgs, str):
+                        imgs = [imgs] if imgs else []
                     if img_url in imgs:
                         idx = imgs.index(img_url)
                         imgs[idx] = new_img_url
                         product["imgs"] = imgs
                         save_products(products)
-                        flash("🔄 Image replaced successfully.", "success")
+                        flash("Image replaced successfully.", "success")
                     else:
-                        flash("❌ Original image not found.", "danger")
+                        flash("Original image not found.", "danger")
                 else:
-                    flash("⚠️ Failed to upload replacement image.", "danger")
+                    flash("Failed to upload replacement image.", "danger")
             else:
-                flash("⚠️ No replacement image selected or unsupported file type.", "warning")
+                flash("No replacement image selected.", "warning")
             return redirect(url_for("secret_admin"))
 
-    # Render admin panel
     return render_template("admin_panel.html", products=products)
 
 # ---------------------------------------------------------------------
