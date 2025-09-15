@@ -20,14 +20,21 @@ import cloudinary.api
 # ---------------------------------------------------------------------
 load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Private directory (not exposed to users)
 PRIVATE_DIR = os.path.join(BASE_DIR, "private")
 os.makedirs(PRIVATE_DIR, exist_ok=True)
+
+# Upload folder (publicly accessible)
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "public", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Flask config
 app = Flask(__name__, static_folder="public", static_url_path="/static")
 app.secret_key = os.environ.get("SECRET_KEY", "8141@#Kaswala")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Products file stored privately
 products_file = os.path.join(PRIVATE_DIR, "products.json")
 
 logging.basicConfig(level=logging.INFO)
@@ -48,7 +55,6 @@ CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL")
 CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
 CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
 CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
-CLOUDINARY_URL="cloudinary://828442639417:fmqTzNjFwZ_IuZn69zwy51d6-mA@dryos74"
 
 
 # Configure cloudinary
