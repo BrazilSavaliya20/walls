@@ -544,24 +544,35 @@
             <tr>
               <td>
                 <div class="product-images">
-                  {% for url in product.imgs %}
-                    <div class="image-container">
-                      <img src="{{ url }}" alt="{{ product.name }}" loading="lazy"
-                           onerror="this.src='/static/images/placeholder.png'">
-                      <div class="image-actions">
-                        <form method="POST" class="inline-form" 
-                              onsubmit="return confirm('Remove this image?');">
-                          <input type="hidden" name="id" value="{{ product.id }}">
-                          <input type="hidden" name="img_url" value="{{ url }}">
-                          <input type="hidden" name="action" value="remove_image">
-                          <button type="submit" class="btn-remove" title="Remove Image">
-                            <i class="fas fa-times"></i>
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  {% endfor %}
-                </div>
+  {% for url in product.imgs %}
+    <div class="image-container">
+      <img 
+  src="{{ url }}" 
+  alt="{{ product.name }}" 
+  loading="lazy"
+  onerror="this.src='{{ url_for('static', filename='images/placeholder.png') }}'">
+
+      <div class="image-actions">
+        <form method="POST" class="inline-form" 
+              onsubmit="return confirm('Remove this image?');">
+          <input type="hidden" name="id" value="{{ product.id }}">
+          <input type="hidden" name="img_url" value="{{ url }}">
+          <input type="hidden" name="action" value="remove_image">
+          <button type="submit" class="btn-remove" title="Remove Image">
+            <i class="fas fa-times"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <!-- If no images exist, show placeholder -->
+    <div class="image-container">
+      <img src="{{ url_for('static', filename='images/placeholder.png') }}" 
+           alt="No image available" loading="lazy">
+    </div>
+  {% endfor %}
+</div>
+
               </td>
 
               <form method="POST" enctype="multipart/form-data" class="inline-form">
