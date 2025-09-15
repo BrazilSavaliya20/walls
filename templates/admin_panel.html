@@ -525,7 +525,6 @@
         <i class="fas fa-box"></i>
         <h2>Product Inventory</h2>
       </div>
-
       <div class="table-wrapper">
         <table>
           <thead>
@@ -547,7 +546,7 @@
                 <div class="product-images">
                   {% for url in product.imgs %}
                     <div class="image-container">
-                      <img src="{{ url }}" alt="{{ product.name }}" loading="lazy" 
+                      <img src="{{ url }}" alt="{{ product.name }}" loading="lazy"
                            onerror="this.src='/static/images/placeholder.png'">
                       <div class="image-actions">
                         <form method="POST" class="inline-form" 
@@ -589,7 +588,7 @@
                             placeholder="Comma-separated features">{{ product.features | join(', ') }}</textarea>
                 </td>
                 <td class="actions-cell">
-                  <input type="file" name="img_file" accept="image/*" multiple style="margin-bottom: 8px;">
+                  <input type="file" name="img_file" accept="image/*,.webp" multiple style="margin-bottom: 8px;">
                   <input type="hidden" name="id" value="{{ product.id }}">
                   <input type="hidden" name="action" value="update">
                   <button type="submit" class="btn btn-edit">
@@ -617,9 +616,8 @@
         <i class="fas fa-plus-circle"></i>
         <h2>Add New Product</h2>
       </div>
-
       <form method="POST" enctype="multipart/form-data">
-        <div class="file-upload" onclick="document.getElementById('fileInput').click()" 
+        <div class="file-upload" onclick="document.getElementById('fileInput').click()"
              ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
           <div class="file-upload-icon">
             <i class="fas fa-cloud-upload-alt"></i>
@@ -628,9 +626,10 @@
             Click to upload images or drag and drop
           </div>
           <div class="file-upload-subtext">
-            PNG, JPG, WEBP up to 10MB each
+            PNG, JPG, GIF, WEBP up to 15MB each.
+            <b>Images are hosted via Freeimage.host and will be public/permanent.</b>
           </div>
-          <input type="file" id="fileInput" name="img_file" accept="image/*" 
+          <input type="file" id="fileInput" name="img_file" accept="image/*,.webp" 
                  multiple required style="display: none;" onchange="updateFileText(this)">
         </div>
 
@@ -639,7 +638,6 @@
             <label for="productName">Product Name</label>
             <input type="text" id="productName" name="name" placeholder="Enter product name" required>
           </div>
-          
           <div class="form-group">
             <label for="productDesc">Description</label>
             <textarea id="productDesc" name="desc" placeholder="Product description" required></textarea>

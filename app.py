@@ -36,14 +36,41 @@ RAZORPAY_KEY_SECRET = "xPSpg6R2zzdWf85Pn5gGfOyQ"
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 # ---------------------------------------------------------------------
+# Freeimage.host API configuration
+# ---------------------------------------------------------------------
+FREEIMAGE_API_KEY = os.environ.get("FREEIMAGE_API_KEY", "6d207e02198a847aa98d0a2a901485a5")   # Store your API key in .env
+
+def upload_to_freeimage_host(file) -> str | None:
+    """Uploads a file object to Freeimage.host and returns the hosted image direct URL."""
+    try:
+        url = "https://freeimage.host/api/1/upload"
+        payload = {
+            "key": FREEIMAGE_API_KEY,
+            "action": "upload",
+            "format": "json"
+        }
+        # We use files["source"] as described in the API docs
+        files = {
+            "source": (file.filename, file.stream, file.content_type)
+        }
+        response = requests.post(url, data=payload, files=files, timeout=30)
+        result = response.json()
+        if response.status_code == 200 and result.get("status_code") == 200:
+            return result["image"]["url"]  # Direct link to the uploaded image
+        else:
+            app.logger.error(f"Freeimage.host upload failed: {result}")
+            return None
+    except Exception as e:
+        app.logger.error(f"Freeimage.host upload error: {e}")
+        return None
+
+# ---------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
-
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 def money_to_int(val: str) -> int:
     if not val:
@@ -54,7 +81,6 @@ def money_to_int(val: str) -> int:
     except ValueError:
         logger.warning(f"money_to_int: Cannot convert value '{val}' to int.")
         return 0
-
 
 # ---------------------------------------------------------------------
 # Firebase Initialization
@@ -72,42 +98,12 @@ def init_firestore():
         firebase_admin.initialize_app(cred)
     return firestore.client()
 
-
 db = None
 try:
     db = init_firestore()
     logger.info("Firestore initialized successfully.")
 except Exception as e:
     logger.error(f"Firestore initialization failed: {e}")
-
-# ---------------------------------------------------------------------
-# ImgBB Upload (Permanent Img URLs)
-# ---------------------------------------------------------------------
-IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac846")
-
-
-def upload_to_imgbb(file) -> str | None:
-    """Uploads a file object to ImgBB and returns the hosted image direct URL (permanent)."""
-    try:
-        response = requests.post(
-            "https://api.imgbb.com/1/upload",
-            params={"key": IMGBB_API_KEY},
-            files={"image": (file.filename, file.stream, file.content_type)},
-            timeout=30
-        )
-        result = response.json()
-        if response.status_code == 200 and result.get("success"):
-            return result["data"]["image"]["url"]
-        else:
-            app.logger.error(f"ImgBB upload failed: {result}")
-            return None
-    except requests.exceptions.RequestException as req_ex:
-        app.logger.error(f"ImgBB upload request error: {req_ex}")
-        return None
-    except Exception as e:
-        app.logger.error(f"ImgBB upload unexpected error: {e}")
-        return None
-
 
 # ---------------------------------------------------------------------
 # Product Data – Robust Persistence
@@ -118,7 +114,6 @@ def save_products(data: List[Dict[str, Any]]) -> None:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.error(f"Failed to write products file: {e}")
-
 
 def load_products() -> List[Dict[str, Any]]:
     if os.path.exists(products_file):
@@ -141,7 +136,6 @@ def load_products() -> List[Dict[str, Any]]:
     ]
     save_products(products_seed)
     return products_seed
-
 
 def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
     items = []
@@ -174,15 +168,12 @@ def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]
             logger.error(f"Error processing cart item {key}: {e}")
     return items, total
 
-
 def get_products():
     return load_products()
-
 
 @app.context_processor
 def inject_request():
     return dict(request=request)
-
 
 @app.context_processor
 def inject_now():
@@ -471,7 +462,8 @@ def secret_admin():
         action = request.form.get("action")
         if action == "add":
             files = request.files.getlist("img_file")
-            img_urls = [upload_to_imgbb(f) for f in files if f and f.filename]
+            # UPLOAD IMAGES TO FREEIMAGE.HOST
+            img_urls = [upload_to_freeimage_host(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
 
             features = request.form.get("features", "")
@@ -498,30 +490,23 @@ def secret_admin():
             if not product:
                 flash("Product not found.", "danger")
                 return redirect(url_for("secret_admin"))
-
             product["name"] = request.form.get("name")
             product["desc"] = request.form.get("desc")
             product["price_small"] = request.form.get("price_small")
             product["price_medium"] = request.form.get("price_medium")
             product["price_large"] = request.form.get("price_large")
-
             features = request.form.get("features", "")
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
-
             files = request.files.getlist("img_file")
-            img_urls = [upload_to_imgbb(f) for f in files if f and f.filename]
+            img_urls = [upload_to_freeimage_host(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
-
-            # Defensive list handling for images
             imgs = product.get("imgs")
             if imgs is None or isinstance(imgs, str):
                 imgs = [imgs] if imgs else []
             if img_urls:
                 imgs.extend(img_urls)
-            # Remove accidental Nones and empty strings
             imgs = [im for im in imgs if im]
             product["imgs"] = imgs
-
             save_products(products)
             flash("Product updated successfully.", "success")
             return redirect(url_for("secret_admin"))
@@ -554,7 +539,7 @@ def secret_admin():
                 return redirect(url_for("secret_admin"))
             files = request.files.getlist("replace_img")
             if files and files[0] and files[0].filename:
-                new_img_url = upload_to_imgbb(files[0])
+                new_img_url = upload_to_freeimage_host(files[0])
                 if new_img_url:
                     imgs = product.get("imgs")
                     if imgs is None or isinstance(imgs, str):
