@@ -450,6 +450,7 @@ def secret_admin():
 
     if request.method == "POST":
         action = request.form.get("action")
+
         if action == "add":
             files = request.files.getlist("img_file")
             img_urls = [upload_to_hostinger(f) for f in files if f and f.filename]
@@ -479,23 +480,28 @@ def secret_admin():
             if not product:
                 flash("Product not found.", "danger")
                 return redirect(url_for("secret_admin"))
+
             product["name"] = request.form.get("name")
             product["desc"] = request.form.get("desc")
             product["price_small"] = request.form.get("price_small")
             product["price_medium"] = request.form.get("price_medium")
             product["price_large"] = request.form.get("price_large")
+
             features = request.form.get("features", "")
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
+
             files = request.files.getlist("img_file")
             img_urls = [upload_to_hostinger(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
+
             imgs = product.get("imgs")
             if imgs is None or isinstance(imgs, str):
                 imgs = [imgs] if imgs else []
+
             if img_urls:
                 imgs.extend(img_urls)
-            imgs = [im for im in imgs if im]
-            product["imgs"] = imgs
+
+            product["imgs"] = [im for im in imgs if im]
             save_products(products)
             flash("Product updated successfully.", "success")
             return redirect(url_for("secret_admin"))
@@ -526,9 +532,10 @@ def secret_admin():
             if not product:
                 flash("Product not found for image replacement.", "danger")
                 return redirect(url_for("secret_admin"))
+
             files = request.files.getlist("replace_img")
             if files and files[0] and files[0].filename:
-                new_img_url = upload_to_freeimage_host(files[0])
+                new_img_url = upload_to_hostinger(files[0])  # ✅ FIXED
                 if new_img_url:
                     imgs = product.get("imgs")
                     if imgs is None or isinstance(imgs, str):
@@ -548,6 +555,7 @@ def secret_admin():
             return redirect(url_for("secret_admin"))
 
     return render_template("admin_panel.html", products=products)
+
 
 # ---------------------------------------------------------------------
 # Run App
