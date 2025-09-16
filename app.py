@@ -363,7 +363,11 @@ def submit_review():
     except:
         flash("Failed to submit review.")
     return redirect(url_for("home"))
+from datetime import datetime
 
+@app.context_processor
+def inject_now():
+    return {'now': datetime.utcnow}
 
 # ----------- Admin Panel -----------
 
