@@ -126,6 +126,18 @@ def save_product(product: dict):
         logger.error(f"Failed to save product {product.get('name')}: {e}")
         return False
 
+
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+
+def allowed_file(filename):
+    return (
+        "." in filename and 
+        filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
+
+
+
 def delete_product(pid):
     if not db:
         return False
