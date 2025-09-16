@@ -9,6 +9,10 @@ import requests
 import firebase_admin
 from firebase_admin import credentials, firestore
 import razorpay
+import base64
+
+
+
 
 # ---------------------------------------------------------------------
 # Load environment variables
@@ -40,30 +44,32 @@ razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 # ---------------------------------------------------------------------
 
 
-import ftplib
-import io
+IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "3848a428af79505ac0d47218d4570b7c")  # Replace with actual key
 
-# FTP host and credentials (use secure storage in production)
-FTP_HOST = "145.79.211.195"
-FTP_USER = "u938557122"
-FTP_PASS = "8141@#Kaswala"
-
-def upload_file_to_hostinger(file_storage) -> str | None:
+def upload_file_to_imgbb(file_storage) -> str | None:
+    """
+    Uploads image file to ImgBB and returns the hosted image URL.
+    """
     try:
-        ftp = ftplib.FTP(FTP_HOST)
-        ftp.login(FTP_USER, FTP_PASS)
-        ftp.cwd('public_html/uploads')
-        
-        filename = file_storage.filename.replace(" ", "_")
-        file_storage.stream.seek(0)  # Reset pointer before reading
-        file_bytes = file_storage.read()
-        bio = io.BytesIO(file_bytes)
-        ftp.storbinary(f"STOR {filename}", bio)
-        ftp.quit()
+        file_storage.stream.seek(0)
+        img_bytes = file_storage.read()
+        encoded_image = base64.b64encode(img_bytes).decode('utf-8')
 
-        return f"https://walls-craft.com/uploads/{filename}"
+        url = "https://api.imgbb.com/1/upload"
+        payload = {
+            "key": IMGBB_API_KEY,
+            "image": encoded_image,
+            "name": file_storage.filename
+        }
+        response = requests.post(url, data=payload)
+        result = response.json()
+        if response.status_code == 200 and result.get("success"):
+            return result["data"]["url"]
+        else:
+            logger.error(f"ImgBB upload failed: {result}")
+            return None
     except Exception as e:
-        logger.error(f"FTP upload error: {e}")
+        logger.error(f"Error uploading to ImgBB: {e}")
         return None
 
 
@@ -134,12 +140,13 @@ def load_products() -> List[Dict[str, Any]]:
     products_seed = [
         {
             "id": 1,
-            "imgs": ["https://walls-craft.com/uploads/sample.jpg"],
+            "imgs": ["https://i.ibb.co/DfdkKCgk/about2-jpg.jpg"],
             "name": "Golden Glow Panel",
             "desc": "Handcrafted golden-accent Wall Craft panel.",
             "price_small": "₹9,999",
             "price_medium": "₹12,999",
             "price_large": "₹15,999",
+            "features": []
         }
     ]
     save_products(products_seed)
@@ -464,19 +471,15 @@ def submit_review():
 # ---------------------------------------------------------------------
 @app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
-    products = load_products()  # Always load latest products
-
+    products = load_products()
     if request.method == "POST":
         action = request.form.get("action")
-
         if action == "add":
             files = request.files.getlist("img_file")
-            img_urls = [upload_file_to_hostinger(f) for f in files if f and f.filename]
-            img_urls = [u for u in img_urls if u]  # Filter out None
-
+            img_urls = [upload_file_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
+            img_urls = [u for u in img_urls if u]
             features = request.form.get("features", "")
             features_list = [f.strip() for f in features.split(",") if f.strip()]
-
             new_id = max([p["id"] for p in products], default=0) + 1
             products.append({
                 "id": new_id,
@@ -491,47 +494,37 @@ def secret_admin():
             save_products(products)
             flash("Product added successfully.", "success")
             return redirect(url_for("secret_admin"))
-
         elif action == "update":
             pid = int(request.form.get("id"))
             product = next((p for p in products if p["id"] == pid), None)
             if not product:
                 flash("Product not found.", "danger")
                 return redirect(url_for("secret_admin"))
-
             product["name"] = request.form.get("name")
             product["desc"] = request.form.get("desc")
             product["price_small"] = request.form.get("price_small")
             product["price_medium"] = request.form.get("price_medium")
             product["price_large"] = request.form.get("price_large")
-
             features = request.form.get("features", "")
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
-
             files = request.files.getlist("img_file")
-            img_urls = [upload_file_to_hostinger(f) for f in files if f and f.filename]
+            img_urls = [upload_file_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
             img_urls = [u for u in img_urls if u]
-
-            imgs = product.get("imgs")
-            if imgs is None:
-                imgs = []
-            elif isinstance(imgs, str):
+            imgs = product.get("imgs") or []
+            if isinstance(imgs, str):
                 imgs = [imgs]
-
             if img_urls:
                 imgs.extend(img_urls)
             product["imgs"] = imgs
             save_products(products)
             flash("Product updated successfully.", "success")
             return redirect(url_for("secret_admin"))
-
         elif action == "delete":
             pid = int(request.form.get("id"))
             products = [p for p in products if p["id"] != pid]
             save_products(products)
             flash("Product deleted successfully.", "success")
             return redirect(url_for("secret_admin"))
-
         elif action == "remove_image":
             pid = int(request.form.get("id"))
             img_url = request.form.get("img_url")
@@ -543,7 +536,6 @@ def secret_admin():
             else:
                 flash("Image or product not found.", "danger")
             return redirect(url_for("secret_admin"))
-
         elif action == "replace_image":
             pid = int(request.form.get("id"))
             img_url = request.form.get("img_url")
@@ -551,17 +543,13 @@ def secret_admin():
             if not product:
                 flash("Product not found for image replacement.", "danger")
                 return redirect(url_for("secret_admin"))
-
             files = request.files.getlist("replace_img")
-            if files and files[0] and files[0].filename:
-                new_img_url = upload_file_to_hostinger(files[0])
+            if files and files[0] and files[0].filename and allowed_file(files[0].filename):
+                new_img_url = upload_file_to_imgbb(files[0])
                 if new_img_url:
-                    imgs = product.get("imgs")
-                    if imgs is None:
-                        imgs = []
-                    elif isinstance(imgs, str):
+                    imgs = product.get("imgs") or []
+                    if isinstance(imgs, str):
                         imgs = [imgs]
-
                     if img_url in imgs:
                         idx = imgs.index(img_url)
                         imgs[idx] = new_img_url
@@ -575,9 +563,7 @@ def secret_admin():
             else:
                 flash("No replacement image selected.", "warning")
             return redirect(url_for("secret_admin"))
-
     return render_template("admin_panel.html", products=products)
-
 
 # ---------------------------------------------------------------------
 # Run App
