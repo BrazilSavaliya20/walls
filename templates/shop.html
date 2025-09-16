@@ -102,161 +102,259 @@
     }
 
     /* ===== Main Section ===== */
-    .featured.ultra-luxury-featured {
-      padding: 20px 5%;
-      background: linear-gradient(135deg, #0a0a0a, #121212);
-      color: #f4e7c1;
-      min-height: 80vh;
-    }
+/* ========== Featured Products ========== */
+.ultra-luxury-featured { 
+  padding: 20px 5%;
+  background: linear-gradient(135deg, #0a0a0a, #121212); 
+  color: #f4e7c1;
+}
 
-    .product-grid.ultra-luxury-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      width: 100%;
-      margin: 0 auto;
-      max-width: 1400px;
-    }
-    @media (max-width: 992px) {
-      .product-grid.ultra-luxury-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-        max-width: 900px;
-      }
-    }
-    @media (max-width: 480px) {
-      .product-grid.ultra-luxury-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        max-width: 100%;
-        margin: 0 10px;
-      }
-    }
+/* Enhanced mobile padding */
+@media (max-width: 480px) {
+  .ultra-luxury-featured {
+    padding: 20px 8px;
+  }
+}
 
-    /* Product Card */
-    .ultra-luxury-product-card {
-      background: #1a1a1a;
-      border-radius: 8px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 320px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.15);
-      overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .ultra-luxury-product-card:hover {
-      box-shadow: 0 10px 30px rgba(212,175,55,0.7);
-      transform: translateY(-5px);
-    }
+/* Grid */
+.ultra-luxury-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+}
 
-    .product-image-wrapper {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #222;
-      position: relative;
-    }
-    .product-image-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.3s ease;
-    }
-    .ultra-luxury-product-card:hover .product-image-wrapper img {
-      transform: scale(1.05);
-    }
+/* Tablet and small desktops */
+@media (max-width: 992px) {
+  .ultra-luxury-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
 
-    /* Price and info */
-    .product-info {
-      margin-top: 14px;
-      text-align: center;
-      width: 100%;
-    }
-    .product-name {
-      font-family: 'Cinzel', serif;
-      font-weight: 600;
-      font-size: 1.3rem;
-      color: #f9f5e3;
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
-      user-select: none;
-    }
-    .price {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #d4af37;
-      margin-bottom: 14px;
-      text-shadow: 0 0 6px rgba(212,175,55,0.4);
-    }
+/* Mobile */
+@media (max-width: 480px) {
+  .ultra-luxury-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+}
 
-    /* Centered fixed Add to Cart Button */
-    .btn-add {
-      background: #d4af37;
-      color: #000;
-      font-weight: 700;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      letter-spacing: 1px;
-      width: 160px;
-      cursor: pointer;
-      box-shadow: 0 6px 15px rgba(212, 175, 55, 0.7);
-      transition: background-color 0.3s ease, transform 0.25s ease;
-      margin: 0 auto;
-      display: block;
-      text-transform: uppercase;
-      user-select: none;
-    }
-    .btn-add:hover, .btn-add:focus {
-      background-color: #b8860b;
-      box-shadow: 0 8px 20px rgba(184, 134, 11, 0.9);
-      transform: scale(1.07);
-      outline: none;
-    }
+/* Product Card Content (Name + Price + Button) */
+.product-info {
+  text-align: center;
+  margin-top: 12px;
+}
 
-    /* Discount badge */
-    .discount-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: #d4af37;
-      color: #000;
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 6px 8px;
-      border-radius: 8px;
-      user-select: none;
-      text-shadow: none;
-    }
+.product-info h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f9f5e3;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+}
 
-    .product-card {
-  cursor: pointer;
-  user-select: none;
+.product-link:hover .product-info h3 {
+  color: #d4af37; /* golden highlight on hover */
+}
+
+.product-info .price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #d4af37;
+  margin-bottom: 14px;
+  display: block;
+  text-shadow: 0 0 6px rgba(212,175,55,0.4);
+}
+
+/* Add to Cart container */
+.add-to-cart-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #1a1a1a;
+  margin-top: 12px;
+}
+
+/* Add to Cart button - REDUCED SIZE FOR DESKTOP */
+.btn-add {
+  background: #d4af37;
+  color: #000;
+  border-radius: 8px;              /* Reduced from 10px */
+  padding: 8px 16px;               /* Reduced from 12px 28px */
+  font-weight: 700;
+  font-size: 0.9rem;               /* Reduced from 1.1rem */
+  box-shadow: 0 3px 10px rgba(212, 175, 55, 0.6);  /* Reduced shadow */
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
+  user-select: none;
+  border: none;
+  letter-spacing: 1px;             /* Reduced from 1.2px */
+  width: 100%;
+  max-width: 140px;                /* Reduced from 180px */
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Desktop/Large screens - even smaller button */
+@media (min-width: 1200px) {
+  .btn-add {
+    padding: 6px 12px;             /* Even smaller for large screens */
+    font-size: 0.8rem;
+    max-width: 120px;
+    border-radius: 6px;
+  }
+}
+
+/* Tablet view adjustments */
+@media (max-width: 992px) and (min-width: 481px) {
+  .btn-add {
+    padding: 9px 18px;
+    font-size: 0.95rem;
+    max-width: 150px;
+  }
+}
+
+/* Mobile - keep original smaller size */
+@media (max-width: 480px) {
+  .btn-add {
+    padding: 10px 18px;            /* Keep mobile padding */
+    font-size: 0.9rem;             /* Keep mobile font size */
+    max-width: 140px;              /* Keep mobile width */
+    border-radius: 8px;
+  }
+}
+
+.btn-add:hover, .btn-add:focus {
+  background-color: #b8860b;
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.8);  /* Adjusted shadow */
+  transform: scale(1.05);
+  outline: none;
+}
+
+/* Quantity & Number Input */
+.add-to-cart-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+@media (max-width: 480px) {
+  .add-to-cart-form {
+    gap: 8px;
+    margin-top: 10px;
+  }
+}
+
+.qty-btn {
+  background: #333;
+  color: #f4e7c1;
+  border: none;
+  width: 40px;
+  height: 40px;
+  font-size: 1.3rem;
   border-radius: 8px;
-  padding: 12px;
-  min-height: 320px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
-.product-card:focus {
-  outline: 3px solid #b88e2f;
+.qty-btn:hover {
+  background-color: #b88e2f;
+  color: #fff;
+  transform: scale(1.05);
 }
 
-.product-card:hover {
-  box-shadow: 0 10px 30px rgba(212,175,55,0.7);
-  transform: translateY(-5px);
+@media (max-width: 480px) {
+  .qty-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+  }
 }
 
+/* Enhanced number input */
+.add-to-cart-form input[type=number]::-webkit-inner-spin-button,
+.add-to-cart-form input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.add-to-cart-form input[type=number] {
+  -moz-appearance: textfield;
+  width: 56px;
+  font-size: 1.05rem;
+  border-radius: 8px;
+  border: 2.5px solid #b88e2f;
+  color: #f4e7c1;
+  background: transparent;
+  text-align: center;
+  padding: 6px 0;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+@media (max-width: 480px) {
+  .add-to-cart-form input[type=number] {
+    width: 44px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
+}
+
+.add-to-cart-form input[type=number]:focus {
+  outline: none;
+  border-color: #d4af37;
+  box-shadow: 0 0 8px rgba(212,175,55,0.6);
+}
+
+/* Product Image Wrapper */
+.product-link .product-image-wrapper {
+  width: 100%;
+  max-width: 350px;
+  aspect-ratio: 4 / 5;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.7);
+  margin: 0 auto;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.product-link .product-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-link:hover .product-image-wrapper {
+  box-shadow: inset 0 0 25px rgba(212, 175, 55, 0.85);
+  transform: scale(1.02);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .product-link .product-image-wrapper {
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-link .product-image-wrapper {
+    max-width: 100%;        /* full width */
+    aspect-ratio: 4 / 5;    /* taller for visibility */
+  }
+}
+
+@media (max-width: 480px) {
+  .product-link .product-image-wrapper {
+    max-width: 100%;        /* take full width */
+    aspect-ratio: 3 / 4;    /* bigger image look */
+  }
+}
 
     /* Footer styling */
     footer {
@@ -428,61 +526,58 @@
   </nav>
 </header>
 
+<!-- Featured Products Section -->
 <section class="featured ultra-luxury-featured">
-  <h2>Our Shop</h2>
+  <h2>Featured Creations</h2>
   <div class="product-grid ultra-luxury-grid">
     {% for product in products %}
-    <div class="product-card ultra-luxury-product-card" data-product-id="{{ product.id }}" tabindex="0" role="link" aria-label="View details for {{ product.name }}">
-      <div class="product-image-wrapper">
-        <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}" loading="lazy" />
-        {% if product.old and (product.old|float) != 0 %}
-        <div class="discount-badge">
-          -{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%
+    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="product-link" title="{{ product.name }}" style="text-decoration:none;">
+      <div>
+        <div class="product-image-wrapper">
+          <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}">
+          {% if product.old and (product.old|float) != 0 %}
+          <div class="discount-badge">
+            -{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%
+          </div>
+          {% endif %}
         </div>
-        {% endif %}
-      </div>
-      <div class="product-info">
-        <h3 class="product-name">{{ product.name }}</h3>
-        <div class="price">
-          <span class="new-price">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
+        <div class="product-info">
+          <h3 class="product-name">{{ product.name }}</h3>
+          <div class="price">
+            <span class="new-price">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
+          </div>
+          <button type="button" class="btn btn-add" style="pointer-events:none;opacity:0.84;">Add to Cart</button>
         </div>
-        <button type="button" class="btn btn-add" aria-label="Add {{ product.name }} to cart">Add to Cart</button>
       </div>
-    </div>
+    </a>
     {% endfor %}
   </div>
 </section>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.product-card').forEach(card => {
-      const productId = card.getAttribute('data-product-id');
+  // Toggle quantity form visibility
+  function toggleCartOptions(productId) {
+    const form = document.getElementById('cart-form-' + productId);
+    if (form.style.display === 'none' || form.style.display === '') {
+      form.style.display = 'flex';
+      form.style.alignItems = 'center';
+      form.style.gap = '10px';
+    } else {
+      form.style.display = 'none';
+    }
+  }
 
-      card.addEventListener('click', e => {
-        // If clicked element is the Add to Cart button, add product to cart without navigation
-        if (e.target.closest('.btn-add')) {
-          e.stopPropagation();
-          // Trigger add to cart logic here - for example, a fetch POST or form submit
-          // This example just alerts; replace with actual add to cart code as needed
-          alert(`Add product ${productId} to cart (implement add to cart logic here)`);
-          return;
-        }
-
-        // Navigate to product detail page if clicked anywhere else on the card
-        window.location.href = `/product/${productId}`;
-      });
-
-      // Support keyboard accessibility
-      card.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          card.click();
-        }
-      });
-    });
-  });
+  // Change quantity +/- bounded between 1 and 10
+  function changeQuantity(productId, delta) {
+    const qtyInput = document.getElementById('quantity-' + productId);
+    let current = parseInt(qtyInput.value);
+    if (isNaN(current)) current = 1;
+    current += delta;
+    if (current < 1) current = 1;
+    else if (current > 10) current = 10;
+    qtyInput.value = current;
+  }
 </script>
-
 
 <script>
   function toggleMenu(x) {
