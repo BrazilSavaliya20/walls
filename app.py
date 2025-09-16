@@ -368,6 +368,9 @@ from datetime import datetime
 @app.context_processor
 def inject_now():
     return {'now': datetime.utcnow}
+@app.route("/cancellation-refund")
+def cancellation_refund():
+    return render_template("cancellation_refund.html")
 
 # ----------- Admin Panel -----------
 
