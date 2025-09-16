@@ -38,37 +38,42 @@ razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 # ---------------------------------------------------------------------
 # Hostinger Upload Integration
 # ---------------------------------------------------------------------
-def upload_to_hostinger(file) -> str | None:
-    """Uploads a file to Hostinger via upload.php and returns the hosted image URL."""
+import ftplib
+import io
+
+# FTP host and credentials (keep password secure; consider env vars)
+FTP_HOST = "ftp.walls-craft.com"
+FTP_USER = "u938557122"
+FTP_PASS = "8141@#Kaswala"
+
+def upload_file_to_hostinger(file_storage) -> str | None:
+    """
+    Uploads werkzeug FileStorage file to Hostinger FTP /public_html/uploads and returns public URL.
+    """
     try:
-        url = "https://walls-craft.com/upload.php"  # Make sure this is absolute!
-        files = {"file": (file.filename, file.stream, file.content_type)}
-        response = requests.post(url, files=files, timeout=30)
-        result = response.json()
-        if result.get("success"):
-            return result["url"]
-        else:
-            app.logger.error(f"Upload failed: {result}")
-            return None
+        ftp = ftplib.FTP(FTP_HOST)
+        ftp.login(FTP_USER, FTP_PASS)
+        ftp.cwd('public_html/uploads')  # Change to uploads folder; create beforehand
+
+        filename = file_storage.filename.replace(" ", "_")
+        file_bytes = file_storage.read()  # Read file content
+
+        # Use FTP storbinary to upload from bytes stream
+        bio = io.BytesIO(file_bytes)
+        ftp.storbinary(f"STOR {filename}", bio)
+
+        ftp.quit()
+
+        # Return public URL
+        return f"https://walls-craft.com/uploads/{filename}"
     except Exception as e:
-        app.logger.error(f"Hostinger upload error: {e}")
+        print(f"FTP upload error: {e}")
         return None
 
 
 
 
-@app.route("/upload", methods=["GET", "POST"])
-def upload():
-    message = ""
-    if request.method == "POST":
-        file = request.files.get("file")
-        if file and allowed_file(file.filename):
-            filename = file.filename.replace(" ", "_")
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            message = f"Upload successful! File accessible at /uploads/{filename}"
-        else:
-            message = "Invalid file or no file selected."
-    return render_template("upload.html", message=message)
+
 
 # ---------------------------------------------------------------------
 # Helpers
@@ -462,15 +467,16 @@ def submit_review():
 # ---------------------------------------------------------------------
 @app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
-    products = load_products()
+    products = load_products()  # Always load latest products
 
     if request.method == "POST":
         action = request.form.get("action")
 
         if action == "add":
+            # Handle new product addition with image upload
             files = request.files.getlist("img_file")
             img_urls = [upload_to_hostinger(f) for f in files if f and f.filename]
-            img_urls = [u for u in img_urls if u]
+            img_urls = [u for u in img_urls if u]  # Filter out None
 
             features = request.form.get("features", "")
             features_list = [f.strip() for f in features.split(",") if f.strip()]
@@ -491,6 +497,7 @@ def secret_admin():
             return redirect(url_for("secret_admin"))
 
         elif action == "update":
+            # Update existing product details and upload additional images
             pid = int(request.form.get("id"))
             product = next((p for p in products if p["id"] == pid), None)
             if not product:
@@ -510,19 +517,22 @@ def secret_admin():
             img_urls = [upload_to_hostinger(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
 
+            # Normalize existing imgs to a list if needed
             imgs = product.get("imgs")
-            if imgs is None or isinstance(imgs, str):
-                imgs = [imgs] if imgs else []
+            if imgs is None:
+                imgs = []
+            elif isinstance(imgs, str):
+                imgs = [imgs]
 
             if img_urls:
                 imgs.extend(img_urls)
-
-            product["imgs"] = [im for im in imgs if im]
+            product["imgs"] = imgs
             save_products(products)
             flash("Product updated successfully.", "success")
             return redirect(url_for("secret_admin"))
 
         elif action == "delete":
+            # Delete a product by ID
             pid = int(request.form.get("id"))
             products = [p for p in products if p["id"] != pid]
             save_products(products)
@@ -530,6 +540,7 @@ def secret_admin():
             return redirect(url_for("secret_admin"))
 
         elif action == "remove_image":
+            # Remove a specific image from a product
             pid = int(request.form.get("id"))
             img_url = request.form.get("img_url")
             product = next((p for p in products if p["id"] == pid), None)
@@ -542,6 +553,7 @@ def secret_admin():
             return redirect(url_for("secret_admin"))
 
         elif action == "replace_image":
+            # Replace one image with a new upload
             pid = int(request.form.get("id"))
             img_url = request.form.get("img_url")
             product = next((p for p in products if p["id"] == pid), None)
@@ -551,11 +563,14 @@ def secret_admin():
 
             files = request.files.getlist("replace_img")
             if files and files[0] and files[0].filename:
-                new_img_url = upload_to_hostinger(files[0])  # ✅ FIXED
+                new_img_url = upload_to_hostinger(files[0])  # Your image upload function
                 if new_img_url:
                     imgs = product.get("imgs")
-                    if imgs is None or isinstance(imgs, str):
-                        imgs = [imgs] if imgs else []
+                    if imgs is None:
+                        imgs = []
+                    elif isinstance(imgs, str):
+                        imgs = [imgs]
+                    
                     if img_url in imgs:
                         idx = imgs.index(img_url)
                         imgs[idx] = new_img_url
@@ -569,6 +584,10 @@ def secret_admin():
             else:
                 flash("No replacement image selected.", "warning")
             return redirect(url_for("secret_admin"))
+
+    # Render admin panel with current products
+    return render_template("admin_panel.html", products=products)
+
 
     return render_template("admin_panel.html", products=products)
 
