@@ -57,9 +57,10 @@ def upload_file_to_imgbb(file_storage) -> str | None:
 
         url = "https://api.imgbb.com/1/upload"
         payload = {
-            "key": IMGBB_API_KEY,
+            "key": "3848a428af79505ac0d47218d4570b7c",
             "image": encoded_image,
-            "name": file_storage.filename
+            "name": file_storage.filename,
+            "expiration": "0"
         }
         response = requests.post(url, data=payload)
         result = response.json()
