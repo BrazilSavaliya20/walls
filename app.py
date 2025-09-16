@@ -368,6 +368,8 @@ from datetime import datetime
 @app.context_processor
 def inject_now():
     return {'now': datetime.utcnow}
+
+
 @app.route("/cancellation-refund")
 def cancellation_refund():
     return render_template("cancellation_refund.html")
@@ -376,6 +378,17 @@ def cancellation_refund():
 @app.route("/privacy-policy")
 def privacy_policy():
     return render_template("privacy_policy.html")
+
+
+
+@app.route("/terms-conditions")
+def terms_conditions():
+    return render_template("terms_conditions.html")
+
+@app.route("/shipping-policy")
+def shipping_policy():
+    return render_template("shipping_policy.html")
+
 
 # ----------- Admin Panel -----------
 
