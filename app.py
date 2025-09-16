@@ -38,19 +38,13 @@ razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 # ---------------------------------------------------------------------
 # Hostinger Upload Integration
 # ---------------------------------------------------------------------
-import ftplib
-import io
 
-# FTP host and credentials (keep password secure; consider env vars)
-FTP_HOST = "ftp.walls-craft.com"
-FTP_USER = "u938557122"
-FTP_PASS = "8141@#Kaswala"
 
 import ftplib
 import io
 
 # FTP host and credentials (use secure storage in production)
-FTP_HOST = "ftp.walls-craft.com"
+FTP_HOST = "ftp://145.79.211.195"
 FTP_USER = "u938557122"
 FTP_PASS = "8141@#Kaswala"
 
