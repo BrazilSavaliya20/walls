@@ -199,6 +199,13 @@ def product_detail(product_id):
 def about():
     return render_template("about.html")
 
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        flash("Thank you for connecting with us! We will get back to you soon.")
+        return redirect(url_for("contact"))
+    return render_template("contact.html")
+
 
 @app.route("/cart")
 def cart():
