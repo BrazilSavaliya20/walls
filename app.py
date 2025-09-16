@@ -44,27 +44,28 @@ import ftplib
 import io
 
 # FTP host and credentials (use secure storage in production)
-FTP_HOST = "ftp://145.79.211.195"
+FTP_HOST = "145.79.211.195"
 FTP_USER = "u938557122"
 FTP_PASS = "8141@#Kaswala"
 
 def upload_file_to_hostinger(file_storage) -> str | None:
-    """
-    Uploads werkzeug FileStorage to Hostinger FTP folder /public_html/uploads and returns public URL.
-    """
     try:
         ftp = ftplib.FTP(FTP_HOST)
         ftp.login(FTP_USER, FTP_PASS)
-        ftp.cwd('public_html/uploads')  # Make sure this folder exists
+        ftp.cwd('public_html/uploads')
+        
         filename = file_storage.filename.replace(" ", "_")
+        file_storage.stream.seek(0)  # Reset pointer before reading
         file_bytes = file_storage.read()
         bio = io.BytesIO(file_bytes)
         ftp.storbinary(f"STOR {filename}", bio)
         ftp.quit()
+
         return f"https://walls-craft.com/uploads/{filename}"
     except Exception as e:
-        print(f"FTP upload error: {e}")
+        logger.error(f"FTP upload error: {e}")
         return None
+
 
 
 
