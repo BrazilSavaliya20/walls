@@ -372,6 +372,11 @@ def inject_now():
 def cancellation_refund():
     return render_template("cancellation_refund.html")
 
+
+@app.route("/privacy-policy")
+def privacy_policy():
+    return render_template("privacy_policy.html")
+
 # ----------- Admin Panel -----------
 
 @app.route("/secret-admin", methods=["GET", "POST"])
