@@ -234,6 +234,30 @@
       text-shadow: none;
     }
 
+    .product-card {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 320px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:focus {
+  outline: 3px solid #b88e2f;
+}
+
+.product-card:hover {
+  box-shadow: 0 10px 30px rgba(212,175,55,0.7);
+  transform: translateY(-5px);
+}
+
+
     /* Footer styling */
     footer {
       background: #111;
@@ -340,6 +364,47 @@
         justify-content: center;
       }
     }
+
+    .footer-policies {
+  background: #181818;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+.footer-policies h4 {
+  color: #d4af37;
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #b88e2f;
+  padding-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+.footer-policies ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.footer-policies ul li {
+  margin: 10px 0;
+}
+
+.footer-policies ul li a {
+  color: #f4e7c1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  font-size: 15px;
+}
+
+.footer-policies ul li a:hover {
+  color: #b88e2f;
+  text-shadow: 0 0 6px #b88e2f;
+}
+
   </style>
 </head>
 <body>
@@ -367,28 +432,57 @@
   <h2>Our Shop</h2>
   <div class="product-grid ultra-luxury-grid">
     {% for product in products %}
-    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="product-link" title="{{ product.name }}" style="text-decoration:none;">
-      <div>
-        <div class="product-image-wrapper">
-          <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}" loading="lazy" />
-          {% if product.old and (product.old|float) != 0 %}
-          <div class="discount-badge">
-            -{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%
-          </div>
-          {% endif %}
+    <div class="product-card ultra-luxury-product-card" data-product-id="{{ product.id }}" tabindex="0" role="link" aria-label="View details for {{ product.name }}">
+      <div class="product-image-wrapper">
+        <img src="{{ product.imgs[0] }}?v={{ now().timestamp() }}" alt="{{ product.name }}" loading="lazy" />
+        {% if product.old and (product.old|float) != 0 %}
+        <div class="discount-badge">
+          -{{ ((product.old|float - product.new|float) / (product.old|float) * 100) | round(0) }}%
         </div>
-        <div class="product-info">
-          <h3 class="product-name">{{ product.name }}</h3>
-          <div class="price">
-            <span class="new-price">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
-          </div>
-          <button type="button" class="btn btn-add" disabled>Add to Cart</button>
-        </div>
+        {% endif %}
       </div>
-    </a>
+      <div class="product-info">
+        <h3 class="product-name">{{ product.name }}</h3>
+        <div class="price">
+          <span class="new-price">₹{{ product.price_small }} – ₹{{ product.price_large }}</span>
+        </div>
+        <button type="button" class="btn btn-add" aria-label="Add {{ product.name }} to cart">Add to Cart</button>
+      </div>
+    </div>
     {% endfor %}
   </div>
 </section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.product-card').forEach(card => {
+      const productId = card.getAttribute('data-product-id');
+
+      card.addEventListener('click', e => {
+        // If clicked element is the Add to Cart button, add product to cart without navigation
+        if (e.target.closest('.btn-add')) {
+          e.stopPropagation();
+          // Trigger add to cart logic here - for example, a fetch POST or form submit
+          // This example just alerts; replace with actual add to cart code as needed
+          alert(`Add product ${productId} to cart (implement add to cart logic here)`);
+          return;
+        }
+
+        // Navigate to product detail page if clicked anywhere else on the card
+        window.location.href = `/product/${productId}`;
+      });
+
+      // Support keyboard accessibility
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          card.click();
+        }
+      });
+    });
+  });
+</script>
+
 
 <script>
   function toggleMenu(x) {
