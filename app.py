@@ -36,38 +36,28 @@ RAZORPAY_KEY_SECRET = "xPSpg6R2zzdWf85Pn5gGfOyQ"
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 # ---------------------------------------------------------------------
-# Freeimage.host API configuration
+# Hostinger Upload Integration
 # ---------------------------------------------------------------------
-FREEIMAGE_API_KEY = os.environ.get("FREEIMAGE_API_KEY", "6d207e02198a847aa98d0a2a901485a5")   # Store your API key in .env
-
-def upload_to_freeimage_host(file) -> str | None:
-    """Uploads a file object to Freeimage.host and returns the hosted image direct URL."""
+def upload_to_hostinger(file) -> str | None:
+    """Uploads a file to Hostinger via upload.php and returns the hosted image URL."""
     try:
-        url = "https://freeimage.host/api/1/upload"
-        payload = {
-            "key": FREEIMAGE_API_KEY,
-            "action": "upload",
-            "format": "json"
-        }
-        # We use files["source"] as described in the API docs
-        files = {
-            "source": (file.filename, file.stream, file.content_type)
-        }
-        response = requests.post(url, data=payload, files=files, timeout=30)
+        url = "https://walls-craft.com/upload.php"
+        files = {"file": (file.filename, file.stream, file.content_type)}
+        response = requests.post(url, files=files, timeout=30)
         result = response.json()
-        if response.status_code == 200 and result.get("status_code") == 200:
-            return result["image"]["url"]  # Direct link to the uploaded image
+        if result.get("success"):
+            return result["url"]
         else:
-            app.logger.error(f"Freeimage.host upload failed: {result}")
+            app.logger.error(f"Upload failed: {result}")
             return None
     except Exception as e:
-        app.logger.error(f"Freeimage.host upload error: {e}")
+        app.logger.error(f"Hostinger upload error: {e}")
         return None
 
 # ---------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -126,7 +116,7 @@ def load_products() -> List[Dict[str, Any]]:
     products_seed = [
         {
             "id": 1,
-            "imgs": ["https://i.ibb.co/DfdkKCgk/about2-jpg.jpg"],
+            "imgs": ["https://walls-craft.com/uploads/sample.jpg"],
             "name": "Golden Glow Panel",
             "desc": "Handcrafted golden-accent Wall Craft panel.",
             "price_small": "₹9,999",
@@ -452,18 +442,17 @@ def submit_review():
     return redirect(url_for("home"))
 
 # ---------------------------------------------------------------------
-# Admin Panel – Always loads and saves immediately for true robustness
+# Admin Panel
 # ---------------------------------------------------------------------
 @app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
-    products = load_products()  # Always get latest
+    products = load_products()
 
     if request.method == "POST":
         action = request.form.get("action")
         if action == "add":
             files = request.files.getlist("img_file")
-            # UPLOAD IMAGES TO FREEIMAGE.HOST
-            img_urls = [upload_to_freeimage_host(f) for f in files if f and f.filename]
+            img_urls = [upload_to_hostinger(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
 
             features = request.form.get("features", "")
@@ -498,7 +487,7 @@ def secret_admin():
             features = request.form.get("features", "")
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
             files = request.files.getlist("img_file")
-            img_urls = [upload_to_freeimage_host(f) for f in files if f and f.filename]
+            img_urls = [upload_to_hostinger(f) for f in files if f and f.filename]
             img_urls = [u for u in img_urls if u]
             imgs = product.get("imgs")
             if imgs is None or isinstance(imgs, str):
