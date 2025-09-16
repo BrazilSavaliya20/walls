@@ -41,7 +41,7 @@ razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 def upload_to_hostinger(file) -> str | None:
     """Uploads a file to Hostinger via upload.php and returns the hosted image URL."""
     try:
-        url = "https://walls-craft.com/upload.php"
+        url = "https://walls-craft.com/upload.php"  # Make sure this is absolute!
         files = {"file": (file.filename, file.stream, file.content_type)}
         response = requests.post(url, files=files, timeout=30)
         result = response.json()
@@ -53,6 +53,22 @@ def upload_to_hostinger(file) -> str | None:
     except Exception as e:
         app.logger.error(f"Hostinger upload error: {e}")
         return None
+
+
+
+
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+    message = ""
+    if request.method == "POST":
+        file = request.files.get("file")
+        if file and allowed_file(file.filename):
+            filename = file.filename.replace(" ", "_")
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            message = f"Upload successful! File accessible at /uploads/{filename}"
+        else:
+            message = "Invalid file or no file selected."
+    return render_template("upload.html", message=message)
 
 # ---------------------------------------------------------------------
 # Helpers
