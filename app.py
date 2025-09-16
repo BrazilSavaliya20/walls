@@ -195,6 +195,11 @@ def product_detail(product_id):
         abort(404)
     return render_template("product_detail.html", product=product)
 
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
