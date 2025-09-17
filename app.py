@@ -465,7 +465,8 @@ def secret_admin():
         action = request.form.get("action")
         if action == "add":
             files = request.files.getlist("img_file")
-            img_urls = [upload_file_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
+            img_urls = [upload_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
+
             img_urls = [u for u in img_urls if u]
             features = request.form.get("features", "")
             features_list = [f.strip() for f in features.split(",") if f.strip()]
@@ -500,7 +501,7 @@ def secret_admin():
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
             # handle images
             files = request.files.getlist("img_file")
-            img_urls = [upload_file_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
+            img_urls = [upload_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
             img_urls = [u for u in img_urls if u]
             imgs = product.get("imgs", [])
             if isinstance(imgs, str):
