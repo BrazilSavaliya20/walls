@@ -136,6 +136,13 @@ def allowed_file(filename):
         filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
     )
 
+def money_to_int(val: str) -> int:
+    if not val:
+        return 0
+    try:
+        return int(val.replace("₹", "").replace(",", "").strip())
+    except Exception:
+        return 0
 
 
 def delete_product(pid):

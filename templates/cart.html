@@ -529,7 +529,7 @@
 
 <header class="navbar">
   <a href="{{ url_for('home') }}" style="display: flex; align-items: center; gap: 10px;">
-    <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Wall Craft Design" style="height: 60px;"/>
+    <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Wall Craft Design" style="height: 60px;" />
     <div class="logo">Wall<span>Crafts</span></div>
   </a>
 
@@ -550,12 +550,36 @@
     </ul>
   </nav>
 </header>
+
 <script>
   function toggleMenu(x) {
     x.classList.toggle("active");
     document.getElementById("navMenu").classList.toggle("active");
   }
 </script>
+
+<!-- Example Product Add to Cart Form -->
+<!-- Repeat this block for each product on product or shop page -->
+<div class="product">
+  <h3>{{ product.name }}</h3>
+  <img src="{{ product.imgs[0] }}" alt="{{ product.name }}" />
+  <p>{{ product.desc }}</p>
+
+  <form action="{{ url_for('add_to_cart') }}" method="POST" class="add-to-cart-form">
+    <input type="hidden" name="product_id" value="{{ product.id }}" />
+    <label for="size_select_{{ product.id }}">Size:</label>
+    <select id="size_select_{{ product.id }}" name="size" required>
+      <option value="small">Small (₹{{ product.price_small }})</option>
+      <option value="medium">Medium (₹{{ product.price_medium }})</option>
+      <option value="large">Large (₹{{ product.price_large }})</option>
+    </select>
+
+    <label for="qty_input_{{ product.id }}">Quantity:</label>
+    <input id="qty_input_{{ product.id }}" type="number" name="quantity" value="1" min="1" max="10" required />
+
+    <button type="submit" class="btn btn-add">Add to Cart</button>
+  </form>
+</div>
 
 <div class="cart-container">
   <h2>Your Shopping Cart</h2>
@@ -580,8 +604,8 @@
         <td data-label="Price">₹{{ item.price }}</td>
         <td data-label="Quantity">
           <form method="POST" action="{{ url_for('update_cart') }}" class="qty-buttons">
-            <input type="hidden" name="product_id" value="{{ item.id }}">
-            <input type="hidden" name="size" value="{{ item.size }}">
+            <input type="hidden" name="product_id" value="{{ item.id }}" />
+            <input type="hidden" name="size" value="{{ item.size }}" />
             <button type="submit" name="action" value="decrease">-</button>
             <span>{{ item.qty }}</span>
             <button type="submit" name="action" value="increase">+</button>
@@ -590,8 +614,8 @@
         <td data-label="Subtotal">₹{{ item.subtotal }}</td>
         <td data-label="Remove">
           <form method="POST" action="{{ url_for('update_cart') }}">
-            <input type="hidden" name="product_id" value="{{ item.id }}">
-            <input type="hidden" name="size" value="{{ item.size }}">
+            <input type="hidden" name="product_id" value="{{ item.id }}" />
+            <input type="hidden" name="size" value="{{ item.size }}" />
             <button type="submit" name="action" value="remove" class="remove-btn">Remove</button>
           </form>
         </td>
@@ -605,13 +629,12 @@
 
   {% else %}
   <div class="empty-cart">
-    <img src="{{ url_for('static', filename='images/empty-cart.png') }}" alt="Empty Cart">
+    <img src="{{ url_for('static', filename='images/empty-cart.png') }}" alt="Empty Cart" />
     <p>Your cart is empty.</p>
     <a href="{{ url_for('shop') }}" class="continue-shopping">Continue Shopping</a>
   </div>
   {% endif %}
 </div>
-
 
 <footer>
   <div class="footer-container">
@@ -634,10 +657,10 @@
     <div class="footer-policies">
       <h4>Policies</h4>
       <ul>
-        <li><a href="https://www.walls-craft.com/cancellation-refund">Cancellation & Refund</a></li>
-        <li><a href="https://www.walls-craft.com/privacy-policy">Privacy Policy</a></li>
-        <li><a href="https://www.walls-craft.com/terms-conditions">Terms & Conditions</a></li>
-        <li><a href="https://www.walls-craft.com/shipping-policy">Shipping Policy</a></li>
+        <li><a href="{{ url_for('cancellation_refund') }}">Cancellation & Refund</a></li>
+        <li><a href="{{ url_for('privacy_policy') }}">Privacy Policy</a></li>
+        <li><a href="{{ url_for('terms_conditions') }}">Terms & Conditions</a></li>
+        <li><a href="{{ url_for('shipping_policy') }}">Shipping Policy</a></li>
       </ul>
     </div>
 
@@ -663,7 +686,6 @@
     <p>&copy; 2025 <span>Wall Craft</span>. All rights reserved.</p>
   </div>
 </footer>
-
 
 </body>
 </html>
