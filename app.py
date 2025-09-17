@@ -61,29 +61,26 @@ except Exception as e:
 import base64
 import requests
 
-def upload_to_imgbb(file_path, api_key):
-    with open(file_path, "rb") as f:
-        img_data = f.read()
-    base64_img = base64.b64encode(img_data).decode('utf-8')
-
-    url = "https://api.imgbb.com/1/upload"
-    payload = {
-        "key": api_key,
-        "image": base64_img,
-        "expiration": 0,  # 0 means no expiration
-    }
-
-    response = requests.post(url, data=payload)
-    if response.status_code == 200:
-        res_json = response.json()
-        if res_json.get("success"):
-            print("Image URL:", res_json["data"]["url"])
-            return res_json["data"]["url"]
+def upload_to_imgbb(file_storage, api_key):
+    try:
+        file_storage.stream.seek(0)
+        img_bytes = file_storage.read()
+        encoded_image = base64.b64encode(img_bytes).decode('utf-8')
+        url = "https://api.imgbb.com/1/upload"
+        payload = {
+            "key": api_key,
+            "image": encoded_image,
+            "name": file_storage.filename,
+            "expiration": "0"
+        }
+        response = requests.post(url, data=payload)
+        result = response.json()
+        if response.status_code == 200 and result.get("success"):
+            return result["data"]["url"]
         else:
-            print("ImgBB error:", res_json)
-    else:
-        print("HTTP error:", response.status_code)
-
+            logger.error(f"ImgBB failed: {result}")
+    except Exception as e:
+        logger.error(f"Error uploading to ImgBB: {e}")
     return None
 
 
@@ -501,7 +498,8 @@ def secret_admin():
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
             # handle images
             files = request.files.getlist("img_file")
-            img_urls = [upload_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
+            img_urls = [upload_to_imgbb(f, "4daaf1a5f4db5099ddf6cc4035486275") for f in files if f and f.filename and allowed_file(f.filename)]
+
             img_urls = [u for u in img_urls if u]
             imgs = product.get("imgs", [])
             if isinstance(imgs, str):
