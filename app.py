@@ -61,14 +61,14 @@ except Exception as e:
 import base64
 import requests
 
-def upload_to_imgbb(file_storage, IMGBB_API_KEY):
+def upload_to_imgbb(file_storage, api_key="4daaf1a5f4db5099ddf6cc4035486275"):
     try:
         file_storage.stream.seek(0)
         img_bytes = file_storage.read()
         encoded_image = base64.b64encode(img_bytes).decode('utf-8')
         url = "https://api.imgbb.com/1/upload"
         payload = {
-            "key": "4daaf1a5f4db5099ddf6cc4035486275",
+            "key": api_key,
             "image": encoded_image,
             "name": file_storage.filename,
             "expiration": "0"
@@ -82,6 +82,7 @@ def upload_to_imgbb(file_storage, IMGBB_API_KEY):
     except Exception as e:
         logger.error(f"Error uploading to ImgBB: {e}")
     return None
+
 
 
 # --- Product data in Firestore ---
@@ -498,7 +499,7 @@ def secret_admin():
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
             # handle images
             files = request.files.getlist("img_file")
-            img_urls = [upload_to_imgbb(f, "4daaf1a5f4db5099ddf6cc4035486275") for f in files if f and f.filename and allowed_file(f.filename)]
+            img_urls = [upload_to_imgbb(f, "IMGBB_API_KEY") for f in files if f and f.filename and allowed_file(f.filename)]
 
             img_urls = [u for u in img_urls if u]
             imgs = product.get("imgs", [])
