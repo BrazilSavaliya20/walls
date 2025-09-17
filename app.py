@@ -68,15 +68,16 @@ def upload_to_imgbb(file_storage, api_key="4daaf1a5f4db5099ddf6cc4035486275"):
         encoded_image = base64.b64encode(img_bytes).decode('utf-8')
         url = "https://api.imgbb.com/1/upload"
         payload = {
-            "key": api_key,
+            "key": api_key,                # Use api_key parameter dynamically
             "image": encoded_image,
             "name": file_storage.filename,
-            "expiration": "0"
+            "expiration": "0"              # 0 = no expiration
         }
         response = requests.post(url, data=payload)
         result = response.json()
         if response.status_code == 200 and result.get("success"):
-            return result["data"]["url"]
+            image_url = result["data"]["url"]  # Direct image URL
+            return image_url
         else:
             logger.error(f"ImgBB failed: {result}")
     except Exception as e:
@@ -141,6 +142,16 @@ def allowed_file(filename):
         filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
     )
 
+def delete_product(pid):
+    if not db:
+        return False
+    try:
+        db.collection("products").document(str(pid)).delete()
+        return True
+    except Exception:
+        return False
+
+
 def money_to_int(val: str) -> int:
     if not val:
         return 0
@@ -150,14 +161,6 @@ def money_to_int(val: str) -> int:
         return 0
 
 
-def delete_product(pid):
-    if not db:
-        return False
-    try:
-        db.collection("products").document(str(pid)).delete()
-        return True
-    except Exception:
-        return False
 
 # --- Cart Utilities ---
 def get_cart_items_and_total(cart, products):
