@@ -235,16 +235,19 @@ def cart():
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
-    product_id = str(request.form.get("product_id"))
-    quantity = int(request.form.get("quantity", 1))
-    size = request.form.get("size", "small")
-    cart = session.get("cart", {})
+    product_id = request.form.get('product_id')
+    size = request.form.get('size')
+    quantity = int(request.form.get('quantity', 1))
+    cart = session.get('cart', {})
+
     key = f"{product_id}:{size}"
     if key not in cart:
-        cart[key] = {"qty": 0}
-    cart[key]["qty"] += quantity
-    session["cart"] = cart
-    return redirect(url_for("cart"))
+        cart[key] = {'qty': 0}
+    cart[key]['qty'] += quantity
+    session['cart'] = cart
+
+    return redirect(url_for('cart'))
+
 
 @app.route("/update-cart", methods=["POST"])
 def update_cart():
