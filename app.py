@@ -68,7 +68,7 @@ def upload_to_imgbb(file_storage, api_key):
         encoded_image = base64.b64encode(img_bytes).decode('utf-8')
         url = "https://api.imgbb.com/1/upload"
         payload = {
-            "key": api_key,
+            "key": "4daaf1a5f4db5099ddf6cc4035486275",
             "image": encoded_image,
             "name": file_storage.filename,
             "expiration": "0"
