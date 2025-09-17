@@ -360,15 +360,36 @@ def process_order():
 
 @app.route("/process_contact", methods=["POST"])
 def process_contact():
-    # Example implementation, adjust as needed
+    if db is None:
+        flash("⚠️ Firestore is not initialized.", "danger")
+        return redirect(url_for("contact"))
+
     name = request.form.get("name")
     email = request.form.get("email")
     mobile = request.form.get("mobile")
     address = request.form.get("address")
     message = request.form.get("message")
-    # Optional: Save or process the contact data here
-    flash("Thank you for reaching out! We have received your message.", "success")
-    return redirect(url_for("contact"))
+
+    if not name or not email or not mobile:
+        flash("⚠️ Please fill in all required fields.", "danger")
+        return redirect(url_for("contact"))
+
+    try:
+        db.collection("contacts").add({
+            "name": name,
+            "email": email,
+            "mobile": mobile,
+            "address": address,
+            "message": message,
+            "timestamp": datetime.utcnow(),
+        })
+        flash("✅ Thank you! Your message has been sent successfully.", "success")
+        return redirect(url_for("contact"))
+    except Exception as e:
+        logger.error(f"Failed to save contact: {e}")
+        flash("⚠️ Failed to send message.", "danger")
+        return redirect(url_for("contact"))
+
 
 
 @app.route("/submit-review", methods=["POST"])
