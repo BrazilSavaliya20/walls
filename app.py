@@ -61,7 +61,7 @@ except Exception as e:
 import base64
 import requests
 
-def upload_to_imgbb(file_storage, api_key):
+def upload_to_imgbb(file_storage, IMGBB_API_KEY):
     try:
         file_storage.stream.seek(0)
         img_bytes = file_storage.read()
