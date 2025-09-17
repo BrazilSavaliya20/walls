@@ -558,33 +558,10 @@
   }
 </script>
 
-<!-- Example Product Add to Cart Form -->
-<!-- Repeat this block for each product on product or shop page -->
-<div class="product">
-  <h3>{{ item.name }}</h3>
-  <img src="{{ product.imgs[0] }}" alt="{{ product.name }}" />
-  <p>{{ product.desc }}</p>
-
-  <form action="{{ url_for('add_to_cart') }}" method="POST" class="add-to-cart-form">
-    <input type="hidden" name="product_id" value="{{ product.id }}" />
-    <label for="size_select_{{ product.id }}">Size:</label>
-    <select id="size_select_{{ product.id }}" name="size" required>
-      <option value="small">Small (₹{{ product.price_small }})</option>
-      <option value="medium">Medium (₹{{ product.price_medium }})</option>
-      <option value="large">Large (₹{{ product.price_large }})</option>
-    </select>
-
-    <label for="qty_input_{{ product.id }}">Quantity:</label>
-    <input id="qty_input_{{ product.id }}" type="number" name="quantity" value="1" min="1" max="10" required />
-
-    <button type="submit" class="btn btn-add">Add to Cart</button>
-  </form>
-</div>
-
 <div class="cart-container">
   <h2>Your Shopping Cart</h2>
 
-{% if cart_items %}
+  {% if cart_items %}
   <table class="cart-table">
     <thead>
       <tr>
@@ -625,23 +602,15 @@
       {% endfor %}
     </tbody>
   </table>
-{% else %}
+
+  <div class="total-section">Total: ₹{{ total }}</div>
+  <a href="{{ url_for('checkout') }}" class="checkout-btn">Proceed to Checkout</a>
+  {% else %}
   <div class="empty-cart">
     <img src="{{ url_for('static', filename='images/empty-cart.png') }}" alt="Empty Cart" />
     <p>Your cart is empty.</p>
     <a href="{{ url_for('shop') }}" class="continue-shopping">Continue Shopping</a>
   </div>
-{% endif %}
-
-
-    <div class="total-section">Total: ₹{{ total }}</div>
-    <a href="{{ url_for('checkout') }}" class="checkout-btn">Proceed to Checkout</a>
-  {% else %}
-    <div class="empty-cart">
-      <img src="{{ url_for('static', filename='images/empty-cart.png') }}" alt="Empty Cart" />
-      <p>Your cart is empty.</p>
-      <a href="{{ url_for('shop') }}" class="continue-shopping">Continue Shopping</a>
-    </div>
   {% endif %}
 </div>
 
@@ -698,3 +667,7 @@
 
 </body>
 </html>
+Fixes made:
+Removed duplicate or misplaced {% else %} block in your cart display logic.
+
+Correctly scopes {% if cart_items %} followed by {% else %} and ended with {% 

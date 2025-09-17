@@ -226,12 +226,13 @@ def contact():
     return render_template("contact.html")
 
 
-@app.route("/cart")
+@app.route('/cart')
 def cart():
-    cart = session.get("cart", {})
+    cart = session.get('cart', {})
     products = load_products()
     items, total = get_cart_items_and_total(cart, products)
-    return render_template("cart.html", cart_items=items, total=total)
+    return render_template('cart.html', cart_items=items, total=total)
+
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
