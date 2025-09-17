@@ -584,47 +584,55 @@
 <div class="cart-container">
   <h2>Your Shopping Cart</h2>
 
-  {% if cart_items %}
-    <table class="cart-table">
-      <thead>
-        <tr>
-          <th>Preview</th>
-          <th>Product</th>
-          <th>Price</th>
-          <th>Quantity</th>
-          <th>Subtotal</th>
-          <th>Remove</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in cart_items %}
-          <tr>
-            <td data-label="Preview">
-              <img src="{{ item.img }}" alt="{{ item.name }}" class="cart-img" />
-            </td>
-            <td data-label="Product">{{ item.name }}</td>
-            <td data-label="Price">₹{{ item.price }}</td>
-            <td data-label="Quantity">
-              <form method="POST" action="{{ url_for('update_cart') }}" class="qty-buttons">
-                <input type="hidden" name="product_id" value="{{ item.id }}" />
-                <input type="hidden" name="size" value="{{ item.size }}" />
-                <button type="submit" name="action" value="decrease">-</button>
-                <span>{{ item.qty }}</span>
-                <button type="submit" name="action" value="increase">+</button>
-              </form>
-            </td>
-            <td data-label="Subtotal">₹{{ item.subtotal }}</td>
-            <td data-label="Remove">
-              <form method="POST" action="{{ url_for('update_cart') }}">
-                <input type="hidden" name="product_id" value="{{ item.id }}" />
-                <input type="hidden" name="size" value="{{ item.size }}" />
-                <button type="submit" name="action" value="remove" class="remove-btn">Remove</button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+{% if cart_items %}
+  <table class="cart-table">
+    <thead>
+      <tr>
+        <th>Preview</th>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in cart_items %}
+      <tr>
+        <td data-label="Preview">
+          <img src="{{ item.img }}" alt="{{ item.name }}" class="cart-img" />
+        </td>
+        <td data-label="Product">{{ item.name }}</td>
+        <td data-label="Price">₹{{ item.price }}</td>
+        <td data-label="Quantity">
+          <form method="POST" action="{{ url_for('update_cart') }}" class="qty-buttons">
+            <input type="hidden" name="product_id" value="{{ item.id }}" />
+            <input type="hidden" name="size" value="{{ item.size }}" />
+            <button type="submit" name="action" value="decrease">-</button>
+            <span>{{ item.qty }}</span>
+            <button type="submit" name="action" value="increase">+</button>
+          </form>
+        </td>
+        <td data-label="Subtotal">₹{{ item.subtotal }}</td>
+        <td data-label="Remove">
+          <form method="POST" action="{{ url_for('update_cart') }}">
+            <input type="hidden" name="product_id" value="{{ item.id }}" />
+            <input type="hidden" name="size" value="{{ item.size }}" />
+            <button type="submit" name="action" value="remove" class="remove-btn">Remove</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="empty-cart">
+    <img src="{{ url_for('static', filename='images/empty-cart.png') }}" alt="Empty Cart" />
+    <p>Your cart is empty.</p>
+    <a href="{{ url_for('shop') }}" class="continue-shopping">Continue Shopping</a>
+  </div>
+{% endif %}
+
 
     <div class="total-section">Total: ₹{{ total }}</div>
     <a href="{{ url_for('checkout') }}" class="checkout-btn">Proceed to Checkout</a>
