@@ -21,6 +21,7 @@ PRIVATE_DIR = os.path.join(BASE_DIR, "private")
 os.makedirs(PRIVATE_DIR, exist_ok=True)
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "public", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+products_file = os.path.join(PRIVATE_DIR, "products.json")
 
 app = Flask(__name__, static_folder="public", static_url_path="/static")
 app.secret_key = os.environ.get("SECRET_KEY", "8141@#Kaswala")
