@@ -30,7 +30,7 @@ logger = logging.getLogger("wallcraft")
 
 # Razorpay config
 RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "rzp_test_RGHzf24TfjfbAy")
-RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "rzp_test_secret")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "xPSpg6R2zzdWf85Pn5gGfOyQ")
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 # ImgBB API Key
