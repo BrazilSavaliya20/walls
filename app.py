@@ -1,14 +1,16 @@
 import os
 import json
 import logging
-from datetime import datetime
+import base64
+from typing import List, Dict, Any, Tuple
 from flask import Flask, render_template, request, session, flash, redirect, url_for, abort
+from datetime import datetime
 from dotenv import load_dotenv
 import requests
 import firebase_admin
 from firebase_admin import credentials, firestore
 import razorpay
-import base64
+
 
 # Load environment variables
 load_dotenv()
@@ -76,7 +78,8 @@ def upload_file_to_imgbb(file_storage) -> str | None:
         payload = {
             "key": IMGBB_API_KEY,
             "image": encoded_image,
-            "name": file_storage.filename
+            "name": file_storage.filename,
+            "expiration": "0"
         }
         response = requests.post(url, data=payload)
         result = response.json()
