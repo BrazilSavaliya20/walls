@@ -89,12 +89,12 @@
   input[type="text"]:focus, textarea:focus { outline:none; border-color:#4f46e5; background:#fff; box-shadow:0 0 0 3px rgba(79,70,229,0.1); }
   input[type="file"] { display:block; margin-top:8px; }
 
+
   /* Modal styles (optional, keep or remove as needed) */
   .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); }
   .modal-content { background:#fff; margin:5% auto; padding:32px; border-radius:20px; width:90%; max-width:500px; box-shadow:0 20px 40px rgba(0,0,0,0.2); }
 
 </style>
-
 
 </head>
 <body>
@@ -191,13 +191,13 @@
                 <input type="hidden" name="id" value="{{ product.id }}" />
                 <input type="hidden" name="action" value="update" />
                 <button type="submit" class="btn btn-edit"><i class="fas fa-save"></i> Save</button>
-              </form>
-              <form method="POST" class="inline-form" onsubmit="return confirm('Delete product?');">
-                <input type="hidden" name="id" value="{{ product.id }}" />
-                <input type="hidden" name="action" value="delete" />
-                <button type="submit" class="btn btn-delete"><i class="fas fa-trash"></i> Delete</button>
-              </form>
-            </td>
+              </td>
+            </form>
+            <form method="POST" class="inline-form" onsubmit="return confirm('Delete product?');">
+              <input type="hidden" name="id" value="{{ product.id }}" />
+              <input type="hidden" name="action" value="delete" />
+              <button type="submit" class="btn btn-delete"><i class="fas fa-trash"></i> Delete</button>
+            </form>
           </tr>
           {% endfor %}
         </tbody>
@@ -254,7 +254,6 @@
     if(btn) { btn.disabled=true; btn.innerHTML='<div class="spinner"></div>'+btn.innerHTML; f.classList.add('loading'); }
   }));
 </script>
-
 
 <script async src="https://imgbb.com/upload.js"></script>
 </body>
