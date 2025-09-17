@@ -34,7 +34,7 @@ RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "xPSpg6R2zzdWf85Pn5g
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 # ImgBB API Key
-IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "4daaf1a5f4db5099ddf6cc4035486275")  # Replace with your key
+IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "debd1d013910003d49c0b4dbec779e64")  # Replace with your key
 
 # Initialize Firestore
 def init_firestore():
@@ -61,7 +61,7 @@ except Exception as e:
 import base64
 import requests
 
-def upload_to_imgbb(file_storage, api_key="4daaf1a5f4db5099ddf6cc4035486275"):
+def upload_to_imgbb(file_storage, api_key="debd1d013910003d49c0b4dbec779e64"):
     try:
         file_storage.stream.seek(0)
         img_bytes = file_storage.read()
