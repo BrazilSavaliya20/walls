@@ -58,27 +58,34 @@ except Exception as e:
     logger.error(f"Failed to init Firestore: {e}")
 
 # --- ImgBB upload ---
-def upload_file_to_imgbb(file_storage) -> str | None:
-    try:
-        file_storage.stream.seek(0)
-        img_bytes = file_storage.read()
-        encoded_image = base64.b64encode(img_bytes).decode('utf-8')
-        url = "https://api.imgbb.com/1/upload"
-        payload = {
-            "key": "4daaf1a5f4db5099ddf6cc4035486275",
-            "image": encoded_image,
-            "name": file_storage.filename,
-            "expiration": "0"  # no auto delete
-        }
-        response = requests.post(url, data=payload)
-        result = response.json()
-        if response.status_code == 200 and result.get("success"):
-            return result["data"]["url"]
+import base64
+import requests
+
+def upload_to_imgbb(file_path, api_key):
+    with open(file_path, "rb") as f:
+        img_data = f.read()
+    base64_img = base64.b64encode(img_data).decode('utf-8')
+
+    url = "https://api.imgbb.com/1/upload"
+    payload = {
+        "key": api_key,
+        "image": base64_img,
+        "expiration": 0,  # 0 means no expiration
+    }
+
+    response = requests.post(url, data=payload)
+    if response.status_code == 200:
+        res_json = response.json()
+        if res_json.get("success"):
+            print("Image URL:", res_json["data"]["url"])
+            return res_json["data"]["url"]
         else:
-            logger.error(f"ImgBB failed: {result}")
-    except Exception as e:
-        logger.error(f"Error uploading to ImgBB: {e}")
+            print("ImgBB error:", res_json)
+    else:
+        print("HTTP error:", response.status_code)
+
     return None
+
 
 # --- Product data in Firestore ---
 def load_products():
