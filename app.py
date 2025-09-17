@@ -355,6 +355,21 @@ def process_order():
         logger.error(f"Order processing error: {e}")
         flash("Order processing error.")
         return redirect(url_for("checkout"))
+    
+
+
+@app.route("/process_contact", methods=["POST"])
+def process_contact():
+    # Example implementation, adjust as needed
+    name = request.form.get("name")
+    email = request.form.get("email")
+    mobile = request.form.get("mobile")
+    address = request.form.get("address")
+    message = request.form.get("message")
+    # Optional: Save or process the contact data here
+    flash("Thank you for reaching out! We have received your message.", "success")
+    return redirect(url_for("contact"))
+
 
 @app.route("/submit-review", methods=["POST"])
 def submit_review():
