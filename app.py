@@ -61,135 +61,149 @@ except Exception as e:
 import base64
 import requests
 
-def upload_to_imgbb(file_storage, api_key="debd1d013910003d49c0b4dbec779e64"):
+IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "debd1d013910003d49c0b4dbec779e64")  # Replace with actual key
+
+def upload_file_to_imgbb(file_storage) -> str | None:
+    """
+    Uploads image file to ImgBB and returns the hosted image URL.
+    """
     try:
         file_storage.stream.seek(0)
         img_bytes = file_storage.read()
         encoded_image = base64.b64encode(img_bytes).decode('utf-8')
+
         url = "https://api.imgbb.com/1/upload"
         payload = {
-            "key": api_key,                # Use api_key parameter dynamically
+            "key": IMGBB_API_KEY,
             "image": encoded_image,
-            "name": file_storage.filename,
-            "expiration": "0"              # 0 = no expiration
+            "name": file_storage.filename
         }
         response = requests.post(url, data=payload)
         result = response.json()
         if response.status_code == 200 and result.get("success"):
-            image_url = result["data"]["url"]  # Direct image URL
-            return image_url
+            return result["data"]["url"]
         else:
-            logger.error(f"ImgBB failed: {result}")
+            logger.error(f"ImgBB upload failed: {result}")
+            return None
     except Exception as e:
         logger.error(f"Error uploading to ImgBB: {e}")
-    return None
+        return None
 
-
-
-# --- Product data in Firestore ---
-def load_products():
-    if not db:
-        # fallback local data (not ideal, but prevents crash)
-        logger.warning("Firestore not available, loading fallback products")
-        return fallback_products()
-    try:
-        products = []
-        for doc in db.collection("products").stream():
-            p = doc.to_dict()
-            try:
-                p['id'] = int(doc.id)
-            except:
-                p['id'] = doc.id
-            products.append(p)
-        if not products:
-            return fallback_products()
-        return products
-    except Exception:
-        return fallback_products()
-
-def fallback_products():
-    # default seed product
-    seed = [{
-        "id": 1,
-        "imgs": ["https://i.ibb.co/DfdkKCgk/about2-jpg.jpg"],
-        "name": "Golden Glow Panel",
-        "desc": "Handcrafted golden-accent Wall Craft panel.",
-        "price_small": "₹9,999",
-        "price_medium": "₹12,999",
-        "price_large": "₹15,999",
-        "features": []
-    }]
-    return seed
-
-def save_product(product: dict):
-    if not db:
-        return False # not supported without firestore
-    try:
-        doc_id = str(product.get("id") or datetime.utcnow().timestamp())
-        db.collection("products").document(doc_id).set(product)
-        return True
-    except Exception as e:
-        logger.error(f"Failed to save product {product.get('name')}: {e}")
-        return False
-
-
-
+# ---------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
-def allowed_file(filename):
-    return (
-        "." in filename and 
-        filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-    )
-
-def delete_product(pid):
-    if not db:
-        return False
-    try:
-        db.collection("products").document(str(pid)).delete()
-        return True
-    except Exception:
-        return False
-
+def allowed_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def money_to_int(val: str) -> int:
     if not val:
         return 0
     try:
-        return int(val.replace("₹", "").replace(",", "").strip())
-    except Exception:
+        cleaned = val.replace("₹", "").replace(",", "").strip()
+        return int(cleaned) if cleaned else 0
+    except ValueError:
+        logger.warning(f"money_to_int: Cannot convert value '{val}' to int.")
         return 0
 
+# ---------------------------------------------------------------------
+# Firebase Initialization
+# ---------------------------------------------------------------------
+def init_firestore():
+    firebase_key_json = os.environ.get("FIREBASE_KEY")
+    if not firebase_key_json:
+        raise Exception("FIREBASE_KEY environment variable not set!")
+    try:
+        firebase_key_dict = json.loads(firebase_key_json)
+    except Exception as e:
+        raise Exception(f"FIREBASE_KEY is not a valid JSON string: {e}")
+    if not firebase_admin._apps:
+        cred = credentials.Certificate(firebase_key_dict)
+        firebase_admin.initialize_app(cred)
+    return firestore.client()
 
+db = None
+try:
+    db = init_firestore()
+    logger.info("Firestore initialized successfully.")
+except Exception as e:
+    logger.error(f"Firestore initialization failed: {e}")
 
-# --- Cart Utilities ---
-def get_cart_items_and_total(cart, products):
+# ---------------------------------------------------------------------
+# Product Data – Robust Persistence
+# ---------------------------------------------------------------------
+def save_products(data: List[Dict[str, Any]]) -> None:
+    try:
+        with open(products_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Failed to write products file: {e}")
+
+def load_products() -> List[Dict[str, Any]]:
+    if os.path.exists(products_file):
+        try:
+            with open(products_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.error(f"Failed to read products file: {e}")
+    # Seed product
+    products_seed = [
+        {
+            "id": 1,
+            "imgs": ["https://i.ibb.co/DfdkKCgk/about2-jpg.jpg"],
+            "name": "Golden Glow Panel",
+            "desc": "Handcrafted golden-accent Wall Craft panel.",
+            "price_small": "₹9,999",
+            "price_medium": "₹12,999",
+            "price_large": "₹15,999",
+            "features": []
+        }
+    ]
+    save_products(products_seed)
+    return products_seed
+
+def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
     items = []
     total = 0
     for key, data in cart.items():
         try:
-            pid, size = key.split(":")
-            qty = data.get("qty", 0)
-            if qty <= 0:
+            parts = key.split(":")
+            if len(parts) != 2:
+                logger.error(f"Invalid cart item key format: {key}")
                 continue
-            product = next((p for p in products if str(p["id"]) == pid), None)
-            if not product:
+            pid, size = parts
+            qty = data.get("qty", 0)
+            product = next((p for p in products if p["id"] == int(pid)), None)
+            if not product or qty <= 0:
                 continue
             price = money_to_int(product.get(f"price_{size}", "0"))
             subtotal = price * qty
             total += subtotal
+            img_url = product.get("imgs")[0] if product.get("imgs") else ""
             items.append({
                 "id": product["id"],
                 "name": product["name"],
-                "img": product.get("imgs", [""])[0],
+                "img": img_url,
                 "size": size,
                 "price": price,
                 "qty": qty,
-                "subtotal": subtotal
+                "subtotal": subtotal,
             })
         except Exception as e:
             logger.error(f"Error processing cart item {key}: {e}")
     return items, total
+
+def get_products():
+    return load_products()
+
+@app.context_processor
+def inject_request():
+    return dict(request=request)
+
+@app.context_processor
+def inject_now():
+    return {'now': datetime.utcnow}
 
 # ==================== Routes ====================
 
@@ -466,13 +480,12 @@ def secret_admin():
         action = request.form.get("action")
         if action == "add":
             files = request.files.getlist("img_file")
-            img_urls = [upload_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
-
+            img_urls = [upload_file_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
             img_urls = [u for u in img_urls if u]
             features = request.form.get("features", "")
             features_list = [f.strip() for f in features.split(",") if f.strip()]
-            new_id = int(datetime.utcnow().timestamp())
-            product = {
+            new_id = max([p["id"] for p in products], default=0) + 1
+            products.append({
                 "id": new_id,
                 "imgs": img_urls,
                 "name": request.form.get("name"),
@@ -480,19 +493,17 @@ def secret_admin():
                 "price_small": request.form.get("price_small"),
                 "price_medium": request.form.get("price_medium"),
                 "price_large": request.form.get("price_large"),
-                "features": features_list
-            }
-            save_product(product)
-            flash("Product added.")
+                "features": features_list,
+            })
+            save_products(products)
+            flash("Product added successfully.", "success")
             return redirect(url_for("secret_admin"))
-
         elif action == "update":
-            pid = request.form.get("id")
-            product_doc = db.collection("products").document(str(pid))
-            if not product_doc.get().exists:
-                flash("Product not found")
+            pid = int(request.form.get("id"))
+            product = next((p for p in products if p["id"] == pid), None)
+            if not product:
+                flash("Product not found.", "danger")
                 return redirect(url_for("secret_admin"))
-            product = product_doc.get().to_dict()
             product["name"] = request.form.get("name")
             product["desc"] = request.form.get("desc")
             product["price_small"] = request.form.get("price_small")
@@ -500,81 +511,66 @@ def secret_admin():
             product["price_large"] = request.form.get("price_large")
             features = request.form.get("features", "")
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
-            # handle images
             files = request.files.getlist("img_file")
-            img_urls = [upload_to_imgbb(f, "IMGBB_API_KEY") for f in files if f and f.filename and allowed_file(f.filename)]
-
+            img_urls = [upload_file_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
             img_urls = [u for u in img_urls if u]
-            imgs = product.get("imgs", [])
+            imgs = product.get("imgs") or []
             if isinstance(imgs, str):
                 imgs = [imgs]
-            imgs.extend(img_urls)
+            if img_urls:
+                imgs.extend(img_urls)
             product["imgs"] = imgs
-            # Save updated
-            try:
-                product_doc.set(product)
-                flash("Product updated.")
-            except:
-                flash("Failed to update product.")
+            save_products(products)
+            flash("Product updated successfully.", "success")
             return redirect(url_for("secret_admin"))
-
         elif action == "delete":
-            pid = request.form.get("id")
-            db.collection("products").document(str(pid)).delete()
-            flash("Product deleted.")
+            pid = int(request.form.get("id"))
+            products = [p for p in products if p["id"] != pid]
+            save_products(products)
+            flash("Product deleted successfully.", "success")
             return redirect(url_for("secret_admin"))
-
         elif action == "remove_image":
-            pid = request.form.get("id")
+            pid = int(request.form.get("id"))
             img_url = request.form.get("img_url")
-            doc_ref = db.collection("products").document(str(pid))
-            if not doc_ref.get().exists:
-                flash("Product not found")
-                return redirect(url_for("secret_admin"))
-            product = doc_ref.get().to_dict()
-            product["imgs"] = [img for img in product.get("imgs", []) if img != img_url]
-            try:
-                doc_ref.set(product)
-                flash("Image removed.")
-            except:
-                flash("Failed to remove image.")
-            return redirect(url_for("secret_admin"))
-
-        elif action == "replace_image":
-            pid = request.form.get("id")
-            img_url = request.form.get("img_url")
-            doc_ref = db.collection("products").document(str(pid))
-            if not doc_ref.get().exists:
-                flash("Product not found")
-                return redirect(url_for("secret_admin"))
-            product = doc_ref.get().to_dict()
-            files = request.files.getlist("replace_img")
-            if not files or not files[0].filename:
-                flash("No replacement image")
-                return redirect(url_for("secret_admin"))
-            new_img = upload_file_to_imgbb(files[0])
-            if not new_img:
-                flash("Image upload failed")
-                return redirect(url_for("secret_admin"))
-
-            imgs = product.get("imgs", [])
-            if isinstance(imgs, str):
-                imgs = [imgs]
-            if img_url in imgs:
-                idx = imgs.index(img_url)
-                imgs[idx] = new_img
-                product["imgs"] = imgs
-                try:
-                    doc_ref.set(product)
-                    flash("Image replaced.")
-                except:
-                    flash("Failed to replace image.")
+            product = next((p for p in products if p["id"] == pid), None)
+            if product and img_url in product.get("imgs", []):
+                product["imgs"] = [img for img in product.get("imgs", []) if img != img_url]
+                save_products(products)
+                flash("Image removed successfully.", "success")
             else:
-                flash("Original image not found.")
+                flash("Image or product not found.", "danger")
             return redirect(url_for("secret_admin"))
+        elif action == "replace_image":
+            pid = int(request.form.get("id"))
+            img_url = request.form.get("img_url")
+            product = next((p for p in products if p["id"] == pid), None)
+            if not product:
+                flash("Product not found for image replacement.", "danger")
+                return redirect(url_for("secret_admin"))
+            files = request.files.getlist("replace_img")
+            if files and files[0] and files[0].filename and allowed_file(files[0].filename):
+                new_img_url = upload_file_to_imgbb(files[0])
+                if new_img_url:
+                    imgs = product.get("imgs") or []
+                    if isinstance(imgs, str):
+                        imgs = [imgs]
+                    if img_url in imgs:
+                        idx = imgs.index(img_url)
+                        imgs[idx] = new_img_url
+                        product["imgs"] = imgs
+                        save_products(products)
+                        flash("Image replaced successfully.", "success")
+                    else:
+                        flash("Original image not found.", "danger")
+                else:
+                    flash("Failed to upload replacement image.", "danger")
+            else:
+                flash("No replacement image selected.", "warning")
+            return redirect(url_for("secret_admin"))
+    return render_template("admin_panel.html", products=products)
 
-    return render_template("admin_panel.html", products=load_products())
-
-# Run the app
+# ---------------------------------------------------------------------
+# Run App
+# ---------------------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
