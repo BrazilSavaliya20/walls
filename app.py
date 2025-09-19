@@ -66,7 +66,8 @@ import requests
 
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "debd1d013910003d49c0b4dbec779e64")  # Replace with actual key
 
-def upload_file_to_imgbb(file_storage) -> str | None:
+def upload_image_and_save_to_firestore(file_storage, product_id):
+    # Upload to ImgBB
     try:
         file_storage.seek(0)
         img_bytes = file_storage.read()
@@ -77,32 +78,38 @@ def upload_file_to_imgbb(file_storage) -> str | None:
             "key": IMGBB_API_KEY,
             "image": encoded_image,
             "name": file_storage.filename,
-            "expiration": "0"  # 0 means never expire
+            "expiration": "0"  # no auto-delete
         }
         headers = {
             "Content-Type": "application/x-www-form-urlencoded"
         }
         response = requests.post(url, data=payload, headers=headers)
-        logger.info(f"ImgBB API response status: {response.status_code}")
         result = response.json()
-        logger.info(f"ImgBB API response: {result}")
 
         if response.status_code == 200 and result.get("success"):
             direct_url = result["data"]["url"]
-            if direct_url and direct_url.split('?')[0].lower().endswith(
-                (".jpg", ".jpeg", ".png", ".webp", ".gif")
-            ):
-                logger.info(f"Image uploaded to ImgBB successfully: {direct_url}")
+            if direct_url:
+                # Save URL to Firestore product document
+                product_ref = db.collection("products").document(str(product_id))
+                product_doc = product_ref.get()
+                if product_doc.exists:
+                    product_data = product_doc.to_dict()
+                    imgs = product_data.get("imgs", [])
+                    if isinstance(imgs, str):
+                        imgs = [imgs]
+                    imgs.append(direct_url)
+                    product_ref.update({"imgs": imgs})
+                else:
+                    # If the product doc doesn't exist, create new with img URL
+                    product_ref.set({"imgs": [direct_url]})
+                logger.info(f"Image URL saved to Firestore for product {product_id}")
                 return direct_url
-            else:
-                logger.error(f"ImgBB upload returned invalid direct_url: {direct_url}")
-        else:
-            logger.error(f"ImgBB upload failed: {result.get('error', result)}")
+        logger.error(f"ImgBB upload failed or invalid direct_url: {result}")
+        return None
+    except Exception as e:
+        logger.error(f"Exception during ImgBB upload and Firestore save: {e}")
         return None
 
-    except Exception as e:
-        logger.error(f"Exception during ImgBB upload: {e}")
-        return None
 
 
 
@@ -496,15 +503,68 @@ def shipping_policy():
 def secret_admin():
     products = load_products()
 
+    def upload_image_and_save_to_firestore(file_storage, product_id):
+        try:
+            file_storage.seek(0)
+            img_bytes = file_storage.read()
+            encoded_image = base64.b64encode(img_bytes).decode('utf-8')
+
+            url = "https://api.imgbb.com/1/upload"
+            payload = {
+                "key": IMGBB_API_KEY,
+                "image": encoded_image,
+                "name": file_storage.filename,
+                "expiration": "0"  # no auto-delete
+            }
+            headers = {
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+            response = requests.post(url, data=payload, headers=headers)
+            result = response.json()
+
+            if response.status_code == 200 and result.get("success"):
+                direct_url = result["data"]["url"]
+                if direct_url:
+                    # Save URL to Firestore product document
+                    product_ref = None
+                    if product_id is not None:
+                        product_ref = db.collection("products").document(str(product_id)) if db else None
+                        if product_ref:
+                            product_doc = product_ref.get()
+                            if product_doc.exists:
+                                product_data = product_doc.to_dict()
+                                imgs = product_data.get("imgs", [])
+                                if isinstance(imgs, str):
+                                    imgs = [imgs]
+                                imgs.append(direct_url)
+                                try:
+                                    product_ref.update({"imgs": imgs})
+                                    logger.info(f"Image URL saved to Firestore for product {product_id}")
+                                except Exception as e:
+                                    logger.error(f"Error updating Firestore product images: {e}")
+                            else:
+                                try:
+                                    product_ref.set({"imgs": [direct_url]})
+                                    logger.info(f"Firestore product document created with image for product {product_id}")
+                                except Exception as e:
+                                    logger.error(f"Error creating Firestore product document: {e}")
+                    return direct_url
+            logger.error(f"ImgBB upload failed or invalid direct_url: {result}")
+            return None
+        except Exception as e:
+            logger.error(f"Exception during ImgBB upload and Firestore save: {e}")
+            return None
+
     if request.method == "POST":
         action = request.form.get("action")
 
         if action == "add":
             files = request.files.getlist("img_file")
             img_urls = []
+            # Push None as product_id since it's a new product (ID to be generated below)
             for f in files:
                 if f and f.filename and allowed_file(f.filename):
-                    url = upload_file_to_imgbb(f)
+                    url = upload_file_to_imgbb(f)  # Use existing function for initial upload
                     if url:
                         img_urls.append(url)
 
@@ -560,7 +620,7 @@ def secret_admin():
             img_urls = []
             for f in files:
                 if f and f.filename and allowed_file(f.filename):
-                    url = upload_file_to_imgbb(f)
+                    url = upload_image_and_save_to_firestore(f, pid)
                     if url:
                         img_urls.append(url)
 
@@ -645,7 +705,7 @@ def secret_admin():
 
             files = request.files.getlist("replace_img")
             if files and files[0] and files[0].filename and allowed_file(files[0].filename):
-                new_img_url = upload_file_to_imgbb(files[0])
+                new_img_url = upload_image_and_save_to_firestore(files[0], pid)
                 if new_img_url:
                     imgs = product.get("imgs") or []
                     if isinstance(imgs, str):
@@ -654,7 +714,7 @@ def secret_admin():
                         idx = imgs.index(img_url)
                         imgs[idx] = new_img_url
                         product["imgs"] = imgs
-                        
+
                         if db:
                             try:
                                 db.collection("products").document(str(pid)).set(product)
@@ -674,6 +734,7 @@ def secret_admin():
             return redirect(url_for("secret_admin"))
 
     return render_template("admin_panel.html", products=products)
+
 
 # ---------------------------------------------------------------------
 # Run App
