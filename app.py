@@ -67,18 +67,13 @@ import requests
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac846")  # Replace with actual key
 
 def upload_file_to_imgbb(file_storage, product_id=None):
-    """
-    Upload an image file to ImgBB v1 API using multipart/form-data POST.
-    Save image URL to Firestore products collection if product_id provided.
-    """
     try:
         files = {
             "image": (file_storage.filename, file_storage, file_storage.content_type)
         }
         data = {
             "key": IMGBB_API_KEY,
-            "expiration": "0"  # disable auto-delete permanently
-            # 'name' param is optional and handled by multipart automatically
+            "expiration": "0"
         }
 
         response = requests.post("https://api.imgbb.com/1/upload", data=data, files=files)
@@ -86,9 +81,8 @@ def upload_file_to_imgbb(file_storage, product_id=None):
 
         if response.status_code == 200 and result.get("success"):
             direct_url = result["data"]["url"]
-            logger.info("Saved ImgBB URLs in Firestore product imgs: %s", imgs)
+            logger.info(f"Image uploaded to ImgBB: {direct_url}")
 
-            # Save URL to Firestore product document
             if db and product_id is not None:
                 product_ref = db.collection("products").document(str(product_id))
                 product_doc = product_ref.get()
@@ -101,9 +95,10 @@ def upload_file_to_imgbb(file_storage, product_id=None):
                     product_ref.update({"imgs": imgs})
                 else:
                     product_ref.set({"imgs": [direct_url]})
-                logger.info(f"Image URL saved in Firestore for product {product_id}")
+                logger.info(f"Image URL saved to Firestore for product {product_id}")
 
             return direct_url
+
         else:
             logger.error(f"ImgBB upload failed: {result}")
             return None
@@ -111,6 +106,7 @@ def upload_file_to_imgbb(file_storage, product_id=None):
     except Exception as e:
         logger.error(f"Exception during ImgBB upload: {e}")
         return None
+
 
 
 
