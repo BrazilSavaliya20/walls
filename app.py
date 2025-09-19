@@ -64,40 +64,31 @@ except Exception as e:
 import base64
 import requests
 
-IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "debd1d013910003d49c0b4dbec779e64")  # Replace with actual key
+IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac846")  # Replace with actual key
 
 def upload_file_to_imgbb(file_storage, product_id=None):
     """
-    Upload an image to ImgBB and optionally save the URL into Firestore under a product document.
+    Upload an image file to ImgBB v1 API using multipart/form-data POST.
+    Save image URL to Firestore products collection if product_id provided.
     """
     try:
-        # Read file bytes
-        file_storage.seek(0)
-        img_bytes = file_storage.read()
-
-        # Convert to base64
-        encoded_image = base64.b64encode(img_bytes).decode("utf-8")
-
-        # API endpoint
-        url = "https://api.imgbb.com/1/upload"
-
-        # Payload
-        payload = {
-            "key": "debd1d013910003d49c0b4dbec779e64",
-            "image": encoded_image,
-            "name": file_storage.filename,  # optional
-            "expiration": "0"  # 0 = never auto delete
+        files = {
+            "image": (file_storage.filename, file_storage, file_storage.content_type)
+        }
+        data = {
+            "key": IMGBB_API_KEY,
+            "expiration": "0"  # disable auto-delete permanently
+            # 'name' param is optional and handled by multipart automatically
         }
 
-        # Send request
-        response = requests.post(url, data=payload)
+        response = requests.post("https://api.imgbb.com/1/upload", data=data, files=files)
         result = response.json()
 
         if response.status_code == 200 and result.get("success"):
             direct_url = result["data"]["url"]
             logger.info(f"Image uploaded to ImgBB: {direct_url}")
 
-            # Save to Firestore if product_id is provided
+            # Save URL to Firestore product document
             if db and product_id is not None:
                 product_ref = db.collection("products").document(str(product_id))
                 product_doc = product_ref.get()
@@ -113,13 +104,14 @@ def upload_file_to_imgbb(file_storage, product_id=None):
                 logger.info(f"Image URL saved in Firestore for product {product_id}")
 
             return direct_url
-
-        logger.error(f"ImgBB upload failed: {result}")
-        return None
+        else:
+            logger.error(f"ImgBB upload failed: {result}")
+            return None
 
     except Exception as e:
-        logger.error(f"Error during ImgBB upload: {e}")
+        logger.error(f"Exception during ImgBB upload: {e}")
         return None
+
 
 
 
@@ -522,7 +514,7 @@ def secret_admin():
             encoded_image = base64.b64encode(img_bytes).decode('utf-8')
             url = "https://api.imgbb.com/1/upload"
             payload = {
-                "key": "debd1d013910003d49c0b4dbec779e64",
+                "key": "49c929b174cd1008c4379f46285ac846",
                 "image": encoded_image,
                 "name": file_storage.filename,
                 "expiration": "0"  # no auto-delete
