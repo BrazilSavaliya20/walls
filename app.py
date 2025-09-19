@@ -68,31 +68,35 @@ IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "debd1d013910003d49c0b4dbec779e6
 
 def upload_file_to_imgbb(file_storage) -> str | None:
     """
-    Uploads image file to ImgBB and returns the hosted image URL.
+    Uploads image file to ImgBB and returns the hosted image URL (permanent).
+    Only returns links that end with an image extension.
     """
     try:
-        file_storage.stream.seek(0)
+        file_storage.seek(0)  # Works for Flask/WSGI FileStorage
         img_bytes = file_storage.read()
         encoded_image = base64.b64encode(img_bytes).decode('utf-8')
 
         url = "https://api.imgbb.com/1/upload"
         payload = {
-            "key": "debd1d013910003d49c0b4dbec779e64",
+            "key": IMGBB_API_KEY,
             "image": encoded_image,
             "name": file_storage.filename,
-            "expiration": "0"  # 0 = never expire
+            "expiration": "0"
         }
         response = requests.post(url, data=payload)
         result = response.json()
         if response.status_code == 200 and result.get("success"):
-            # Always take the direct image link for websites
-            return result["data"]["url"]
-        else:
-            logger.error(f"ImgBB upload failed: {result}")
-            return None
+            direct_url = result["data"]["url"]
+            # Only accept valid image URLs that end with a common extension
+            if direct_url and direct_url.split('?')[0].lower().endswith(
+                (".jpg", ".jpeg", ".png", ".webp", ".gif")):
+                return direct_url
+        logger.error(f"ImgBB upload failed: {result}")
+        return None
     except Exception as e:
         logger.error(f"Error uploading to ImgBB: {e}")
         return None
+
 
 # ---------------------------------------------------------------------
 # Helpers
