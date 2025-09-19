@@ -67,15 +67,10 @@ import requests
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "debd1d013910003d49c0b4dbec779e64")  # Replace with actual key
 
 def upload_file_to_imgbb(file_storage) -> str | None:
-    """
-    Uploads image file to ImgBB and returns the hosted image URL (permanent).
-    Only returns links that end with an image extension.
-    """
     try:
-        file_storage.seek(0)  # Works for Flask/WSGI FileStorage
+        file_storage.seek(0)
         img_bytes = file_storage.read()
         encoded_image = base64.b64encode(img_bytes).decode('utf-8')
-
         url = "https://api.imgbb.com/1/upload"
         payload = {
             "key": IMGBB_API_KEY,
@@ -87,15 +82,20 @@ def upload_file_to_imgbb(file_storage) -> str | None:
         result = response.json()
         if response.status_code == 200 and result.get("success"):
             direct_url = result["data"]["url"]
-            # Only accept valid image URLs that end with a common extension
             if direct_url and direct_url.split('?')[0].lower().endswith(
-                (".jpg", ".jpeg", ".png", ".webp", ".gif")):
+                (".jpg", ".jpeg", ".png", ".webp", ".gif")
+            ):
+                logger.info(f"Success upload: {direct_url}")
                 return direct_url
-        logger.error(f"ImgBB upload failed: {result}")
+            else:
+                logger.error(f"Upload returned bad direct_url field: {direct_url}")
+        else:
+            logger.error(f"ImgBB upload failed response: {result}")
         return None
     except Exception as e:
-        logger.error(f"Error uploading to ImgBB: {e}")
+        logger.error(f"Exception in upload_file_to_imgbb: {e}")
         return None
+
 
 
 # ---------------------------------------------------------------------
@@ -146,6 +146,7 @@ def save_products(data: List[Dict[str, Any]]) -> None:
     try:
         with open(products_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+        logger.info("products.json saved with %d products", len(data))
     except Exception as e:
         logger.error(f"Failed to write products file: {e}")
 
@@ -485,16 +486,24 @@ def shipping_policy():
 @app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
     products = load_products()
+
     if request.method == "POST":
         action = request.form.get("action")
+
         if action == "add":
             files = request.files.getlist("img_file")
-            img_urls = [upload_file_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
-            img_urls = [u for u in img_urls if u]
+            img_urls = []
+            for f in files:
+                if f and f.filename and allowed_file(f.filename):
+                    url = upload_file_to_imgbb(f)
+                    if url:
+                        img_urls.append(url)
+
             features = request.form.get("features", "")
             features_list = [f.strip() for f in features.split(",") if f.strip()]
             new_id = max([p["id"] for p in products], default=0) + 1
-            products.append({
+
+            new_product = {
                 "id": new_id,
                 "imgs": img_urls,
                 "name": request.form.get("name"),
@@ -503,59 +512,128 @@ def secret_admin():
                 "price_medium": request.form.get("price_medium"),
                 "price_large": request.form.get("price_large"),
                 "features": features_list,
-            })
+            }
+            products.append(new_product)
+
+            if db:
+                try:
+                    db.collection("products").document(str(new_id)).set(new_product)
+                    logger.info("Product synced to Firestore")
+                except Exception as e:
+                    logger.error(f"Could not save product to Firestore: {e}")
+
             save_products(products)
             flash("Product added successfully.", "success")
             return redirect(url_for("secret_admin"))
+
         elif action == "update":
-            pid = int(request.form.get("id"))
+            try:
+                pid = int(request.form.get("id"))
+            except (ValueError, TypeError):
+                flash("Invalid product ID.", "danger")
+                return redirect(url_for("secret_admin"))
+
             product = next((p for p in products if p["id"] == pid), None)
             if not product:
                 flash("Product not found.", "danger")
                 return redirect(url_for("secret_admin"))
+
             product["name"] = request.form.get("name")
             product["desc"] = request.form.get("desc")
             product["price_small"] = request.form.get("price_small")
             product["price_medium"] = request.form.get("price_medium")
             product["price_large"] = request.form.get("price_large")
+
             features = request.form.get("features", "")
             product["features"] = [f.strip() for f in features.split(",") if f.strip()]
+
             files = request.files.getlist("img_file")
-            img_urls = [upload_file_to_imgbb(f) for f in files if f and f.filename and allowed_file(f.filename)]
-            img_urls = [u for u in img_urls if u]
+            img_urls = []
+            for f in files:
+                if f and f.filename and allowed_file(f.filename):
+                    url = upload_file_to_imgbb(f)
+                    if url:
+                        img_urls.append(url)
+
             imgs = product.get("imgs") or []
             if isinstance(imgs, str):
                 imgs = [imgs]
             if img_urls:
                 imgs.extend(img_urls)
             product["imgs"] = imgs
+
+            if db:
+                try:
+                    db.collection("products").document(str(pid)).set(product)
+                    logger.info("Product updated in Firestore")
+                except Exception as e:
+                    logger.error(f"Could not update product in Firestore: {e}")
+
             save_products(products)
             flash("Product updated successfully.", "success")
             return redirect(url_for("secret_admin"))
+
         elif action == "delete":
-            pid = int(request.form.get("id"))
+            try:
+                pid = int(request.form.get("id"))
+            except (ValueError, TypeError):
+                flash("Invalid product ID.", "danger")
+                return redirect(url_for("secret_admin"))
+
             products = [p for p in products if p["id"] != pid]
+
+            if db:
+                try:
+                    db.collection("products").document(str(pid)).delete()
+                    logger.info("Product deleted from Firestore")
+                except Exception as e:
+                    logger.error(f"Could not delete product from Firestore: {e}")
+
             save_products(products)
             flash("Product deleted successfully.", "success")
             return redirect(url_for("secret_admin"))
+
         elif action == "remove_image":
-            pid = int(request.form.get("id"))
+            try:
+                pid = int(request.form.get("id"))
+            except (ValueError, TypeError):
+                flash("Invalid product ID.", "danger")
+                return redirect(url_for("secret_admin"))
+
             img_url = request.form.get("img_url")
             product = next((p for p in products if p["id"] == pid), None)
+
             if product and img_url in product.get("imgs", []):
                 product["imgs"] = [img for img in product.get("imgs", []) if img != img_url]
+
+                if db:
+                    try:
+                        db.collection("products").document(str(pid)).set(product)
+                        logger.info("Product image removed and product updated in Firestore")
+                    except Exception as e:
+                        logger.error(f"Could not update product image in Firestore: {e}")
+
                 save_products(products)
                 flash("Image removed successfully.", "success")
             else:
                 flash("Image or product not found.", "danger")
+
             return redirect(url_for("secret_admin"))
+
         elif action == "replace_image":
-            pid = int(request.form.get("id"))
+            try:
+                pid = int(request.form.get("id"))
+            except (ValueError, TypeError):
+                flash("Invalid product ID.", "danger")
+                return redirect(url_for("secret_admin"))
+
             img_url = request.form.get("img_url")
             product = next((p for p in products if p["id"] == pid), None)
+
             if not product:
                 flash("Product not found for image replacement.", "danger")
                 return redirect(url_for("secret_admin"))
+
             files = request.files.getlist("replace_img")
             if files and files[0] and files[0].filename and allowed_file(files[0].filename):
                 new_img_url = upload_file_to_imgbb(files[0])
@@ -567,6 +645,14 @@ def secret_admin():
                         idx = imgs.index(img_url)
                         imgs[idx] = new_img_url
                         product["imgs"] = imgs
+                        
+                        if db:
+                            try:
+                                db.collection("products").document(str(pid)).set(product)
+                                logger.info("Product image replaced and updated in Firestore")
+                            except Exception as e:
+                                logger.error(f"Could not update replaced image in Firestore: {e}")
+
                         save_products(products)
                         flash("Image replaced successfully.", "success")
                     else:
@@ -575,7 +661,9 @@ def secret_admin():
                     flash("Failed to upload replacement image.", "danger")
             else:
                 flash("No replacement image selected.", "warning")
+
             return redirect(url_for("secret_admin"))
+
     return render_template("admin_panel.html", products=products)
 
 # ---------------------------------------------------------------------
