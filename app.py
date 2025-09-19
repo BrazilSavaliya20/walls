@@ -76,15 +76,14 @@ def upload_file_to_imgbb(file_storage, product_id=None):
             "expiration": "0"
         }
 
-        # Do NOT set headers manually - let requests manage in multipart uploads
+        # Let requests set multipart/form-data headers automatically
         response = requests.post("https://api.imgbb.com/1/upload", files=files, data=data)
         result = response.json()
 
         if response.status_code == 200 and result.get("success"):
             direct_url = result["data"]["url"]
-            logger.info(f"Image uploaded to ImgBB: {direct_url}")
+            logger.info(f"ImgBB upload success: {direct_url}")
 
-            # Save URL to Firestore if product_id supplied
             if db and product_id is not None:
                 product_ref = db.collection("products").document(str(product_id))
                 product_doc = product_ref.get()
@@ -97,13 +96,12 @@ def upload_file_to_imgbb(file_storage, product_id=None):
                     product_ref.update({"imgs": imgs})
                 else:
                     product_ref.set({"imgs": [direct_url]})
-                logger.info(f"Image URL saved to Firestore for product {product_id}")
+                logger.info(f"Saved image URL to Firestore for product {product_id}")
 
             return direct_url
         else:
             logger.error(f"ImgBB upload failed: {result}")
             return None
-
     except Exception as e:
         logger.error(f"Exception during ImgBB upload: {e}")
         return None
