@@ -69,20 +69,22 @@ IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac84
 def upload_file_to_imgbb(file_storage, product_id=None):
     try:
         files = {
-            "image": (file_storage.filename, file_storage, file_storage.content_type)
+            "image": (file_storage.filename, file_storage.stream, file_storage.content_type)
         }
         data = {
             "key": IMGBB_API_KEY,
             "expiration": "0"
         }
 
-        response = requests.post("https://api.imgbb.com/1/upload", data=data, files=files)
+        # Do NOT set headers manually - let requests manage in multipart uploads
+        response = requests.post("https://api.imgbb.com/1/upload", files=files, data=data)
         result = response.json()
 
         if response.status_code == 200 and result.get("success"):
             direct_url = result["data"]["url"]
             logger.info(f"Image uploaded to ImgBB: {direct_url}")
 
+            # Save URL to Firestore if product_id supplied
             if db and product_id is not None:
                 product_ref = db.collection("products").document(str(product_id))
                 product_doc = product_ref.get()
@@ -98,7 +100,6 @@ def upload_file_to_imgbb(file_storage, product_id=None):
                 logger.info(f"Image URL saved to Firestore for product {product_id}")
 
             return direct_url
-
         else:
             logger.error(f"ImgBB upload failed: {result}")
             return None
@@ -106,6 +107,7 @@ def upload_file_to_imgbb(file_storage, product_id=None):
     except Exception as e:
         logger.error(f"Exception during ImgBB upload: {e}")
         return None
+
 
 
 
