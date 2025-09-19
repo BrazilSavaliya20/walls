@@ -170,28 +170,24 @@ def save_products(data: List[Dict[str, Any]]) -> None:
     except Exception as e:
         logger.error(f"Failed to write products file: {e}")
 
-def load_products() -> List[Dict[str, Any]]:
-    if os.path.exists(products_file):
-        try:
-            with open(products_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            logger.error(f"Failed to read products file: {e}")
-    # Seed product
-    products_seed = [
-        {
-            "id": 1,
-            "imgs": ["https://i.ibb.co/DfdkKCgk/about2-jpg.jpg"],
-            "name": "Golden Glow Panel",
-            "desc": "Handcrafted golden-accent Wall Craft panel.",
-            "price_small": "₹9,999",
-            "price_medium": "₹12,999",
-            "price_large": "₹15,999",
-            "features": []
-        }
-    ]
-    save_products(products_seed)
-    return products_seed
+def load_products_from_firestore() -> List[Dict[str, Any]]:
+    if not db:
+        logger.warning("Firestore DB not initialized.")
+        return []
+
+    products = []
+    try:
+        docs = db.collection("products").order_by("id").stream()
+        for doc in docs:
+            product = doc.to_dict()
+            # Ensure 'id' is int for sorting & comparisons if stored as string
+            if "id" in product:
+                product["id"] = int(product["id"])
+            products.append(product)
+    except Exception as e:
+        logger.error(f"Error loading products from Firestore: {e}")
+    return products
+
 
 def get_cart_items_and_total(cart: Dict[str, Any], products: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
     items = []
@@ -239,7 +235,7 @@ def inject_now():
 
 @app.route("/")
 def home():
-    products = load_products()
+    products = load_products_from_firestore()
     reviews = []
     if db:
         try:
@@ -260,7 +256,7 @@ def shop():
 
 @app.route("/product/<int:product_id>")
 def product_detail(product_id):
-    products = load_products()
+    products = load_products_from_firestore()
     product = next((p for p in products if p["id"] == product_id), None)
     if not product:
         abort(404)
@@ -281,7 +277,7 @@ def contact():
 @app.route('/cart')
 def cart():
     cart = session.get('cart', {})
-    products = load_products()
+    products = load_products_from_firestore()
     items, total = get_cart_items_and_total(cart, products)
     return render_template('cart.html', cart_items=items, total=total)
 
@@ -322,7 +318,7 @@ def update_cart():
 @app.route("/checkout")
 def checkout():
     cart = session.get("cart", {})
-    products = load_products()
+    products = load_products_from_firestore()
     items, total = get_cart_items_and_total(cart, products)
 
     amount_paise = total * 100
@@ -365,7 +361,7 @@ def process_order():
             flash("Payment verification failed")
             return redirect(url_for("checkout"))
         
-        products = load_products()
+        products = load_products_from_firestore()
         order_data = {
             "name": request.form.get("name"),
             "mobile": request.form.get("mobile"),
@@ -505,7 +501,7 @@ def shipping_policy():
 
 @app.route("/secret-admin", methods=["GET", "POST"])
 def secret_admin():
-    products = load_products()
+    products = load_products_from_firestore()
 
     def upload_image_and_save_to_firestore(file_storage, product_id):
         try:
@@ -527,29 +523,26 @@ def secret_admin():
             if response.status_code == 200 and result.get("success"):
                 direct_url = result["data"]["url"]
                 if direct_url:
-                    # Save URL to Firestore product document
-                    product_ref = None
-                    if product_id is not None:
-                        product_ref = db.collection("products").document(str(product_id)) if db else None
-                        if product_ref:
-                            product_doc = product_ref.get()
-                            if product_doc.exists:
-                                product_data = product_doc.to_dict()
-                                imgs = product_data.get("imgs", [])
-                                if isinstance(imgs, str):
-                                    imgs = [imgs]
-                                imgs.append(direct_url)
-                                try:
-                                    product_ref.update({"imgs": imgs})
-                                    logger.info(f"Image URL saved to Firestore for product {product_id}")
-                                except Exception as e:
-                                    logger.error(f"Error updating Firestore product images: {e}")
-                            else:
-                                try:
-                                    product_ref.set({"imgs": [direct_url]})
-                                    logger.info(f"Firestore product document created with image for product {product_id}")
-                                except Exception as e:
-                                    logger.error(f"Error creating Firestore product document: {e}")
+                    if db and product_id is not None:
+                        product_ref = db.collection("products").document(str(product_id))
+                        product_doc = product_ref.get()
+                        if product_doc.exists:
+                            product_data = product_doc.to_dict()
+                            imgs = product_data.get("imgs", [])
+                            if isinstance(imgs, str):
+                                imgs = [imgs]
+                            imgs.append(direct_url)
+                            try:
+                                product_ref.update({"imgs": imgs})
+                                logger.info(f"Image URL saved to Firestore for product {product_id}")
+                            except Exception as e:
+                                logger.error(f"Error updating Firestore product images: {e}")
+                        else:
+                            try:
+                                product_ref.set({"imgs": [direct_url]})
+                                logger.info(f"Firestore product document created with image for product {product_id}")
+                            except Exception as e:
+                                logger.error(f"Error creating Firestore product document: {e}")
                     return direct_url
             logger.error(f"ImgBB upload failed or invalid direct_url: {result}")
             return None
@@ -565,14 +558,14 @@ def secret_admin():
             img_urls = []
             for f in files:
                 if f and f.filename and allowed_file(f.filename):
-                    # This is the line you wanted integrated (uses upload_file_to_imgbb)
                     url = upload_file_to_imgbb(f)
                     if url:
                         img_urls.append(url)
 
             features = request.form.get("features", "")
             features_list = [f.strip() for f in features.split(",") if f.strip()]
-            new_id = max([p["id"] for p in products], default=0) + 1
+            new_id = max([p.get("id", 0) for p in products], default=0) + 1
+
             new_product = {
                 "id": new_id,
                 "imgs": img_urls,
@@ -583,15 +576,13 @@ def secret_admin():
                 "price_large": request.form.get("price_large"),
                 "features": features_list,
             }
-            products.append(new_product)
-            if db:
-                try:
-                    db.collection("products").document(str(new_id)).set(new_product)
-                    logger.info("Product synced to Firestore")
-                except Exception as e:
-                    logger.error(f"Could not save product to Firestore: {e}")
-            save_products(products)
-            flash("Product added successfully.", "success")
+            try:
+                db.collection("products").document(str(new_id)).set(new_product)
+                logger.info("Product synced to Firestore")
+                flash("Product added successfully.", "success")
+            except Exception as e:
+                logger.error(f"Could not save product to Firestore: {e}")
+                flash("Failed to add product.", "danger")
             return redirect(url_for("secret_admin"))
 
         elif action == "update":
@@ -600,7 +591,7 @@ def secret_admin():
             except (ValueError, TypeError):
                 flash("Invalid product ID.", "danger")
                 return redirect(url_for("secret_admin"))
-            product = next((p for p in products if p["id"] == pid), None)
+            product = next((p for p in products if p.get("id") == pid), None)
             if not product:
                 flash("Product not found.", "danger")
                 return redirect(url_for("secret_admin"))
@@ -624,14 +615,13 @@ def secret_admin():
             if img_urls:
                 imgs.extend(img_urls)
             product["imgs"] = imgs
-            if db:
-                try:
-                    db.collection("products").document(str(pid)).set(product)
-                    logger.info("Product updated in Firestore")
-                except Exception as e:
-                    logger.error(f"Could not update product in Firestore: {e}")
-            save_products(products)
-            flash("Product updated successfully.", "success")
+            try:
+                db.collection("products").document(str(pid)).set(product)
+                logger.info("Product updated in Firestore")
+                flash("Product updated successfully.", "success")
+            except Exception as e:
+                logger.error(f"Could not update product in Firestore: {e}")
+                flash("Failed to update product.", "danger")
             return redirect(url_for("secret_admin"))
 
         elif action == "delete":
@@ -640,15 +630,13 @@ def secret_admin():
             except (ValueError, TypeError):
                 flash("Invalid product ID.", "danger")
                 return redirect(url_for("secret_admin"))
-            products = [p for p in products if p["id"] != pid]
-            if db:
-                try:
-                    db.collection("products").document(str(pid)).delete()
-                    logger.info("Product deleted from Firestore")
-                except Exception as e:
-                    logger.error(f"Could not delete product from Firestore: {e}")
-            save_products(products)
-            flash("Product deleted successfully.", "success")
+            try:
+                db.collection("products").document(str(pid)).delete()
+                logger.info("Product deleted from Firestore")
+                flash("Product deleted successfully.", "success")
+            except Exception as e:
+                logger.error(f"Could not delete product from Firestore: {e}")
+                flash("Failed to delete product.", "danger")
             return redirect(url_for("secret_admin"))
 
         elif action == "remove_image":
@@ -658,17 +646,16 @@ def secret_admin():
                 flash("Invalid product ID.", "danger")
                 return redirect(url_for("secret_admin"))
             img_url = request.form.get("img_url")
-            product = next((p for p in products if p["id"] == pid), None)
+            product = next((p for p in products if p.get("id") == pid), None)
             if product and img_url in product.get("imgs", []):
                 product["imgs"] = [img for img in product.get("imgs", []) if img != img_url]
-                if db:
-                    try:
-                        db.collection("products").document(str(pid)).set(product)
-                        logger.info("Product image removed and product updated in Firestore")
-                    except Exception as e:
-                        logger.error(f"Could not update product image in Firestore: {e}")
-                save_products(products)
-                flash("Image removed successfully.", "success")
+                try:
+                    db.collection("products").document(str(pid)).set(product)
+                    logger.info("Product image removed and product updated in Firestore")
+                    flash("Image removed successfully.", "success")
+                except Exception as e:
+                    logger.error(f"Could not update product image in Firestore: {e}")
+                    flash("Failed to remove image.", "danger")
             else:
                 flash("Image or product not found.", "danger")
             return redirect(url_for("secret_admin"))
@@ -680,7 +667,7 @@ def secret_admin():
                 flash("Invalid product ID.", "danger")
                 return redirect(url_for("secret_admin"))
             img_url = request.form.get("img_url")
-            product = next((p for p in products if p["id"] == pid), None)
+            product = next((p for p in products if p.get("id") == pid), None)
             if not product:
                 flash("Product not found for image replacement.", "danger")
                 return redirect(url_for("secret_admin"))
@@ -695,16 +682,13 @@ def secret_admin():
                         idx = imgs.index(img_url)
                         imgs[idx] = new_img_url
                         product["imgs"] = imgs
-                        if db:
-                            try:
-                                db.collection("products").document(str(pid)).set(product)
-                                logger.info("Product image replaced and updated in Firestore")
-                            except Exception as e:
-                                logger.error(f"Could not update replaced image in Firestore: {e}")
-                        save_products(products)
-                        flash("Image replaced successfully.", "success")
-                    else:
-                        flash("Original image not found.", "danger")
+                        try:
+                            db.collection("products").document(str(pid)).set(product)
+                            logger.info("Product image replaced and updated in Firestore")
+                            flash("Image replaced successfully.", "success")
+                        except Exception as e:
+                            logger.error(f"Could not update replaced image in Firestore: {e}")
+                            flash("Failed to update image.", "danger")
                 else:
                     flash("Failed to upload replacement image.", "danger")
             else:
@@ -712,6 +696,7 @@ def secret_admin():
             return redirect(url_for("secret_admin"))
 
     return render_template("admin_panel.html", products=products)
+
 
 
 
