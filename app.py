@@ -77,14 +77,15 @@ def upload_file_to_imgbb(file_storage) -> str | None:
 
         url = "https://api.imgbb.com/1/upload"
         payload = {
-            "key": IMGBB_API_KEY,
+            "key": "debd1d013910003d49c0b4dbec779e64",
             "image": encoded_image,
             "name": file_storage.filename,
-            "expiration": "0"
+            "expiration": "0"  # 0 = never expire
         }
         response = requests.post(url, data=payload)
         result = response.json()
         if response.status_code == 200 and result.get("success"):
+            # Always take the direct image link for websites
             return result["data"]["url"]
         else:
             logger.error(f"ImgBB upload failed: {result}")
