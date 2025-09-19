@@ -67,22 +67,31 @@ import requests
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac846")  # Replace with actual key
 
 def upload_file_to_imgbb(file_storage, product_id=None):
+    import io
     try:
+        file_storage.seek(0)
+        file_bytes = file_storage.read()
+        file_stream = io.BytesIO(file_bytes)
+        
         files = {
-            "image": (file_storage.filename, file_storage.stream, file_storage.content_type)
+            "image": (file_storage.filename, file_stream, file_storage.content_type or 'application/octet-stream')
         }
         data = {
             "key": IMGBB_API_KEY,
             "expiration": "0"
         }
-
-        # Let requests set multipart/form-data headers automatically
-        response = requests.post("https://api.imgbb.com/1/upload", files=files, data=data)
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+        logger.info(f"Uploading image {file_storage.filename} to ImgBB with API key {IMGBB_API_KEY[:6]}...")
+        response = requests.post("https://api.imgbb.com/1/upload", files=files, data=data, headers=headers, timeout=10)
+        logger.info(f"ImgBB response status: {response.status_code}")
+        logger.info(f"ImgBB response text: {response.text}")
         result = response.json()
 
         if response.status_code == 200 and result.get("success"):
             direct_url = result["data"]["url"]
-            logger.info(f"ImgBB upload success: {direct_url}")
+            logger.info(f"Image uploaded to ImgBB: {direct_url}")
 
             if db and product_id is not None:
                 product_ref = db.collection("products").document(str(product_id))
@@ -96,12 +105,13 @@ def upload_file_to_imgbb(file_storage, product_id=None):
                     product_ref.update({"imgs": imgs})
                 else:
                     product_ref.set({"imgs": [direct_url]})
-                logger.info(f"Saved image URL to Firestore for product {product_id}")
+                logger.info(f"Image URL saved to Firestore for product {product_id}")
 
             return direct_url
         else:
             logger.error(f"ImgBB upload failed: {result}")
             return None
+
     except Exception as e:
         logger.error(f"Exception during ImgBB upload: {e}")
         return None
