@@ -71,30 +71,39 @@ def upload_file_to_imgbb(file_storage) -> str | None:
         file_storage.seek(0)
         img_bytes = file_storage.read()
         encoded_image = base64.b64encode(img_bytes).decode('utf-8')
+
         url = "https://api.imgbb.com/1/upload"
         payload = {
             "key": IMGBB_API_KEY,
             "image": encoded_image,
             "name": file_storage.filename,
-            "expiration": "0"
+            "expiration": "0"  # 0 means never expire
         }
-        response = requests.post(url, data=payload)
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        response = requests.post(url, data=payload, headers=headers)
+        logger.info(f"ImgBB API response status: {response.status_code}")
         result = response.json()
+        logger.info(f"ImgBB API response: {result}")
+
         if response.status_code == 200 and result.get("success"):
             direct_url = result["data"]["url"]
             if direct_url and direct_url.split('?')[0].lower().endswith(
                 (".jpg", ".jpeg", ".png", ".webp", ".gif")
             ):
-                logger.info(f"Success upload: {direct_url}")
+                logger.info(f"Image uploaded to ImgBB successfully: {direct_url}")
                 return direct_url
             else:
-                logger.error(f"Upload returned bad direct_url field: {direct_url}")
+                logger.error(f"ImgBB upload returned invalid direct_url: {direct_url}")
         else:
-            logger.error(f"ImgBB upload failed response: {result}")
+            logger.error(f"ImgBB upload failed: {result.get('error', result)}")
         return None
+
     except Exception as e:
-        logger.error(f"Exception in upload_file_to_imgbb: {e}")
+        logger.error(f"Exception during ImgBB upload: {e}")
         return None
+
 
 
 
