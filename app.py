@@ -86,7 +86,7 @@ def upload_file_to_imgbb(file_storage, product_id=None):
 
         if response.status_code == 200 and result.get("success"):
             direct_url = result["data"]["url"]
-            logger.info(f"Image uploaded to ImgBB: {direct_url}")
+            logger.info("Saved ImgBB URLs in Firestore product imgs: %s", imgs)
 
             # Save URL to Firestore product document
             if db and product_id is not None:
