@@ -66,58 +66,43 @@ import requests
 
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY", "49c929b174cd1008c4379f46285ac846")  # Replace with actual key
 
-def upload_file_to_imgbb(file_storage, product_id=None):
-    import io
+def upload_file_to_imgbb_and_get_url(file_storage) -> str | None:
     try:
         file_storage.seek(0)
-        file_bytes = file_storage.read()
-        file_stream = io.BytesIO(file_bytes)
-        
-        files = {
-            "image": (file_storage.filename, file_stream, file_storage.content_type or 'application/octet-stream')
-        }
-        data = {
+        img_bytes = file_storage.read()
+        encoded_image = base64.b64encode(img_bytes).decode('utf-8')
+        url = "https://api.imgbb.com/1/upload"
+        payload = {
             "key": IMGBB_API_KEY,
+            "image": encoded_image,
+            "name": file_storage.filename,
             "expiration": "0"
         }
         headers = {
-            "User-Agent": "Mozilla/5.0"
+            "Content-Type": "application/x-www-form-urlencoded"
         }
-        logger.info(f"Uploading image {file_storage.filename} to ImgBB with API key {IMGBB_API_KEY[:6]}...")
-        response = requests.post("https://api.imgbb.com/1/upload", files=files, data=data, headers=headers, timeout=10)
-        logger.info(f"ImgBB response status: {response.status_code}")
-        logger.info(f"ImgBB response text: {response.text}")
+        response = requests.post(url, data=payload, headers=headers)
         result = response.json()
-
         if response.status_code == 200 and result.get("success"):
             direct_url = result["data"]["url"]
-            logger.info(f"Image uploaded to ImgBB: {direct_url}")
-
-            if db and product_id is not None:
-                product_ref = db.collection("products").document(str(product_id))
-                product_doc = product_ref.get()
-                if product_doc.exists:
-                    product_data = product_doc.to_dict()
-                    imgs = product_data.get("imgs", [])
-                    if isinstance(imgs, str):
-                        imgs = [imgs]
-                    imgs.append(direct_url)
-                    product_ref.update({"imgs": imgs})
-                else:
-                    product_ref.set({"imgs": [direct_url]})
-                logger.info(f"Image URL saved to Firestore for product {product_id}")
-
             return direct_url
         else:
             logger.error(f"ImgBB upload failed: {result}")
             return None
-
     except Exception as e:
         logger.error(f"Exception during ImgBB upload: {e}")
         return None
 
 
 
+def add_product_to_firestore(data):
+    try:
+        db.collection("products").document(str(data["id"])).set(data)
+        logger.info(f"Product {data['id']} saved to Firestore")
+        return True
+    except Exception as e:
+        logger.error(f"Error saving product to Firestore: {e}")
+        return False
 
 
 
